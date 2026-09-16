@@ -1,0 +1,33 @@
+SkillConnect/
+│
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── main.js
+│   └── images/
+│
+├── includes/
+│   ├── db_connect.php
+│   ├── auth.php
+│   ├── functions.php
+│   ├── header.php
+│   └── footer.php
+│
+├── actions/
+│   ├── auth_process.php
+│   ├── profile_update.php
+│   ├── skill_process.php
+│   └── mentorship_process.php
+│
+├── admin/
+│   ├── dashboard.php
+│   └── manage_users.php
+│
+├── index.php
+├── login.php
+├── dashboard.php
+├── profile.php
+├── edit_profile.php
+├── search.php
+└── logout.php

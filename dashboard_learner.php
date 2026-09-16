@@ -1,3 +1,0 @@
-<?php 
-//Done by Team 
-?>
