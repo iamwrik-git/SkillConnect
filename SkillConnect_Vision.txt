@@ -1,3 +1,5 @@
+PROJECT ARCHITECTURE
+
 SkillConnect/
 │
 ├── assets/
@@ -31,3 +33,112 @@ SkillConnect/
 ├── edit_profile.php
 ├── search.php
 └── logout.php
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+                                         DATABASE       
+
+CREATE DATABASE IF NOT EXISTS skillconnect;
+
+USE skillconnect;
+
+
+-- =========================================
+-- USERS
+-- =========================================
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    name VARCHAR(100) NOT NULL,
+
+    email VARCHAR(100) NOT NULL UNIQUE,
+
+    password_hash VARCHAR(255) NOT NULL,
+
+    profile_photo VARCHAR(255)
+        DEFAULT 'default.jpg',
+
+    bio TEXT NULL,
+
+    exp_level ENUM(
+        'Beginner',
+        'Intermediate',
+        'Expert'
+    ) NULL,
+
+    role ENUM(
+        'trainee',
+        'trainer'
+    ) NOT NULL,
+
+    is_admin TINYINT(1) NOT NULL DEFAULT 0,
+
+    created_at TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =========================================
+-- SKILLS
+-- =========================================
+
+CREATE TABLE skills (
+    skill_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    skill_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+
+-- =========================================
+-- USER SKILLS
+-- =========================================
+
+CREATE TABLE user_skills (
+    user_id INT NOT NULL,
+
+    skill_id INT NOT NULL,
+
+    PRIMARY KEY (user_id, skill_id),
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (skill_id)
+        REFERENCES skills(skill_id)
+        ON DELETE CASCADE
+);
+
+
+-- =========================================
+-- MENTORSHIPS
+-- =========================================
+
+CREATE TABLE mentorships (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    trainer_id INT NOT NULL,
+
+    trainee_id INT NOT NULL,
+
+    status ENUM(
+        'pending',
+        'accepted',
+        'rejected'
+    ) NOT NULL DEFAULT 'pending',
+
+    created_at TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (trainer_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (trainee_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
+
+
