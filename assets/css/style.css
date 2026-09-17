@@ -1,0 +1,268 @@
+/* style.css */
+
+/* ==========================================================================
+   1. Core Interface Variables & Global Resets
+   ========================================================================== */
+:root {
+    --bg-main: #f3f4f6;
+    --bg-card: #ffffff;
+    --primary-grad-start: #1d4ed8;
+    --primary-grad-end: #4f46e5;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --input-focus: #3b82f6;
+    --danger-bg: #fef2f2;
+    --danger-border: #ef4444;
+    --danger-text: #b91c1c;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --transition: cubic-bezier(0.4, 0, 0.2, 1);
+    --duration: 0.5s;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. Main Layout Shell Structure
+   ========================================================================== */
+.auth-container {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 1100px;
+    min-height: 700px;
+    border-radius: var(--radius);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Left Brand Banner Column */
+.brand-panel {
+    width: 55%;
+    background: linear-gradient(135deg, var(--primary-grad-start), var(--primary-grad-end));
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #ffffff;
+    position: relative;
+    z-index: 5;
+}
+
+/* Right Dynamic Form Content Column */
+.form-panel {
+    width: 45%;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Two-Page Smooth View Translation Slider */
+.form-view-window {
+    width: 200%;
+    display: flex;
+    transition: transform var(--duration) var(--transition);
+}
+
+.form-view {
+    width: 50%;
+    transition: opacity var(--duration) var(--transition), visibility var(--duration);
+    padding: 5px;
+}
+
+/* Default state hiding parameters */
+.register-view {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* ==========================================================================
+   3. Sliding Morph Transition States
+   ========================================================================== */
+.brand-marketing {
+    transition: transform var(--duration) var(--transition), opacity var(--duration) var(--transition);
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    right: 50px;
+}
+
+.text-register-view {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Action Trigger State Bindings (When Checkbox Is Toggled) */
+.state-trigger:checked ~ .auth-container .form-view-window {
+    transform: translateX(-50%);
+}
+
+.state-trigger:checked ~ .auth-container .login-view {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.state-trigger:checked ~ .auth-container .register-view {
+    opacity: 1;
+    visibility: visible;
+}
+
+.state-trigger:checked ~ .auth-container .text-login-view {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.state-trigger:checked ~ .auth-container .text-register-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   4. Form Presentation Components
+   ========================================================================== */
+.brand-logo { font-size: 1.5rem; font-weight: 700; }
+.vector-wrapper { display: flex; justify-content: center; margin: auto 0; }
+.vector-wrapper svg { width: 260px; height: 260px; opacity: 0.85; }
+.brand-marketing h2 { font-size: 1.85rem; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+.brand-marketing p { color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; line-height: 1.5; }
+
+.form-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+.form-header h1 { font-size: 1.6rem; font-weight: 700; }
+.subtitle { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+.switch-auth-link {
+    color: var(--primary-grad-start);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.switch-auth-link:hover { color: var(--primary-grad-end); text-decoration: underline; }
+
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #4b5563; letter-spacing: 0.05em; }
+
+.form-group input:not([type="radio"]) {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.925rem;
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease;
+}
+.form-group input:not([type="radio"]):focus {
+    border-color: var(--input-focus);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 13px;
+    background-color: var(--primary-grad-start);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.925rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+}
+.submit-btn:hover { background-color: #1e40af; }
+
+.error-banner {
+    background-color: var(--danger-bg);
+    border-left: 4px solid var(--danger-border);
+    color: var(--danger-text);
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   5. Modern Segmented Account Type Option Cards
+   ========================================================================== */
+.modern-selector-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 2px;
+}
+
+.selector-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background-color: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.card-icon { font-size: 1.25rem; }
+.card-text-group { display: flex; flex-direction: column; gap: 1px; }
+.card-title { font-size: 0.875rem; font-weight: 700; color: var(--text-main); }
+.card-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Interactive Hover States */
+.selector-card:hover {
+    border-color: #cbd5e1;
+    background-color: #f1f5f9;
+}
+
+/* Modern Activation Glow Effect via Native Radio Siblings */
+input[type="radio"]:checked + .selector-card {
+    border-color: var(--input-focus);
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08), 0 0 0 4px rgba(59, 130, 246, 0.06);
+}
+
+input[type="radio"]:checked + .selector-card .card-title {
+    color: var(--primary-grad-start);
+}
+
+/* ==========================================================================
+   6. Responsive Adaptive Breakpoints
+   ========================================================================== */
+@media (max-width: 900px) {
+    .auth-container { flex-direction: column; max-width: 480px; min-height: auto; }
+    .brand-panel { display: none; }
+    .form-panel { width: 100%; padding: 40px 25px; }
+}
+
+@media (max-width: 440px) {
+    .modern-selector-group { flex-direction: column; gap: 10px; }
+}

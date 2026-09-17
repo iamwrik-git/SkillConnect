@@ -140,5 +140,10 @@ CREATE TABLE mentorships (
         ON DELETE CASCADE
 );
 
+------------------------------------------------------------------------------------------------------------------------------------
+                                     ###Backend Logic###
 
+1. db_connect   [Done & verified]
+2. auth [Done & verified]
+3. auth_process  [Done & verified]
 
