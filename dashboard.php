@@ -1,8 +1,6 @@
 <?php
 // dashboard.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+
 // 1. Include db connection and authentication helpers
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -16,7 +14,6 @@ $role = $_SESSION['role'] ?? '';
 $name = $_SESSION['name'] ?? 'User';
 
 // 4. Fetch Database Information
-// THE EXISTING BACKEND LOGIC IS STRICTLY PRESERVED HERE
 $skills = [];
 $pending_requests = [];
 $accepted_mentorships = [];
@@ -24,7 +21,7 @@ $rejected_history = [];
 $db_error = false;
 
 try {
-    // Fetch Skills (Retained for statistics count)
+    // Fetch Skills
     $skill_stmt = $pdo->prepare("
         SELECT s.skill_name 
         FROM user_skills us 
@@ -69,20 +66,23 @@ try {
             }
         }
     }
-
 } catch (PDOException $e) {
     error_log("Dashboard DB Error: " . $e->getMessage());
     $db_error = true;
 }
 
-// Include the existing header (which should handle <head>, stylesheets, and opening <body>)
+// Include the existing header
 if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
 
-// Helper function to resolve profile photo
-function getProfilePhotoPath($photo) {
-    return empty($photo) ? 'default.jpg' : $photo;
+// Helper function to resolve profile photo or generate initials
+function getProfilePhotoUrl($photo, $name)
+{
+    if (empty($photo) || $photo === 'default.jpg') {
+        return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
+    }
+    return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
 }
 ?>
 
@@ -114,8 +114,8 @@ function getProfilePhotoPath($photo) {
             </div>
             <div class="hero-graphic">
                 <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" opacity="0.1"/>
-                    <path d="M16 10L12 14L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" opacity="0.1" />
+                    <path d="M16 10L12 14L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
                 </svg>
             </div>
         </div>
@@ -124,7 +124,10 @@ function getProfilePhotoPath($photo) {
         <div class="dashboard-stats">
             <div class="stat-card">
                 <div class="stat-icon icon-blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
                 </div>
                 <div class="stat-details">
                     <div class="stat-value"><?= count($skills) ?></div>
@@ -134,7 +137,11 @@ function getProfilePhotoPath($photo) {
 
             <div class="stat-card">
                 <div class="stat-icon icon-green">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
                 </div>
                 <div class="stat-details">
                     <div class="stat-value"><?= count($accepted_mentorships) ?></div>
@@ -144,7 +151,10 @@ function getProfilePhotoPath($photo) {
 
             <div class="stat-card">
                 <div class="stat-icon icon-orange">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
                 </div>
                 <div class="stat-details">
                     <div class="stat-value"><?= count($pending_requests) ?></div>
@@ -154,11 +164,13 @@ function getProfilePhotoPath($photo) {
 
             <div class="stat-card">
                 <div class="stat-icon icon-purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
                 </div>
                 <div class="stat-details">
                     <div class="stat-value text-muted stat-value-text">Coming Soon</div>
-                    <div class="stat-label">Saved Trainers</div>
+                    <div class="stat-label"><?= $role === 'trainer' ? 'Saved Trainees' : 'Saved Trainers' ?></div>
                 </div>
             </div>
         </div>
@@ -166,12 +178,15 @@ function getProfilePhotoPath($photo) {
         <!-- 3. QUICK ACTIONS -->
         <div class="quick-actions-section">
             <h2 class="section-title">Quick Actions</h2>
-            
+
             <div class="quick-actions-grid">
                 <?php if ($role === 'trainee'): ?>
                     <a href="search.php" class="action-card">
                         <div class="action-icon bg-blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" />
+                            </svg>
                         </div>
                         <div class="action-text">
                             <h3>Find Trainers</h3>
@@ -183,7 +198,10 @@ function getProfilePhotoPath($photo) {
 
                 <a href="edit_profile.php" class="action-card">
                     <div class="action-icon bg-green">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
                     </div>
                     <div class="action-text">
                         <h3>Edit Profile</h3>
@@ -194,7 +212,11 @@ function getProfilePhotoPath($photo) {
 
                 <a href="edit_profile.php" class="action-card">
                     <div class="action-icon bg-purple">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg>
                     </div>
                     <div class="action-text">
                         <h3>Manage Skills</h3>
@@ -207,10 +229,10 @@ function getProfilePhotoPath($photo) {
 
         <!-- 4. MAIN DASHBOARD CONTENT GRID (50/50 Layout) -->
         <div class="dashboard-content-grid">
-            
+
             <?php if ($role === 'trainee'): ?>
                 <!-- ================= TRAINEE VIEW ================= -->
-                
+
                 <!-- LEFT COLUMN -->
                 <div class="dashboard-column">
                     <div class="card activity-section">
@@ -225,10 +247,11 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($accepted_mentorships as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
                                         <div class="activity-details">
                                             <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
-                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                            <!-- FIXED PHP NULL WARNING -->
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
                                         </div>
                                         <div class="activity-actions">
                                             <span class="badge badge-success">Mentor</span>
@@ -256,10 +279,11 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($pending_requests as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
                                         <div class="activity-details">
                                             <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
-                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                            <!-- FIXED PHP NULL WARNING -->
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
                                         </div>
                                         <div class="activity-actions">
                                             <span class="badge badge-warning">Pending</span>
@@ -278,7 +302,7 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($rejected_history as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
                                         <div class="activity-details">
                                             <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
                                             <p>Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></p>
@@ -295,7 +319,7 @@ function getProfilePhotoPath($photo) {
 
             <?php else: ?>
                 <!-- ================= TRAINER VIEW ================= -->
-                
+
                 <!-- LEFT COLUMN -->
                 <div class="dashboard-column">
                     <div class="card activity-section">
@@ -310,10 +334,12 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($pending_requests as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
+
                                         <div class="activity-details">
                                             <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
-                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?> • <?= date('M j', strtotime($req['created_at'])) ?></p>
+                                            <!-- FIXED PHP NULL WARNING -->
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?> • <?= date('M j', strtotime($req['created_at'])) ?></p>
                                         </div>
                                         <div class="activity-actions form-group-inline">
                                             <!-- EXACT PRESERVED ACCEPT/REJECT FORMS -->
@@ -349,10 +375,12 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($accepted_mentorships as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
+
                                         <div class="activity-details">
                                             <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
-                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                            <!-- FIXED PHP NULL WARNING -->
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
                                         </div>
                                         <div class="activity-actions">
                                             <span class="badge badge-success">Accepted</span>
@@ -372,7 +400,7 @@ function getProfilePhotoPath($photo) {
                             <div class="activity-list">
                                 <?php foreach ($rejected_history as $req): ?>
                                     <div class="activity-item compact">
-                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile" class="activity-avatar">
                                         <div class="activity-details">
                                             <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
                                             <p>Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></p>
@@ -394,9 +422,9 @@ function getProfilePhotoPath($photo) {
 
 </div>
 
-<?php 
+<?php
 // Include the existing footer
 if (file_exists('includes/footer.php')) {
-    require_once 'includes/footer.php'; 
+    require_once 'includes/footer.php';
 }
 ?>

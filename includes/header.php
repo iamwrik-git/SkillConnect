@@ -1,35 +1,31 @@
 <?php
 // includes/header.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 if (!isset($page_title)) {
     $page_title = 'SkillConnect';
 }
 
-// --- SELF-HEALING DATABASE FALLBACK ---
-// We dynamically fetch the picture via your system's auth logic if it's missing from the current session
-if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
-    $current_uid = getCurrentUserId();
-    if ($current_uid) {
-        try {
-            if (!isset($pdo) && file_exists(__DIR__ . '/db_connect.php')) {
-                require_once __DIR__ . '/db_connect.php';
-            }
-            
-            if (isset($pdo)) {
-                $check_stmt = $pdo->prepare("SELECT profile_photo FROM users WHERE user_id = ?");
-                $check_stmt->execute([$current_uid]);
-                $user_row = $check_stmt->fetch(PDO::FETCH_ASSOC);
-                if ($user_row) {
-                    $_SESSION['profile_photo'] = $user_row['profile_photo'] ?? 'default.jpg';
-                }
-            }
-        } catch (PDOException $e) {
-            error_log("Header DB Fallback Error: " . $e->getMessage());
-        }
+// Get the role to conditionally render sidebar items
+$user_role = $_SESSION['role'] ?? 'trainee';
+
+// Get the current page filename to apply the active blue marker
+$current_page = basename($_SERVER['PHP_SELF']);
+
+// ==========================================
+// NEW: FETCH SEARCH AUTO-COMPLETE SUGGESTIONS
+// ==========================================
+$search_suggestions = [];
+if (isset($pdo)) {
+    try {
+        // Grab all skill names AND trainer names to populate the dropdown
+        $sgStmt = $pdo->query("
+            SELECT skill_name AS suggestion FROM skills
+            UNION
+            SELECT name AS suggestion FROM users WHERE role = 'trainer'
+        ");
+        $search_suggestions = $sgStmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $e) {
+        error_log("Search Suggestions Error: " . $e->getMessage());
     }
 }
 ?>
@@ -39,7 +35,8 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Cache buster active for development -->
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
 </head>
 <body>
     <div class="app-layout">
@@ -53,9 +50,20 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
                 </a>
             </div>
 
+            <!-- ==========================================
+                 UPDATED: GLOBAL SEARCH BAR WITH DATALIST
+                 ========================================== -->
             <div class="nav-search">
                 <form action="search.php" method="GET" class="search-form">
-                    <input type="text" name="q" placeholder="Search mentors, skills..." class="search-input" aria-label="Global search">
+                    <!-- Added list="globalSearchOptions" to link to the datalist below -->
+                    <input type="text" name="q" placeholder="Search mentors, skills..." class="search-input" aria-label="Global search" list="globalSearchOptions" autocomplete="off">
+                    
+                    <!-- Native HTML5 Autocomplete Dropdown -->
+                    <datalist id="globalSearchOptions">
+                        <?php foreach($search_suggestions as $suggestion): ?>
+                            <option value="<?= htmlspecialchars($suggestion, ENT_QUOTES, 'UTF-8') ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
                 </form>
             </div>
 
@@ -90,18 +98,16 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
                 <!-- Me / Profile Popover -->
                 <div class="nav-item has-dropdown" data-dropdown="profile">
                     <button type="button" class="nav-btn me-btn" aria-expanded="false">
-                        <?php 
-                        $session_photo = $_SESSION['profile_photo'] ?? '';
-                        
-                        if (!empty($session_photo) && $session_photo !== 'default.jpg'): 
+                        <?php
+                            $nav_photo = $_SESSION['profile_photo'] ?? '';
+                            $nav_name = $_SESSION['name'] ?? 'User';
+                            if (empty($nav_photo) || $nav_photo === 'default.jpg') {
+                                $nav_avatar_url = "https://ui-avatars.com/api/?name=" . urlencode($nav_name) . "&background=eff6ff&color=2563eb&bold=true";
+                            } else {
+                                $nav_avatar_url = 'assets/images/profile/' . htmlspecialchars($nav_photo, ENT_QUOTES, 'UTF-8');
+                            }
                         ?>
-                            <!-- Render actual user photo using matching assets/images/profile path structure -->
-                            <img src="assets/images/profile/<?= htmlspecialchars($session_photo, ENT_QUOTES, 'UTF-8') ?>" alt="Me" class="nav-avatar-img">
-                        <?php else: ?>
-                            <!-- Fallback to original CSS gray circle if no custom photo exists -->
-                            <span class="avatar-placeholder"></span>
-                        <?php endif; ?>
-                        
+                        <img src="<?= $nav_avatar_url ?>" alt="Me" class="avatar-placeholder" style="object-fit: cover;">
                         <span class="nav-text">Me ▼</span>
                     </button>
                     <div class="dropdown-popup profile-popup">
@@ -112,7 +118,7 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
                                 <?php endif; ?>
                                 
                                 <?php if (isset($_SESSION['role'])): ?>
-                                    <div class="profile-role"><?= htmlspecialchars($_SESSION['role'], ENT_QUOTES, 'UTF-8') ?></div>
+                                    <div class="profile-role"><?= htmlspecialchars(ucfirst($_SESSION['role']), ENT_QUOTES, 'UTF-8') ?></div>
                                 <?php endif; ?>
                             </div>
                             <div class="popup-actions">
@@ -133,10 +139,14 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
                     <nav class="sidebar-section">
                         <h3 class="sidebar-heading">MAIN</h3>
                         <ul class="sidebar-list">
-                            <li><a href="dashboard.php" class="sidebar-link">Dashboard</a></li>
-                            <li><a href="search.php" class="sidebar-link">Find Trainers</a></li>
-                            <li><a href="profile.php" class="sidebar-link">Profile</a></li>
-                            <li><a href="edit_profile.php" class="sidebar-link">Edit Profile</a></li>
+                            <li><a href="dashboard.php" class="sidebar-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">Dashboard</a></li>
+                            
+                            <?php if ($user_role === 'trainee'): ?>
+                                <li><a href="search.php" class="sidebar-link <?= $current_page === 'search.php' ? 'active' : '' ?>">Find Trainers</a></li>
+                            <?php endif; ?>
+                            
+                            <li><a href="profile.php" class="sidebar-link <?= $current_page === 'profile.php' ? 'active' : '' ?>">Profile</a></li>
+                            <li><a href="edit_profile.php" class="sidebar-link <?= $current_page === 'edit_profile.php' ? 'active' : '' ?>">Edit Profile</a></li>
                         </ul>
                     </nav>
 
@@ -144,10 +154,13 @@ if (!isset($_SESSION['profile_photo']) && function_exists('getCurrentUserId')) {
                         <h3 class="sidebar-heading">MY SPACE</h3>
                         <ul class="sidebar-list">
                             <li><a href="profile.php" class="sidebar-link">My Skills</a></li>
-                            <li><a href="dashboard.php" class="sidebar-link">My Mentorships</a></li>
+                            
+                            <!-- Dynamically rename based on role -->
+                            <li><a href="dashboard.php" class="sidebar-link"><?= $user_role === 'trainer' ? 'My Trainees' : 'My Mentorships' ?></a></li>
+                            
                             <li>
                                 <div class="sidebar-link disabled">
-                                    Saved Trainers
+                                    <?= $user_role === 'trainer' ? 'Saved Trainees' : 'Saved Trainers' ?>
                                     <span class="badge badge-sidebar">Coming Soon</span>
                                 </div>
                             </li>
