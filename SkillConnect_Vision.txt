@@ -7,7 +7,7 @@ SkillConnect/
 │   │   └── style.css
 │   ├── js/
 │   │   └── main.js
-│   └── images/
+│   └── images/profile
 │
 ├── includes/
 │   ├── db_connect.php
@@ -146,4 +146,7 @@ CREATE TABLE mentorships (
 1. db_connect   [Done & verified]
 2. auth [Done & verified]
 3. auth_process  [Done & verified]
+
+4. login [Almost Done but add required logo and design]
+5. 
 

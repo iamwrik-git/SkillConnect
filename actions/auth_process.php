@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-require_once 'includes/db_connect.php'; //include db connection page
+require_once(__DIR__ . '/../includes/db_connect.php'); //Pre existed bug fixed
 
 //determine the action requested
 $action = $_POST['action'] ?? '';
