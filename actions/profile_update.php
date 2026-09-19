@@ -149,6 +149,8 @@ try {
     }
 
     $_SESSION['name'] = $name;
+    $_SESSION['profile_photo'] = $final_photo; // Add this line!
+    $_SESSION['role'] = $role ?? $_SESSION['role']; 
     $_SESSION['success'] = "Profile updated successfully.";
 } catch (PDOException $e) {
     error_log("Database error (Update Profile): ".$e->getMessage());

@@ -1,6 +1,8 @@
 <?php
 // dashboard.php
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // 1. Include db connection and authentication helpers
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -14,6 +16,7 @@ $role = $_SESSION['role'] ?? '';
 $name = $_SESSION['name'] ?? 'User';
 
 // 4. Fetch Database Information
+// THE EXISTING BACKEND LOGIC IS STRICTLY PRESERVED HERE
 $skills = [];
 $pending_requests = [];
 $accepted_mentorships = [];
@@ -21,7 +24,7 @@ $rejected_history = [];
 $db_error = false;
 
 try {
-    // Fetch Skills
+    // Fetch Skills (Retained for statistics count)
     $skill_stmt = $pdo->prepare("
         SELECT s.skill_name 
         FROM user_skills us 
@@ -83,259 +86,312 @@ function getProfilePhotoPath($photo) {
 }
 ?>
 
-<div class="dashboard-layout">
+<div class="dashboard-page">
 
-    <!-- Left Sidebar Navigation -->
-    <aside class="sidebar">
-        <h2 class="sidebar-logo">SkillConnect</h2>
-        
-        <nav class="sidebar-nav">
-            <p class="sidebar-section-title">Main</p>
-            <a href="dashboard.php" class="sidebar-link active">Dashboard</a>
+    <?php if ($db_error): ?>
+        <section class="card error-card">
+            <h3 class="card-title text-danger">Database Error</h3>
+            <p>We encountered an issue loading your dashboard data. Please try again later.</p>
+        </section>
+    <?php elseif (!in_array($role, ['trainee', 'trainer'])): ?>
+        <section class="card error-card">
+            <h3 class="card-title text-danger">Account Configuration Error</h3>
+            <p>Your account does not have a valid role assigned. Please contact the administrator.</p>
+        </section>
+    <?php else: ?>
+
+        <!-- 1. HERO SECTION -->
+        <div class="dashboard-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome back, <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>!</h1>
+                <p class="hero-subtitle">
+                    <?php if ($role === 'trainee'): ?>
+                        Keep learning, keep growing.
+                    <?php else: ?>
+                        Share your expertise and guide the next generation.
+                    <?php endif; ?>
+                </p>
+            </div>
+            <div class="hero-graphic">
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" opacity="0.1"/>
+                    <path d="M16 10L12 14L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 2. STATISTICS -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value"><?= count($skills) ?></div>
+                    <div class="stat-label"><?= $role === 'trainer' ? 'Skills I Teach' : 'Skills Added' ?></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-green">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value"><?= count($accepted_mentorships) ?></div>
+                    <div class="stat-label"><?= $role === 'trainer' ? 'Accepted Trainees' : 'My Mentors' ?></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-orange">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value"><?= count($pending_requests) ?></div>
+                    <div class="stat-label">Pending Requests</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-purple">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="stat-details">
+                    <div class="stat-value text-muted stat-value-text">Coming Soon</div>
+                    <div class="stat-label">Saved Trainers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. QUICK ACTIONS -->
+        <div class="quick-actions-section">
+            <h2 class="section-title">Quick Actions</h2>
+            
+            <div class="quick-actions-grid">
+                <?php if ($role === 'trainee'): ?>
+                    <a href="search.php" class="action-card">
+                        <div class="action-icon bg-blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        </div>
+                        <div class="action-text">
+                            <h3>Find Trainers</h3>
+                            <p>Search by skill and connect with mentors.</p>
+                        </div>
+                        <div class="action-arrow">›</div>
+                    </a>
+                <?php endif; ?>
+
+                <a href="edit_profile.php" class="action-card">
+                    <div class="action-icon bg-green">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="action-text">
+                        <h3>Edit Profile</h3>
+                        <p>Keep your profile updated.</p>
+                    </div>
+                    <div class="action-arrow">›</div>
+                </a>
+
+                <a href="edit_profile.php" class="action-card">
+                    <div class="action-icon bg-purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <div class="action-text">
+                        <h3>Manage Skills</h3>
+                        <p>Add or update your skills.</p>
+                    </div>
+                    <div class="action-arrow">›</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. MAIN DASHBOARD CONTENT GRID (50/50 Layout) -->
+        <div class="dashboard-content-grid">
             
             <?php if ($role === 'trainee'): ?>
-                <a href="search.php" class="sidebar-link">Find Trainers</a>
-            <?php endif; ?>
-            
-            <a href="profile.php" class="sidebar-link">Profile</a>
-            <a href="edit_profile.php" class="sidebar-link">Edit Profile</a>
-            
-            <!-- Future Features Section (Visual UI placeholders only) -->
-            <p class="sidebar-section-title">Explore</p>
-            <a href="#" onclick="alert('Stay tuned — this feature is planned for a future version of SkillConnect.'); return false;" class="sidebar-link future">Communities</a>
-            <a href="#" onclick="alert('Stay tuned — this feature is planned for a future version of SkillConnect.'); return false;" class="sidebar-link future">Leaderboard</a>
-        </nav>
-        
-        <div class="sidebar-footer">
-            <a href="logout.php" class="sidebar-logout">Logout</a>
-        </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-        
-        <!-- Welcome Hero Section -->
-        <header class="hero-card">
-            <h1 class="hero-title">Welcome, <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>!</h1>
-            <p class="hero-subtitle">
-                <?php if ($role === 'trainee'): ?>
-                    Connect with skilled mentors and grow your knowledge.
-                <?php elseif ($role === 'trainer'): ?>
-                    Share your expertise and guide the next generation of learners.
-                <?php endif; ?>
-            </p>
-        </header>
-
-        <!-- Role-Specific Content Grid -->
-        <div class="content-grid">
-            
-            <?php if ($db_error): ?>
-                <section class="dashboard-card error-card">
-                    <h3 class="card-title">Database Error</h3>
-                    <p>We encountered an issue loading your dashboard data. Please try again later.</p>
-                </section>
-            <?php endif; ?>
-
-            <?php if (!$db_error && $role === 'trainee'): ?>
                 <!-- ================= TRAINEE VIEW ================= -->
                 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Skills I Want to Learn</h3>
-                    <?php if (empty($skills)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">You haven't added any skills yet.</p>
-                            <p class="empty-state-subtext">Add your skills to get started.</p>
+                <!-- LEFT COLUMN -->
+                <div class="dashboard-column">
+                    <div class="card activity-section">
+                        <div class="card-header">
+                            <h3 class="card-title">My Mentors</h3>
                         </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($skills as $skill): ?>
-                                <li class="skill-item"><?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
+                        <?php if (empty($accepted_mentorships)): ?>
+                            <div class="empty-state">
+                                <p>You don't have any accepted mentors yet.</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="activity-list">
+                                <?php foreach ($accepted_mentorships as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="badge badge-success">Mentor</span>
+                                            <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn btn-secondary btn-sm">Profile</a>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">My Mentors</h3>
-                    <?php if (empty($accepted_mentorships)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">You don't have any accepted mentors yet.</p>
+                <!-- RIGHT COLUMN -->
+                <div class="dashboard-column">
+                    <div class="card activity-section">
+                        <div class="card-header">
+                            <h3 class="card-title">Pending Requests</h3>
                         </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($accepted_mentorships as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>(<?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?>)</span>
-                                    
-                                    <strong>- Mentor</strong>
-                                    
-                                    <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="action-button">View Profile</a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
+                        <?php if (empty($pending_requests)): ?>
+                            <div class="empty-state">
+                                <p>No pending mentorship requests.</p>
+                                <a href="search.php" class="btn btn-primary empty-state-action">Find Trainers</a>
+                            </div>
+                        <?php else: ?>
+                            <div class="activity-list">
+                                <?php foreach ($pending_requests as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="badge badge-warning">Pending</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Pending Requests</h3>
-                    <?php if (empty($pending_requests)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">No pending mentorship requests.</p>
+                    <?php if (!empty($rejected_history)): ?>
+                        <div class="card activity-section mt-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Request History</h3>
+                            </div>
+                            <div class="activity-list">
+                                <?php foreach ($rejected_history as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
+                                            <p>Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></p>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="badge badge-danger">Rejected</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                        <a href="search.php" class="action-button">Find Trainers</a>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($pending_requests as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>(<?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?>)</span>
-                                    
-                                    <em>- Pending</em>
-                                    
-                                    <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="action-button">View Profile</a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
                     <?php endif; ?>
-                </section>
+                </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Request History</h3>
-                    <?php if (empty($rejected_history)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">No rejected requests.</p>
-                        </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($rejected_history as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>- Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></span>
-                                    
-                                    <strong>(Rejected)</strong>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
-
-            <?php elseif (!$db_error && $role === 'trainer'): ?>
+            <?php else: ?>
                 <!-- ================= TRAINER VIEW ================= -->
                 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Skills I Teach</h3>
-                    <?php if (empty($skills)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">You haven't added any teaching skills yet.</p>
-                            <p class="empty-state-subtext">Add your skills to get started.</p>
+                <!-- LEFT COLUMN -->
+                <div class="dashboard-column">
+                    <div class="card activity-section">
+                        <div class="card-header">
+                            <h3 class="card-title">Pending Requests</h3>
                         </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($skills as $skill): ?>
-                                <li class="skill-item"><?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
+                        <?php if (empty($pending_requests)): ?>
+                            <div class="empty-state">
+                                <p>No pending mentorship requests.</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="activity-list">
+                                <?php foreach ($pending_requests as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?> • <?= date('M j', strtotime($req['created_at'])) ?></p>
+                                        </div>
+                                        <div class="activity-actions form-group-inline">
+                                            <!-- EXACT PRESERVED ACCEPT/REJECT FORMS -->
+                                            <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form">
+                                                <input type="hidden" name="action" value="accept_request">
+                                                <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                                <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                                            </form>
+                                            <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form">
+                                                <input type="hidden" name="action" value="reject_request">
+                                                <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                                <button type="submit" class="btn btn-secondary btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Pending Requests</h3>
-                    <?php if (empty($pending_requests)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">No pending mentorship requests.</p>
+                <!-- RIGHT COLUMN -->
+                <div class="dashboard-column">
+                    <div class="card activity-section">
+                        <div class="card-header">
+                            <h3 class="card-title">Accepted Trainees</h3>
                         </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($pending_requests as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>(<?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?>)</span>
-                                    <span>- <?= date('M j, Y', strtotime($req['created_at'])) ?></span>
-                                    
-                                    <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="action-button">View Profile</a>
-                                    
-                                    <form action="actions/mentorship_process.php" method="POST" class="inline-form">
-                                        <input type="hidden" name="action" value="accept_request">
-                                        <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
-                                        <button type="submit" class="submit-btn">Accept</button>
-                                    </form>
-                                    
-                                    <form action="actions/mentorship_process.php" method="POST" class="inline-form">
-                                        <input type="hidden" name="action" value="reject_request">
-                                        <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
-                                        <button type="submit" class="submit-btn">Reject</button>
-                                    </form>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
+                        <?php if (empty($accepted_mentorships)): ?>
+                            <div class="empty-state">
+                                <p>You don't have any accepted trainees yet.</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="activity-list">
+                                <?php foreach ($accepted_mentorships as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><a href="profile.php?user_id=<?= (int)$req['user_id'] ?>"><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></a></h4>
+                                            <p><?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?></p>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="badge badge-success">Accepted</span>
+                                            <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn btn-secondary btn-sm">Profile</a>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Accepted Trainees</h3>
-                    <?php if (empty($accepted_mentorships)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">You don't have any accepted trainees yet.</p>
+                    <?php if (!empty($rejected_history)): ?>
+                        <div class="card activity-section mt-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Request History</h3>
+                            </div>
+                            <div class="activity-list">
+                                <?php foreach ($rejected_history as $req): ?>
+                                    <div class="activity-item compact">
+                                        <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="activity-avatar">
+                                        <div class="activity-details">
+                                            <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
+                                            <p>Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></p>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="badge badge-danger">Rejected</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($accepted_mentorships as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>(<?= htmlspecialchars(ucfirst($req['exp_level']), ENT_QUOTES, 'UTF-8') ?>)</span>
-                                    
-                                    <strong>- Accepted</strong>
-                                    
-                                    <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="action-button">View Profile</a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
                     <?php endif; ?>
-                </section>
+                </div>
 
-                <section class="dashboard-card">
-                    <h3 class="card-title">Request History</h3>
-                    <?php if (empty($rejected_history)): ?>
-                        <div class="empty-state">
-                            <p class="empty-state-text">No rejected requests.</p>
-                        </div>
-                    <?php else: ?>
-                        <ul class="skill-list">
-                            <?php foreach ($rejected_history as $req): ?>
-                                <li class="skill-item">
-                                    <img src="assets/images/profile/<?= htmlspecialchars(getProfilePhotoPath($req['profile_photo']), ENT_QUOTES, 'UTF-8') ?>" alt="Profile" width="40" height="40" class="profile-thumb">
-                                    
-                                    <strong><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                    <span>- Requested on <?= date('M j, Y', strtotime($req['created_at'])) ?></span>
-                                    
-                                    <strong>(Rejected)</strong>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </section>
-                
-            <?php elseif (!$db_error): ?>
-                <!-- ================= INVALID ROLE FALLBACK ================= -->
-                <section class="dashboard-card error-card">
-                    <h3 class="card-title">Account Configuration Error</h3>
-                    <p>Your account does not have a valid role assigned. Please contact the administrator.</p>
-                </section>
             <?php endif; ?>
 
         </div>
-    </main>
+    <?php endif; ?>
+
 </div>
 
 <?php 
