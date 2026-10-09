@@ -51,15 +51,40 @@ try {
     error_log("User Skills Fetch Error (search.php): " . $e->getMessage());
 }
 
-// 4. Handle Search Requests (Dropdown OR Global Text Search)
+// 4. Handle Search Requests and Sorting Validation
 $search_skill_id = filter_input(INPUT_GET, 'skill_id', FILTER_VALIDATE_INT);
-$search_query = trim($_GET['q'] ?? ''); // Grabs text from the top nav bar
+$search_query = trim($_GET['q'] ?? ''); 
+$sort = $_GET['sort'] ?? 'name_asc';
+
 $search_performed = false;
 $search_error = '';
 $selected_skill_name = '';
 $trainers = [];
 
-// SCENARIO A: User used the visual Dropdown (Exact Skill Match from their profile)
+/* 
+ * Sorting Logic & Documentation
+ * Unspecified experience evaluates to 0. 
+ * High to Low: Expert(3), Intermediate(2), Beginner(1), Unspecified(0).
+ * Low to High: Unspecified(0), Beginner(1), Intermediate(2), Expert(3).
+ */
+switch ($sort) {
+    case 'name_desc':
+        $order_by_sql = "u.name DESC";
+        break;
+    case 'exp_desc':
+        $order_by_sql = "CASE u.exp_level WHEN 'Expert' THEN 3 WHEN 'Intermediate' THEN 2 WHEN 'Beginner' THEN 1 ELSE 0 END DESC, u.name ASC";
+        break;
+    case 'exp_asc':
+        $order_by_sql = "CASE u.exp_level WHEN 'Expert' THEN 3 WHEN 'Intermediate' THEN 2 WHEN 'Beginner' THEN 1 ELSE 0 END ASC, u.name ASC";
+        break;
+    case 'name_asc':
+    default:
+        $order_by_sql = "u.name ASC";
+        $sort = 'name_asc';
+        break;
+}
+
+// SCENARIO A: User used the visual Dropdown
 if ($search_skill_id && $search_skill_id > 0) {
     $search_performed = true;
 
@@ -84,7 +109,7 @@ if ($search_skill_id && $search_skill_id > 0) {
                       FROM mentorships 
                       WHERE trainee_id = ? AND status IN ('pending', 'accepted')
                   )
-                ORDER BY u.name ASC
+                ORDER BY $order_by_sql
             ");
             $trainerStmt->execute([$search_skill_id, $current_user_id]);
             $fetched_trainers = $trainerStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -93,15 +118,15 @@ if ($search_skill_id && $search_skill_id > 0) {
         error_log("Trainer Search Error (Dropdown): " . $e->getMessage());
         $search_error = "An unexpected error occurred while searching for trainers.";
     }
-} // SCENARIO B: User used the Global Search Bar (Text Match for ANY Name OR ANY Skill)
+} 
+// SCENARIO B: User used the Global Search Bar
 elseif (!empty($search_query)) {
     $search_performed = true;
-    $selected_skill_name = '"' . $search_query . '"'; // Display what they typed
+    $selected_skill_name = '"' . $search_query . '"'; 
 
     try {
         $like_term = '%' . $search_query . '%';
 
-        // Prioritizes accepted trainers at the top using a CASE statement
         $trainerStmt = $pdo->prepare("
             SELECT DISTINCT u.user_id, u.name, u.profile_photo, u.bio, u.exp_level,
                    (SELECT COUNT(*) FROM mentorships m 
@@ -113,7 +138,7 @@ elseif (!empty($search_query)) {
             JOIN skills s ON us.skill_id = s.skill_id
             WHERE u.role = 'trainer' 
               AND (u.name LIKE ? OR s.skill_name LIKE ?)
-            ORDER BY is_connected DESC, u.name ASC
+            ORDER BY is_connected DESC, $order_by_sql
         ");
         $trainerStmt->execute([$current_user_id, $like_term, $like_term]);
         $fetched_trainers = $trainerStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -170,7 +195,7 @@ if (file_exists('includes/header.php')) {
         </div>
     </header>
 
-    <!-- Visual Search Box (For specific skills added to profile) -->
+    <!-- Visual Search Box -->
     <section class="card search-box-card">
         <div class="search-box-icon">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -223,23 +248,35 @@ if (file_exists('includes/header.php')) {
             </div>
         <?php else: ?>
 
-            <!-- Search Results Header -->
+            <!-- Search Results Header & Sorter -->
             <div class="search-results-header">
                 <div class="results-title-group">
                     <h3>Search Results for <?= htmlspecialchars($selected_skill_name, ENT_QUOTES, 'UTF-8') ?></h3>
                     <span class="badge results-badge"><?= count($trainers) ?> trainers found</span>
                 </div>
-                <!-- UI-Only sort dropdown to match reference image -->
+                
                 <div class="results-sort">
-                    <span class="sort-label">Sort by:</span>
-                    <select class="form-input sort-select">
-                        <option>Name (A - Z)</option>
-                    </select>
+                    <form action="search.php" method="GET" class="sort-form">
+                        <?php if (!empty($search_query)): ?>
+                            <input type="hidden" name="q" value="<?= htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8') ?>">
+                        <?php endif; ?>
+                        <?php if (!empty($search_skill_id)): ?>
+                            <input type="hidden" name="skill_id" value="<?= htmlspecialchars($search_skill_id, ENT_QUOTES, 'UTF-8') ?>">
+                        <?php endif; ?>
+                        
+                        <span class="sort-label">Sort by:</span>
+                        <select name="sort" class="form-input sort-select" onchange="this.form.submit()">
+                            <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Name (A - Z)</option>
+                            <option value="name_desc" <?= $sort === 'name_desc' ? 'selected' : '' ?>>Name (Z - A)</option>
+                            <option value="exp_desc" <?= $sort === 'exp_desc' ? 'selected' : '' ?>>Experience (High to Low)</option>
+                            <option value="exp_asc" <?= $sort === 'exp_asc' ? 'selected' : '' ?>>Experience (Low to High)</option>
+                        </select>
+                    </form>
                 </div>
             </div>
 
             <?php if (empty($trainers)): ?>
-                <!-- Empty State: No Trainers Found (A6 Integration) -->
+                <!-- Empty State: No Trainers Found -->
                 <div class="search-empty-state card">
                     <div class="empty-icon-wrapper">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -273,43 +310,31 @@ if (file_exists('includes/header.php')) {
                                 <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Trainer Photo" class="trainer-avatar">
                                 <div class="trainer-info">
                                     <h4 class="trainer-name"><?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                                    <div class="trainer-role-badge">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="12" cy="7" r="4"></circle>
-                                        </svg>
-                                        Trainer
-                                    </div>
+                                    <span class="trainer-role-text">Trainer</span>
                                     <div class="trainer-exp">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                                        </svg>
-                                        Experience: <span><?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') : 'Not specified' ?></span>
+                                        <?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') . ' experience' : 'Experience not specified' ?>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Bio -->
+                            <!-- Bio (Line clamped) -->
                             <div class="trainer-bio">
                                 <?php if (!empty($trainer['bio'])): ?>
-                                    <p><?= htmlspecialchars($trainer['bio'], ENT_QUOTES, 'UTF-8') ?></p>
+                                    <p class="trainer-bio-clamp"><?= htmlspecialchars($trainer['bio'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <?php else: ?>
-                                    <p class="italic" style="color: #94a3b8;">No bio added yet.</p>
+                                    <p class="italic trainer-bio-clamp" style="color: #94a3b8;">No bio added yet.</p>
                                 <?php endif; ?>
                             </div>
 
                             <!-- Skills -->
                             <div class="trainer-skills">
-                                <h5>Skills</h5>
                                 <div class="skill-chips-mini">
                                     <?php if (!empty($trainer['skills'])): ?>
-                                        <?php foreach (array_slice($trainer['skills'], 0, 3) as $skill): ?>
+                                        <?php foreach (array_slice($trainer['skills'], 0, 4) as $skill): ?>
                                             <span class="chip-mini"><?= htmlspecialchars($skill, ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php endforeach; ?>
-                                        <?php if (count($trainer['skills']) > 3): ?>
-                                            <span class="chip-mini">+<?= count($trainer['skills']) - 3 ?></span>
+                                        <?php if (count($trainer['skills']) > 4): ?>
+                                            <span class="chip-mini">+<?= count($trainer['skills']) - 4 ?></span>
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <span class="chip-mini">No skills listed</span>
@@ -317,15 +342,20 @@ if (file_exists('includes/header.php')) {
                                 </div>
                             </div>
 
-                            <!-- Action -->
+                            <!-- Action Buttons -->
                             <div class="trainer-card-footer">
-                                <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn-outline-primary">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
+                                <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn btn-outline-primary">
                                     View Profile
                                 </a>
+                                
+                                <form action="actions/mentorship_process.php" method="POST" class="mentorship-request-form">
+                                    <input type="hidden" name="action" value="send_request">
+                                    <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
+                                    <button type="submit" class="btn btn-primary" data-loading-text="Requesting...">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                        Request Mentorship
+                                    </button>
+                                </form>
                             </div>
 
                         </div>
