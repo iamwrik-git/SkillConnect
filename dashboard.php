@@ -108,7 +108,7 @@ function getProfilePhotoUrl($photo, $name)
         <!-- 1. HERO SECTION -->
         <div class="dashboard-hero">
             <div class="hero-content">
-                <h1 class="hero-title">Welcome, <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>!</h1>
+                <h1 class="hero-title">Welcome back!</h1>
                 <p class="hero-subtitle">
                     <?php if ($role === 'trainee'): ?>
                         Keep learning, keep growing.
@@ -117,23 +117,37 @@ function getProfilePhotoUrl($photo, $name)
                     <?php endif; ?>
                 </p>
             </div>
-            <div class="hero-graphic" style="right: 1rem;">
-                <svg width="240" height="120" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Abstract Background Leaves/Shapes -->
-                    <path d="M220 80C220 50 190 40 190 40C190 40 180 70 200 90C210 100 220 80 220 80Z" fill="#93C5FD" opacity="0.6"/>
-                    <path d="M30 110C30 80 60 70 60 70C60 70 70 100 50 120C40 130 30 110 30 110Z" fill="#BFDBFE" opacity="0.6"/>
-                    <path d="M120 120 C120 70 160 50 160 50 C160 50 155 90 180 110 C190 118 170 120 120 120Z" fill="#DBEAFE" opacity="0.8"/>
-                    <!-- Lightbulb motif -->
-                    <circle cx="170" cy="35" r="14" fill="#FDE047"/>
-                    <path d="M165 46 L175 46 L173 52 L167 52 Z" fill="#FBBF24"/>
-                    <path d="M168 52 L172 52 L171 56 L169 56 Z" fill="#B45309"/>
-                    <!-- Student/Trainer character -->
-                    <circle cx="100" cy="45" r="16" fill="#FCA5A5"/> 
-                    <path d="M80 110 C80 85 90 75 100 75 C110 75 120 85 120 110 Z" fill="#2563EB"/>
-                    <!-- Laptop element -->
-                    <rect x="110" y="75" width="56" height="34" rx="2" fill="#1E293B"/> 
-                    <rect x="100" y="105" width="76" height="5" rx="2" fill="#475569"/> 
-                    <rect x="115" y="79" width="46" height="26" fill="#E2E8F0"/> 
+            
+            <!-- Exact Replica Graphic: Waves, Plant, and Text -->
+            <div class="hero-graphic">
+                <svg viewBox="0 0 550 150" height="100%" preserveAspectRatio="xMaxYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Overlapping Background Waves -->
+                    <path d="M0 150 Q 150 70, 300 120 T 550 40 V 150 Z" fill="#DCE8FA" opacity="0.6"/>
+                    <path d="M120 150 Q 250 100, 380 130 T 550 80 V 150 Z" fill="#C5DDFC" opacity="0.5"/>
+                    <path d="M250 150 Q 320 120, 420 140 T 550 110 V 150 Z" fill="#93C5FD" opacity="0.3"/>
+
+                    <!-- Plant Stem -->
+                    <path d="M 370 150 Q 365 90, 380 30" stroke="#1E40AF" stroke-width="4" stroke-linecap="round"/>
+
+                    <!-- Top Right Leaf -->
+                    <path d="M 376 55 C 385 15, 425 15, 430 30 C 435 45, 400 75, 376 55 Z" fill="#60A5FA"/>
+                    <path d="M 376 55 Q 405 40, 420 30" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>
+
+                    <!-- Mid Left Leaf -->
+                    <path d="M 372 100 C 330 65, 290 85, 295 105 C 300 125, 350 120, 372 100 Z" fill="#3B82F6"/>
+                    <path d="M 372 100 Q 330 95, 310 95" stroke="#1E40AF" stroke-width="2" stroke-linecap="round"/>
+
+                    <!-- Bottom Right Leaf -->
+                    <path d="M 370 130 C 390 95, 430 105, 420 125 C 410 145, 380 145, 370 130 Z" fill="#93C5FD"/>
+
+                    <!-- Handwritten Stacked Text -->
+                    <g fill="#3B82F6" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-style="italic" font-size="22" font-weight="500" letter-spacing="0.5">
+                        <text x="450" y="65">Learn</text>
+                        <text x="450" y="95">Connect</text>
+                        <text x="450" y="125">Grow</text>
+                    </g>
+                    <!-- Slanted Underline -->
+                    <line x1="450" y1="138" x2="515" y2="130" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </div>
         </div>
@@ -194,16 +208,16 @@ function getProfilePhotoUrl($photo, $name)
                 </div>
             </div>
         </div>
-
+        
         <!-- 3. QUICK ACTIONS -->
         <div class="quick-actions-section">
             <h2 class="section-title">Quick Actions</h2>
 
             <div class="quick-actions-grid">
                 <?php if ($role === 'trainee'): ?>
-                    <a href="search.php" class="action-card">
-                        <div class="action-icon bg-blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <a href="search.php" class="action-card theme-blue">
+                        <div class="action-icon">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="11" cy="11" r="8" />
                                 <path d="M21 21l-4.35-4.35" />
                             </svg>
@@ -216,9 +230,9 @@ function getProfilePhotoUrl($photo, $name)
                     </a>
                 <?php endif; ?>
 
-                <a href="edit_profile.php" class="action-card">
-                    <div class="action-icon bg-green">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a href="edit_profile.php" class="action-card theme-green">
+                    <div class="action-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                             <circle cx="12" cy="7" r="4" />
                         </svg>
@@ -230,9 +244,9 @@ function getProfilePhotoUrl($photo, $name)
                     <div class="action-arrow">›</div>
                 </a>
 
-                <a href="my_skills.php" class="action-card">
-                    <div class="action-icon bg-purple">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a href="my_skills.php" class="action-card theme-purple">
+                    <div class="action-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2L2 7l10 5 10-5-10-5z" />
                             <path d="M2 17l10 5 10-5" />
                             <path d="M2 12l10 5 10-5" />
@@ -259,13 +273,18 @@ function getProfilePhotoUrl($photo, $name)
                         <div class="card-header" style="margin-bottom: 0;">
                             <h3 class="card-title">My Mentors</h3>
                             <?php if (count($accepted_mentorships) > 0): ?>
-                            <a href="mentorships.php" class="text-muted" style="font-size:1.2rem; text-decoration:none;">›</a>
+                                <a href="mentorships.php" class="text-muted" style="font-size:1.2rem; text-decoration:none;">›</a>
                             <?php endif; ?>
                         </div>
                         <?php if (empty($accepted_mentorships)): ?>
                             <div class="empty-state" style="margin-top: 1rem;">
                                 <div class="empty-state-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
                                 </div>
                                 <h3>No mentors yet</h3>
                                 <p>Find a trainer who matches your learning goals.</p>
@@ -301,7 +320,10 @@ function getProfilePhotoUrl($photo, $name)
                         <?php if (empty($pending_requests)): ?>
                             <div class="empty-state">
                                 <div class="empty-state-icon icon-orange">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
                                 </div>
                                 <h3>No pending requests</h3>
                                 <p>Your mentorship requests will appear here.</p>
@@ -336,7 +358,11 @@ function getProfilePhotoUrl($photo, $name)
                         <?php if (empty($rejected_history)): ?>
                             <div class="empty-state">
                                 <div class="empty-state-icon icon-gray">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                        <path d="M12 7v5l4 2" />
+                                    </svg>
                                 </div>
                                 <h3>No request history</h3>
                                 <p>Your previous mentorship requests will appear here.</p>
@@ -377,7 +403,10 @@ function getProfilePhotoUrl($photo, $name)
                         <?php if (empty($pending_requests)): ?>
                             <div class="empty-state">
                                 <div class="empty-state-icon icon-orange">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
                                 </div>
                                 <h3>No pending requests</h3>
                                 <p>New mentorship requests from trainees will appear here.</p>
@@ -415,7 +444,7 @@ function getProfilePhotoUrl($photo, $name)
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
-                    
+
                     <div class="card activity-section mt-4">
                         <div class="card-header">
                             <h3 class="card-title">Request History</h3>
@@ -423,7 +452,11 @@ function getProfilePhotoUrl($photo, $name)
                         <?php if (empty($rejected_history)): ?>
                             <div class="empty-state">
                                 <div class="empty-state-icon icon-gray">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                        <path d="M12 7v5l4 2" />
+                                    </svg>
                                 </div>
                                 <h3>No request history</h3>
                                 <p>Your previous mentorship requests will appear here.</p>
@@ -458,13 +491,18 @@ function getProfilePhotoUrl($photo, $name)
                         <div class="card-header" style="margin-bottom: 0;">
                             <h3 class="card-title">Accepted Trainees</h3>
                             <?php if (count($accepted_mentorships) > 0): ?>
-                            <a href="mentorships.php" class="text-muted" style="font-size:1.2rem; text-decoration:none;">›</a>
+                                <a href="mentorships.php" class="text-muted" style="font-size:1.2rem; text-decoration:none;">›</a>
                             <?php endif; ?>
                         </div>
                         <?php if (empty($accepted_mentorships)): ?>
                             <div class="empty-state" style="margin-top: 1rem;">
                                 <div class="empty-state-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
                                 </div>
                                 <h3>No trainees yet</h3>
                                 <p>Trainees you accept will appear here.</p>

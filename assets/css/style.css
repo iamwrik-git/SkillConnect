@@ -175,17 +175,8 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .sidebar-link .badge { margin-left: auto; }
 
 /* Ensure inline SVGs are consistent size and don't shrink */
-.sidebar-link svg {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-}
-
-.logout-link svg {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-}
+.sidebar-link svg { flex-shrink: 0; width: 20px; height: 20px; }
+.logout-link svg { flex-shrink: 0; width: 18px; height: 18px; }
 
 /* ==========================================================================
    6. GLOBAL APP COMPONENTS
@@ -212,11 +203,59 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
    ========================================================================== */
 .dashboard-page { display: flex; flex-direction: column; gap: 32px; }
 .dashboard-page .text-danger { color: var(--danger-color); }
-.dashboard-hero { background-color: #eff6ff; border: 1px solid #e0e7ff; border-radius: var(--radius-lg); padding: 2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5); }
-.dashboard-hero .hero-content { position: relative; z-index: 2; }
-.dashboard-hero .hero-title { font-size: 1.875rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; letter-spacing: -0.025em; }
-.dashboard-hero .hero-subtitle { font-size: 1.125rem; color: #475569; }
-.dashboard-hero .hero-graphic { color: var(--primary-color); position: absolute; right: 2rem; top: 50%; transform: translateY(-50%); z-index: 1; }
+
+.dashboard-hero {
+    background: linear-gradient(135deg, #F0F5FF 0%, #DCE8FA 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero .hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-hero .hero-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+}
+
+.dashboard-hero .hero-subtitle {
+    font-size: 1.125rem;
+    color: #475569;
+    margin: 0;
+}
+
+.dashboard-hero .hero-graphic {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 100%; /* Stretches the SVG container to fill the height */
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+}
+
+/* Hide the graphic gracefully on smaller screens */
+@media (max-width: 768px) {
+    .dashboard-hero {
+        padding: 2rem 1.5rem;
+    }
+    .dashboard-hero .hero-graphic {
+        display: none;
+    }
+}
+
+
 .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
 .stat-card { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; align-items: center; gap: 1.25rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
 .stat-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -231,15 +270,64 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .quick-actions-section .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem; }
 .quick-actions-section .section-subtitle { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
 .quick-actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
-.action-card { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; transition: all 0.2s ease; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
-.action-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transform: translateY(-2px); }
-.action-icon { width: 40px; height: 40px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.action-icon.bg-blue { background-color: var(--primary-light); color: var(--primary-color); }
-.action-icon.bg-green { background-color: var(--success-bg); color: var(--success-color); }
-.action-icon.bg-purple { background-color: var(--info-bg); color: var(--info-color); }
-.action-text h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem; }
-.action-text p { font-size: 0.8125rem; color: var(--text-secondary); }
-.action-arrow { margin-left: auto; font-size: 1.5rem; color: var(--text-muted); }
+
+/* Quick Actions Colorful Cards Re-design */
+.action-card {
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    box-shadow: none;
+}
+
+.action-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Blue Theme */
+.action-card.theme-blue { background-color: #F0F5FF; border: 1px solid #E6EFFF; }
+.action-card.theme-blue:hover { border-color: #BFDBFE; transform: translateY(-2px); }
+.action-card.theme-blue .action-icon { background-color: #DBEAFE; color: #2563EB; }
+
+/* Green Theme */
+.action-card.theme-green { background-color: #ECFDF5; border: 1px solid #D1FAE5; }
+.action-card.theme-green:hover { border-color: #A7F3D0; transform: translateY(-2px); }
+.action-card.theme-green .action-icon { background-color: #D1FAE5; color: #059669; }
+
+/* Purple Theme */
+.action-card.theme-purple { background-color: #F5F3FF; border: 1px solid #EDE9FE; }
+.action-card.theme-purple:hover { border-color: #DDD6FE; transform: translateY(-2px); }
+.action-card.theme-purple .action-icon { background-color: #EDE9FE; color: #7C3AED; }
+
+.action-text h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+}
+
+.action-text p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.action-arrow {
+    margin-left: auto;
+    font-size: 1.75rem;
+    font-weight: 300;
+    color: #64748B;
+}
+
 .dashboard-content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
 .activity-list { display: flex; flex-direction: column; }
 .activity-item { display: flex; align-items: center; padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); gap: 1rem; }
