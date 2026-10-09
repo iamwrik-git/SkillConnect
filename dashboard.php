@@ -117,10 +117,23 @@ function getProfilePhotoUrl($photo, $name)
                     <?php endif; ?>
                 </p>
             </div>
-            <div class="hero-graphic">
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" opacity="0.1" />
-                    <path d="M16 10L12 14L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" />
+            <div class="hero-graphic" style="right: 1rem;">
+                <svg width="240" height="120" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Abstract Background Leaves/Shapes -->
+                    <path d="M220 80C220 50 190 40 190 40C190 40 180 70 200 90C210 100 220 80 220 80Z" fill="#93C5FD" opacity="0.6"/>
+                    <path d="M30 110C30 80 60 70 60 70C60 70 70 100 50 120C40 130 30 110 30 110Z" fill="#BFDBFE" opacity="0.6"/>
+                    <path d="M120 120 C120 70 160 50 160 50 C160 50 155 90 180 110 C190 118 170 120 120 120Z" fill="#DBEAFE" opacity="0.8"/>
+                    <!-- Lightbulb motif -->
+                    <circle cx="170" cy="35" r="14" fill="#FDE047"/>
+                    <path d="M165 46 L175 46 L173 52 L167 52 Z" fill="#FBBF24"/>
+                    <path d="M168 52 L172 52 L171 56 L169 56 Z" fill="#B45309"/>
+                    <!-- Student/Trainer character -->
+                    <circle cx="100" cy="45" r="16" fill="#FCA5A5"/> 
+                    <path d="M80 110 C80 85 90 75 100 75 C110 75 120 85 120 110 Z" fill="#2563EB"/>
+                    <!-- Laptop element -->
+                    <rect x="110" y="75" width="56" height="34" rx="2" fill="#1E293B"/> 
+                    <rect x="100" y="105" width="76" height="5" rx="2" fill="#475569"/> 
+                    <rect x="115" y="79" width="46" height="26" fill="#E2E8F0"/> 
                 </svg>
             </div>
         </div>
@@ -287,6 +300,9 @@ function getProfilePhotoUrl($photo, $name)
                         </div>
                         <?php if (empty($pending_requests)): ?>
                             <div class="empty-state">
+                                <div class="empty-state-icon icon-orange">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </div>
                                 <h3>No pending requests</h3>
                                 <p>Your mentorship requests will appear here.</p>
                             </div>
@@ -318,8 +334,12 @@ function getProfilePhotoUrl($photo, $name)
                             <h3 class="card-title">Request History</h3>
                         </div>
                         <?php if (empty($rejected_history)): ?>
-                            <div class="empty-state" style="box-shadow: none; border: 1px dashed var(--border-color);">
+                            <div class="empty-state">
+                                <div class="empty-state-icon icon-gray">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                </div>
                                 <h3>No request history</h3>
+                                <p>Your previous mentorship requests will appear here.</p>
                             </div>
                         <?php else: ?>
                             <div class="activity-list">
@@ -356,6 +376,9 @@ function getProfilePhotoUrl($photo, $name)
                         </div>
                         <?php if (empty($pending_requests)): ?>
                             <div class="empty-state">
+                                <div class="empty-state-icon icon-orange">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </div>
                                 <h3>No pending requests</h3>
                                 <p>New mentorship requests from trainees will appear here.</p>
                             </div>
@@ -398,8 +421,12 @@ function getProfilePhotoUrl($photo, $name)
                             <h3 class="card-title">Request History</h3>
                         </div>
                         <?php if (empty($rejected_history)): ?>
-                            <div class="empty-state" style="box-shadow: none; border: 1px dashed var(--border-color);">
+                            <div class="empty-state">
+                                <div class="empty-state-icon icon-gray">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                </div>
                                 <h3>No request history</h3>
+                                <p>Your previous mentorship requests will appear here.</p>
                             </div>
                         <?php else: ?>
                             <div class="activity-list">

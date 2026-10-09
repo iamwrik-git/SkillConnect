@@ -64,10 +64,10 @@ $current_skill_count = count($user_skills);
 $points = 0;
 
 $hasPhoto = (!empty($user['profile_photo']) && $user['profile_photo'] !== 'default.jpg');
-$hasName  = !empty(trim($user['name']));
-$hasEmail = !empty(trim($user['email']));
+$hasName  = !empty(trim($user['name'] ?? ''));
+$hasEmail = !empty(trim($user['email'] ?? ''));
 $hasExp   = !empty($user['exp_level']);
-$hasBio   = !empty(trim($user['bio']));
+$hasBio   = !empty(trim($user['bio'] ?? ''));
 $skillPts = min(3, $current_skill_count); // Cap at 3 for calculation
 
 if ($hasPhoto) $points += 1;
