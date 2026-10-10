@@ -164,6 +164,19 @@ if (!empty($fetched_trainers)) {
     }
 }
 
+// ---- ADDED FOR SAVED TRAINERS FEATURE ----
+$saved_trainers = [];
+if ($current_user_role === 'trainee') {
+    try {
+        $st_stmt = $pdo->prepare("SELECT trainer_id FROM saved_trainers WHERE user_id = ?");
+        $st_stmt->execute([$current_user_id]);
+        $saved_trainers = $st_stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $e) {
+        error_log("Saved Trainers fetch failed in search.php: " . $e->getMessage());
+    }
+}
+// ------------------------------------------
+
 // 5. Output Header
 $page_title = 'Find Trainers - SkillConnect';
 if (file_exists('includes/header.php')) {
@@ -212,7 +225,7 @@ if (file_exists('includes/header.php')) {
                     <select class="form-input" disabled>
                         <option>No skills added to your profile yet</option>
                     </select>
-                    <a href="edit_profile.php" class="btn btn-primary">Add Skills First</a>
+                    <a href="my_skills.php" class="btn btn-primary">Add Skills First</a>
                 <?php else: ?>
                     <select name="skill_id" required class="form-input">
                         <option value="">-- Select a Skill --</option>
@@ -306,7 +319,7 @@ if (file_exists('includes/header.php')) {
                         <div class="card trainer-card">
 
                             <!-- Trainer Header -->
-                            <div class="trainer-card-header">
+                            <div class="trainer-card-header" style="position: relative; padding-right: 2.5rem;">
                                 <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Trainer Photo" class="trainer-avatar">
                                 <div class="trainer-info">
                                     <h4 class="trainer-name"><?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?></h4>
@@ -315,6 +328,26 @@ if (file_exists('includes/header.php')) {
                                         <?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') . ' experience' : 'Experience not specified' ?>
                                     </div>
                                 </div>
+                                
+                                <!-- Bookmark Form -->
+                                <?php if ($current_user_role === 'trainee'): ?>
+                                    <form action="actions/saved_trainer_process.php" method="POST" class="bookmark-form" style="position: absolute; top: -4px; right: -4px; margin: 0;">
+                                        <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
+                                        <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
+                                        
+                                        <?php if (in_array($trainer['user_id'], $saved_trainers)): ?>
+                                            <input type="hidden" name="action" value="remove">
+                                            <button type="submit" class="bookmark-btn saved" aria-label="Remove saved trainer" title="Remove saved trainer">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                                            </button>
+                                        <?php else: ?>
+                                            <input type="hidden" name="action" value="save">
+                                            <button type="submit" class="bookmark-btn unsaved" aria-label="Save trainer" title="Save trainer">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                                            </button>
+                                        <?php endif; ?>
+                                    </form>
+                                <?php endif; ?>
                             </div>
 
                             <!-- Bio (Line clamped) -->

@@ -66,6 +66,16 @@ try {
             }
         }
     }
+
+    // ---- ADDED FOR SAVED TRAINERS FEATURE ----
+    $saved_trainers_count = 0;
+    if ($role === 'trainee') {
+        $st_stmt = $pdo->prepare("SELECT COUNT(*) FROM saved_trainers WHERE user_id = ?");
+        $st_stmt->execute([$user_id]);
+        $saved_trainers_count = $st_stmt->fetchColumn();
+    }
+    // ------------------------------------------
+
 } catch (PDOException $e) {
     error_log("Dashboard DB Error: " . $e->getMessage());
     $db_error = true;
@@ -196,17 +206,21 @@ function getProfilePhotoUrl($photo, $name)
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon icon-purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                    </svg>
-                </div>
-                <div class="stat-details">
-                    <div class="stat-value text-muted stat-value-text">Coming Soon</div>
-                    <div class="stat-label"><?= $role === 'trainer' ? 'Saved Trainees' : 'Saved Trainers' ?></div>
-                </div>
-            </div>
+            <!-- Trainees ONLY get the Saved Trainers stat card. -->
+            <?php if ($role === 'trainee'): ?>
+                <a href="saved_trainers.php" class="stat-card stat-card-link" style="text-decoration: none; color: inherit; display: flex; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="stat-icon icon-purple">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value"><?= (int)$saved_trainers_count ?></div>
+                        <div class="stat-label">Saved Trainers</div>
+                    </div>
+                    <div style="margin-left: auto; color: #94a3b8; font-size: 1.25rem;">›</div>
+                </a>
+            <?php endif; ?>
         </div>
         
         <!-- 3. QUICK ACTIONS -->
@@ -258,6 +272,21 @@ function getProfilePhotoUrl($photo, $name)
                     </div>
                     <div class="action-arrow">›</div>
                 </a>
+
+                <?php if ($role === 'trainee'): ?>
+                    <a href="saved_trainers.php" class="action-card theme-blue">
+                        <div class="action-icon">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="action-text">
+                            <h3>Saved Trainers</h3>
+                            <p>View your bookmarked mentors.</p>
+                        </div>
+                        <div class="action-arrow">›</div>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 

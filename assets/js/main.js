@@ -1,3 +1,5 @@
+// assets/js/main.js
+
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // A1: EXISTING TOAST NOTIFICATIONS
@@ -333,6 +335,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
 
     document.addEventListener('submit', (e) => {
+
+        // ----------------------------------------------------------------------
+        // Remove Saved Trainer confirmation
+        // ----------------------------------------------------------------------
+
+        const removeSavedForm = e.target.closest('.js-confirm-remove-saved');
+
+        if (removeSavedForm) {
+            e.preventDefault();
+
+            const trainerName = removeSavedForm.getAttribute('data-trainer-name') || 'this trainer';
+
+            showConfirmationModal({
+                title: 'Remove Saved Trainer?',
+                message: `Are you sure you want to remove ${trainerName} from your saved trainers?`,
+                confirmText: 'Remove',
+                confirmClass: 'confirm-danger'
+            }, () => {
+                const submitBtn = removeSavedForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    setButtonLoadingState(submitBtn);
+                }
+                removeSavedForm.submit();
+            });
+
+            return;
+        }
+
 
         // ----------------------------------------------------------------------
         // Remove Skill confirmation

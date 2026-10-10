@@ -718,3 +718,61 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .skill-limit-tracker.is-normal svg { color: #64748b; }
 .skill-limit-tracker.is-maxed { background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
 .skill-limit-tracker.is-maxed svg { color: #d97706; }
+
+/* ==========================================================================
+   21. SAVED TRAINERS FEATURE COMPONENTS
+   ========================================================================== */
+
+/* Link-based Stats Card Wrapper */
+a.stat-card-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    border-color: #cbd5e1;
+}
+
+/* Bookmark Buttons */
+.bookmark-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.bookmark-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.bookmark-btn.unsaved {
+    color: #94a3b8;
+}
+.bookmark-btn.unsaved:hover {
+    color: var(--primary-color);
+    background-color: var(--primary-light);
+}
+.bookmark-btn.saved {
+    color: var(--primary-color);
+}
+.bookmark-btn.saved:hover {
+    color: var(--danger-color);
+    background-color: var(--danger-bg);
+}
+
+/* Removal Buttons */
+.btn-danger-light {
+    background-color: var(--danger-bg);
+    color: var(--danger-color);
+    border: 1px solid #fecaca;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.btn-danger-light:hover {
+    background-color: #fecaca;
+    color: #991b1b;
+}

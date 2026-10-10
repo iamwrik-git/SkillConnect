@@ -180,12 +180,16 @@ if (isset($pdo)) {
                                     <span><?= $user_role === 'trainer' ? 'My Trainees' : 'My Mentorships' ?></span>
                                 </a>
                             </li>
+                            
+                            <?php if ($user_role === 'trainee'): ?>
                             <li>
-                                <div class="sidebar-link disabled">
+                                <a href="saved_trainers.php" class="sidebar-link <?= $current_page === 'saved_trainers.php' ? 'active' : '' ?>">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                                    <span><?= $user_role === 'trainer' ? 'Saved Trainees' : 'Saved Trainers' ?></span>
-                                </div>
+                                    <span>Saved Trainers</span>
+                                </a>
                             </li>
+                            <?php endif; ?>
+                            
                         </ul>
                     </nav>
 
