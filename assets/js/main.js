@@ -1,9 +1,11 @@
 // assets/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ==========================================================================
-    // A1: EXISTING TOAST NOTIFICATIONS
-    // ==========================================================================
+
+    // =========================================================
+    // A1: TOAST NOTIFICATIONS
+    // =========================================================
+
     const flashMessages = document.querySelectorAll('.js-toast-target');
 
     if (flashMessages.length > 0) {
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const messageText = msgElement.textContent.trim();
+
             msgElement.style.display = 'none';
 
             const toast = document.createElement('div');
@@ -83,8 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button
                     type="button"
                     class="toast-close"
-                    aria-label="Close Notification"
-                >
+                    aria-label="Close Notification">
                     <svg width="16" height="16" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2"
                          stroke-linecap="round" stroke-linejoin="round">
@@ -96,11 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             toastContainer.appendChild(toast);
 
-            const closeBtn = toast.querySelector('.toast-close');
-
-            closeBtn.addEventListener('click', () => {
-                dismissToast(toast);
-            });
+            toast.querySelector('.toast-close')
+                .addEventListener('click', () => {
+                    dismissToast(toast);
+                });
 
             const duration = type === 'error' ? 6000 : 4000;
 
@@ -112,18 +113,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         function dismissToast(toastElement) {
+            if (toastElement.classList.contains('toast-closing')) {
+                return;
+            }
+
             toastElement.classList.add('toast-closing');
 
             toastElement.addEventListener('animationend', () => {
                 toastElement.remove();
-            });
+            }, { once: true });
         }
     }
 
 
-    // ==========================================================================
+    // =========================================================
     // A2: CONFIRMATION DIALOGS
-    // ==========================================================================
+    // =========================================================
 
     function showConfirmationModal(
         { title, message, confirmText, confirmClass },
@@ -132,18 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const backdrop = document.createElement('div');
         backdrop.className = 'confirm-modal-backdrop';
 
-        const iconHtml =
-            confirmClass === 'confirm-danger'
-                ? `
-                    <svg width="28" height="28" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>`
-                : '';
+        const iconHtml = confirmClass === 'confirm-danger'
+            ? `
+                <svg width="28" height="28" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>`
+            : '';
 
         backdrop.innerHTML = `
             <div
@@ -151,8 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 role="dialog"
                 aria-labelledby="confirm-modal-title"
                 aria-describedby="confirm-modal-desc"
-                aria-modal="true"
-            >
+                aria-modal="true">
+
                 <div class="confirm-modal-icon ${confirmClass}">
                     ${iconHtml}
                 </div>
@@ -172,8 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <button
                         type="button"
-                        class="btn ${confirmClass} confirm-action-btn"
-                    >
+                        class="btn ${confirmClass} confirm-action-btn">
                         ${confirmText}
                     </button>
                 </div>
@@ -190,16 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         confirmBtn.focus();
 
+        let modalClosed = false;
+
         function closeModal() {
+            if (modalClosed) return;
+
+            modalClosed = true;
             backdrop.classList.remove('show');
 
             document.removeEventListener('keydown', escListener);
 
             backdrop.addEventListener('transitionend', () => {
-                if (document.body.contains(backdrop)) {
+                backdrop.remove();
+            }, { once: true });
+
+            // Fallback if the transition event does not fire.
+            setTimeout(() => {
+                if (backdrop.isConnected) {
                     backdrop.remove();
                 }
-            });
+            }, 400);
         }
 
         function escListener(e) {
@@ -212,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cancelBtn.addEventListener('click', closeModal);
 
-        backdrop.addEventListener('click', (e) => {
+        backdrop.addEventListener('click', e => {
             if (e.target === backdrop) {
                 closeModal();
             }
@@ -225,11 +238,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ==========================================================================
-    // A3: BUTTON LOADING / PROCESSING STATES
-    // ==========================================================================
+    // =========================================================
+    // A3: BUTTON LOADING STATES
+    // =========================================================
 
     function setButtonLoadingState(btn) {
+        if (!btn || btn.disabled) {
+            return;
+        }
+
         const loadingText = btn.getAttribute('data-loading-text');
 
         if (!loadingText) {
@@ -249,8 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 stroke="currentColor"
                 stroke-width="3"
                 stroke-linecap="round"
-                stroke-linejoin="round"
-            >
+                stroke-linejoin="round">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
             </svg>
 
@@ -259,27 +275,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ==========================================================================
+    // =========================================================
     // A4: PASSWORD VISIBILITY TOGGLE
-    // ==========================================================================
+    // =========================================================
 
     const passwordToggles =
         document.querySelectorAll('.js-password-toggle');
 
     passwordToggles.forEach(toggle => {
         toggle.addEventListener('click', function () {
-
             const wrapper = this.closest('.password-wrapper');
 
-            if (!wrapper) {
-                return;
-            }
+            if (!wrapper) return;
 
             const input = wrapper.querySelector('input');
 
-            if (!input) {
-                return;
-            }
+            if (!input) return;
 
             const isPassword = input.type === 'password';
 
@@ -290,9 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isPassword ? 'Hide password' : 'Show password'
             );
 
-            if (isPassword) {
-
-                this.innerHTML = `
+            this.innerHTML = isPassword
+                ? `
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -300,17 +310,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                        </path>
+                        stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                         <line x1="1" y1="1" x2="23" y2="23"></line>
                     </svg>
-                `;
-
-            } else {
-
-                this.innerHTML = `
+                `
+                : `
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -318,45 +323,76 @@ document.addEventListener('DOMContentLoaded', () => {
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
-                        </path>
+                        stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 `;
-            }
         });
     });
 
 
-    // ==========================================================================
-    // GLOBAL FORM INTERCEPTOR
-    // ==========================================================================
+    // =========================================================
+    // A5: LOGIN / SIGNUP PANEL SUPPORT
+    // =========================================================
 
-    document.addEventListener('submit', (e) => {
+    /*
+     * The existing login/signup transition remains CSS-driven.
+     * This code does not change authentication or form submission.
+     *
+     * The checkbox selector below is optional. If your page already
+     * controls the transition through CSS, no extra JavaScript is needed.
+     */
 
-        // ----------------------------------------------------------------------
-        // Remove Saved Trainer confirmation
-        // ----------------------------------------------------------------------
+    const stateTrigger = document.querySelector('.state-trigger');
 
-        const removeSavedForm = e.target.closest('.js-confirm-remove-saved');
+    if (stateTrigger) {
+        stateTrigger.addEventListener('change', () => {
+            document.dispatchEvent(
+                new CustomEvent('auth:panel-change', {
+                    detail: {
+                        mode: stateTrigger.checked ? 'signup' : 'login'
+                    }
+                })
+            );
+        });
+    }
+
+
+    // =========================================================
+    // A6: GLOBAL FORM INTERCEPTOR
+    // =========================================================
+
+    document.addEventListener('submit', e => {
+
+        // -----------------------------------------------------
+        // Remove saved trainer confirmation
+        // -----------------------------------------------------
+
+        const removeSavedForm =
+            e.target.closest('.js-confirm-remove-saved');
 
         if (removeSavedForm) {
             e.preventDefault();
 
-            const trainerName = removeSavedForm.getAttribute('data-trainer-name') || 'this trainer';
+            const trainerName =
+                removeSavedForm.getAttribute('data-trainer-name') ||
+                'this trainer';
 
             showConfirmationModal({
                 title: 'Remove Saved Trainer?',
-                message: `Are you sure you want to remove ${trainerName} from your saved trainers?`,
+                message:
+                    `Are you sure you want to remove ${trainerName} from your saved trainers?`,
                 confirmText: 'Remove',
                 confirmClass: 'confirm-danger'
             }, () => {
-                const submitBtn = removeSavedForm.querySelector('button[type="submit"]');
+                const submitBtn =
+                    removeSavedForm.querySelector('button[type="submit"]');
+
                 if (submitBtn) {
                     setButtonLoadingState(submitBtn);
                 }
+
                 removeSavedForm.submit();
             });
 
@@ -364,15 +400,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // ----------------------------------------------------------------------
-        // Remove Skill confirmation
-        // ----------------------------------------------------------------------
+        // -----------------------------------------------------
+        // Remove skill confirmation
+        // -----------------------------------------------------
 
         const removeSkillForm =
             e.target.closest('.js-confirm-remove-skill');
 
         if (removeSkillForm) {
-
             e.preventDefault();
 
             const skillName =
@@ -386,11 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmText: 'Remove Skill',
                 confirmClass: 'confirm-danger'
             }, () => {
-
                 const submitBtn =
-                    removeSkillForm.querySelector(
-                        'button[type="submit"]'
-                    );
+                    removeSkillForm.querySelector('button[type="submit"]');
 
                 if (submitBtn) {
                     setButtonLoadingState(submitBtn);
@@ -403,15 +435,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // ----------------------------------------------------------------------
-        // Reject Mentorship confirmation
-        // ----------------------------------------------------------------------
+        // -----------------------------------------------------
+        // Reject mentorship confirmation
+        // -----------------------------------------------------
 
         const rejectMentorshipForm =
             e.target.closest('.js-confirm-reject-request');
 
         if (rejectMentorshipForm) {
-
             e.preventDefault();
 
             showConfirmationModal({
@@ -421,11 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmText: 'Reject',
                 confirmClass: 'confirm-danger'
             }, () => {
-
                 const submitBtn =
-                    rejectMentorshipForm.querySelector(
-                        'button[type="submit"]'
-                    );
+                    rejectMentorshipForm.querySelector('button[type="submit"]');
 
                 if (submitBtn) {
                     setButtonLoadingState(submitBtn);
@@ -438,9 +466,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // ----------------------------------------------------------------------
+        // -----------------------------------------------------
         // Standard form loading states
-        // ----------------------------------------------------------------------
+        // -----------------------------------------------------
 
         if (
             e.submitter &&
@@ -453,4 +481,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 0);
         }
     });
+
 });

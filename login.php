@@ -30,7 +30,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication - SkillConnect</title>
+    <title>Sign In or Sign Up - SkillConnect</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="auth-page">
@@ -177,7 +177,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
         <div class="login-illustration-panel">
             
             <!-- Static Asset: object-fit: cover guarantees no white space -->
-            <img src="assets/images/skillconnect-auth.webp" alt="SkillConnect Workspace" class="auth-illustration-img">
+            <img src="assets/images/skillconnect-auth-login.jpg" alt="SkillConnect learner exploring programming, data science, and machine learning at a laptop" class="auth-illustration-img">
             <div class="auth-illustration-overlay"></div>
 
             <!-- Top Brand -->

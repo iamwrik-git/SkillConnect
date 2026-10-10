@@ -1,5 +1,5 @@
 /* ==========================================================================
-   1. CORE VARIABLES & GLOBAL RESETS
+   01. DESIGN TOKENS AND GLOBAL BASE STYLES
    ========================================================================== */
 :root {
     --bg-main: #f8fafc;
@@ -55,7 +55,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 input, select, textarea { font-family: inherit; }
 
 /* ==========================================================================
-   2. SKILLCONNECT AUTHENTICATION PAGE
+   02. AUTHENTICATION PAGE — LAYOUT, FORMS, ILLUSTRATION, AND STATE TRANSITIONS
    ========================================================================== */
 .auth-page { background-color: #f1f5f9; }
 .login-workspace { position: relative; width: min(1100px, calc(100% - 40px)); height: 780px; margin: 40px auto; overflow: hidden; background: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 8px 16px rgba(15, 23, 42, 0.04); display: flex; }
@@ -94,34 +94,175 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
 .auth-divider span { padding: 0 16px; }
 .auth-bottom-text { text-align: center; font-size: 14px; color: #64748b; }
-.login-illustration-panel { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; background: #f1f5f9; z-index: 30; box-shadow: -10px 0 30px rgba(15, 23, 42, 0.05); transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-.auth-illustration-img { position: absolute; top: 50%; left: 50%; width: 100%; height: auto; transform: translate(-50%, -50%); z-index: 1; }
-.auth-illustration-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 1) 100%); z-index: 2; pointer-events: none; }
-.illustration-brand { position: relative; z-index: 10; text-align: center; padding-top: 48px; }
-.illustration-brand h2 { font-size: 36px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
-.illustration-brand h2 .text-primary { color: #2563eb; }
-.panel-typography { position: absolute; bottom: 48px; left: 0; width: 100%; z-index: 10; text-align: center; padding: 0 40px; }
-.panel-typography h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-.panel-typography p { font-size: 14px; color: #475569; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+.login-illustration-panel {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    background: linear-gradient(
+        145deg,
+        #edf5ff 0%,
+        #dceaff 55%,
+        #f0f6ff 100%
+    );
+
+    z-index: 30;
+    overflow: hidden;
+
+    box-shadow: -10px 0 30px rgba(15, 23, 42, 0.05);
+
+    transition:
+        transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* New portrait illustration */
+.auth-illustration-img {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    transform: none;
+
+    z-index: 1;
+}
+
+/* Blend the illustration with the logo and bottom text */
+.auth-illustration-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        to bottom,
+        rgba(239, 246, 255, 0.88) 0%,
+        rgba(239, 246, 255, 0.12) 18%,
+        rgba(239, 246, 255, 0.00) 65%,
+        rgba(239, 246, 255, 0.82) 84%,
+        rgba(239, 246, 255, 0.96) 100%
+    );
+
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* SkillConnect branding at the top */
+.illustration-brand {
+    position: relative;
+    z-index: 10;
+
+    text-align: center;
+
+    padding: 36px 20px 0;
+}
+
+.illustration-brand h2 {
+    margin: 0;
+
+    font-size: 34px;
+    font-weight: 800;
+
+    color: #0f172a;
+
+    letter-spacing: -1.1px;
+}
+
+.illustration-brand h2 .text-primary {
+    color: #2563eb;
+}
+
+/* Text at the bottom */
+.panel-typography {
+    position: absolute;
+
+    bottom: 34px;
+    left: 0;
+
+    width: 100%;
+    padding: 0 30px;
+
+    z-index: 10;
+
+    text-align: center;
+}
+
+.panel-typography h3 {
+    margin: 0 0 8px;
+
+    color: #0f172a;
+
+    font-size: 18px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.panel-typography p {
+    max-width: 400px;
+    margin: 0 auto;
+
+    color: #475569;
+
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+/* Preserve login/signup switching animation */
+.state-trigger:checked ~ .login-workspace
+.login-illustration-panel {
+    transform: translateX(-100%);
+    box-shadow: 10px 0 30px rgba(15, 23, 42, 0.05);
+}
+
+/* Smoothly transition the bottom text */
+.text-signup-state,
+.text-login-state {
+    transition:
+        opacity 300ms ease,
+        visibility 300ms ease;
+}
+
+.text-signup-state {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.text-login-state {
+    opacity: 1;
+    visibility: visible;
+}
+
+.state-trigger:checked ~ .login-workspace
+.text-login-state {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.state-trigger:checked ~ .login-workspace
+.text-signup-state {
+    opacity: 1;
+    visibility: visible;
+}
 .state-trigger:checked ~ .login-workspace .login-form-panel { transform: translateX(100%); }
-.state-trigger:checked ~ .login-workspace .login-illustration-panel { transform: translateX(-100%); box-shadow: 10px 0 30px rgba(15, 23, 42, 0.05); }
 .state-trigger:checked ~ .login-workspace .login-view { opacity: 0; visibility: hidden; z-index: 1; pointer-events: none; transition: opacity 300ms ease, visibility 300ms ease, z-index 300ms step-end; }
 .state-trigger:checked ~ .login-workspace .register-view { opacity: 1; visibility: visible; z-index: 10; pointer-events: auto; transition: opacity 300ms ease, visibility 300ms ease, z-index 300ms step-start; }
-.text-signup-state, .text-login-state { transition: opacity 300ms ease, visibility 300ms ease; }
-.text-signup-state { opacity: 0; visibility: hidden; }
-.text-login-state { opacity: 1; visibility: visible; }
-.state-trigger:checked ~ .login-workspace .text-login-state { opacity: 0; visibility: hidden; }
-.state-trigger:checked ~ .login-workspace .text-signup-state { opacity: 1; visibility: visible; }
 
 /* ==========================================================================
-   3. GLOBAL APP SHELL & SCROLLING ARCHITECTURE
+   03. MAIN APPLICATION LAYOUT AND SCROLLING
    ========================================================================== */
 .app-layout { height: 100vh; overflow: hidden; display: flex; flex-direction: column; background-color: var(--bg-color); }
 .app-body { flex: 1; min-height: 0; overflow: hidden; display: flex; }
 .main-content { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 32px 2.5rem 3rem; scroll-behavior: auto; }
 
 /* ==========================================================================
-   4. TOP NAVIGATION & SKILLCONNECT BRANDING
+   04. TOP NAVIGATION, SEARCH, DROPDOWNS, AND BRANDING
    ========================================================================== */
 .top-nav { flex-shrink: 0; height: var(--header-height); background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem 0 0; z-index: 40; }
 .nav-brand { width: var(--sidebar-width); height: var(--header-height); padding: 0 1.5rem; border-right: 1px solid var(--border-color); display: flex; align-items: center; }
@@ -155,7 +296,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .btn-view-profile:hover { background-color: var(--primary-light); color: var(--primary-color); }
 
 /* ==========================================================================
-   5. SIDEBAR NAVIGATION
+   05. SIDEBAR NAVIGATION
    ========================================================================== */
 .sidebar { flex-shrink: 0; height: 100%; overflow: hidden; width: var(--sidebar-width); background-color: var(--surface-color); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
 .sidebar-scrollable { flex: 1; padding: 2rem 1.5rem; overflow: hidden; }
@@ -179,7 +320,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .logout-link svg { flex-shrink: 0; width: 18px; height: 18px; }
 
 /* ==========================================================================
-   6. GLOBAL APP COMPONENTS
+   06. SHARED APPLICATION COMPONENTS — BUTTONS, CARDS, AND BADGES
    ========================================================================== */
 .app-layout .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.625rem 1.25rem; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; transition: all 0.2s; text-align: center; }
 .app-layout .btn-primary { background-color: var(--primary-color); color: var(--text-inverse); }
@@ -199,7 +340,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .app-layout .badge-info { background-color: var(--info-bg); color: var(--info-color); }
 
 /* ==========================================================================
-   7. DASHBOARD SPECIFIC STYLES
+   07. DASHBOARD AND QUICK ACTIONS
    ========================================================================== */
 .dashboard-page { display: flex; flex-direction: column; gap: 32px; }
 .dashboard-page .text-danger { color: var(--danger-color); }
@@ -348,7 +489,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .activity-item.compact .activity-details p { font-size: 0.8rem; }
 
 /* ==========================================================================
-   8. PROFILE PAGE VISUAL REDESIGN
+   08. PROFILE PAGE
    ========================================================================== */
 .profile-page-wrapper { display: flex; flex-direction: column; gap: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 .profile-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 2rem; }
@@ -388,7 +529,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .skill-chip { padding: 0.5rem 1rem; background-color: #f1f5f9; border-radius: 9999px; font-size: 0.8125rem; font-weight: 500; color: #0f172a; }
 
 /* ==========================================================================
-   9. EDIT PROFILE VISUAL REDESIGN
+   09. EDIT PROFILE PAGE AND FORM CONTROLS
    ========================================================================== */
 .edit-profile-page { display: flex; flex-direction: column; gap: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 .edit-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
@@ -452,7 +593,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .why-skills-item svg { flex-shrink: 0; color: var(--primary-color); margin-top: 0.1rem; }
 
 /* ==========================================================================
-   11. FIND TRAINERS / SEARCH PAGE REDESIGN
+   11. TRAINER SEARCH AND DISCOVERY
    ========================================================================== */
 .search-page-wrapper { display: flex; flex-direction: column; gap: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 .search-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
@@ -505,7 +646,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .mentorship-request-form .btn-primary { width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.6rem 0.5rem; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 
 /* ==========================================================================
-   12. TOAST NOTIFICATIONS (A1)
+   12. TOAST NOTIFICATIONS
    ========================================================================== */
 .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
 .toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 12px; background-color: var(--surface-color); border-radius: var(--radius-md); padding: 16px; width: 320px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); animation: toastSlideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; position: relative; overflow: hidden; }
@@ -527,7 +668,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 @keyframes toastFadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
 
 /* ==========================================================================
-   13. CONFIRMATION MODALS (A2)
+   13. CONFIRMATION MODALS
    ========================================================================== */
 .confirm-modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.4); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; padding: 1rem; }
 .confirm-modal-backdrop.show { opacity: 1; visibility: visible; }
@@ -545,14 +686,14 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .confirm-danger:hover { background-color: #dc2626; border-color: #dc2626; }
 
 /* ==========================================================================
-   14. LOADING STATES (A3)
+   14. BUTTON LOADING STATES
    ========================================================================== */
 .is-loading { position: relative; pointer-events: none !important; opacity: 0.85; cursor: wait !important; text-decoration: none !important; }
 .spinner-icon { animation: spin-animation 1s linear infinite; margin-right: 8px; display: inline-block; vertical-align: middle; }
 @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* ==========================================================================
-   15. PASSWORD VISIBILITY TOGGLE (A4)
+   15. PASSWORD VISIBILITY CONTROLS
    ========================================================================== */
 .password-wrapper { position: relative; display: block; width: 100%; }
 .password-wrapper .form-input { padding-right: 2.5rem; }
@@ -562,7 +703,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .password-toggle-btn svg { width: 1.25rem; height: 1.25rem; }
 
 /* ==========================================================================
-   16. FORM VALIDATION FEEDBACK (A5)
+   16. FORM VALIDATION FEEDBACK
    ========================================================================== */
 .form-input.is-invalid { border-color: var(--danger-color); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
 .form-input.is-valid { border-color: var(--success-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
@@ -571,7 +712,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .feedback-icon { flex-shrink: 0; }
 
 /* ==========================================================================
-   17. EMPTY STATES (A6)
+   17. SHARED EMPTY STATES
    ========================================================================== */
 .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary); background-color: var(--surface-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .empty-state-icon { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background-color: var(--primary-light); color: var(--primary-color); margin-bottom: 1.25rem; }
@@ -599,7 +740,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .stay-tuned-back:hover { color: var(--primary-hover); }
 
 /* ==========================================================================
-   19. MENTORSHIPS DEDICATED PAGE
+   19. MENTORSHIP FEATURES AND REQUEST ACTIONS
    ========================================================================== */
 .view-all-link { display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: color 0.2s ease; }
 .view-all-link:hover { color: var(--primary-hover); text-decoration: underline; }
@@ -629,7 +770,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .btn-reject:hover { background-color: var(--danger-bg); }
 
 /* ==========================================================================
-   20. RESPONSIVE MEDIA QUERIES (CONSOLIDATED)
+   20. RESPONSIVE DESIGN — EXISTING BREAKPOINTS (KEEP IN CASCADE ORDER)
    ========================================================================== */
 @media (max-width: 1024px) {
     .dashboard-content-grid, .profile-content-grid, .edit-profile-grid { grid-template-columns: 1fr; }
@@ -720,7 +861,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .skill-limit-tracker.is-maxed svg { color: #d97706; }
 
 /* ==========================================================================
-   21. SAVED TRAINERS FEATURE COMPONENTS
+   21. SAVED TRAINERS FEATURE
    ========================================================================== */
 
 /* Link-based Stats Card Wrapper */
@@ -778,7 +919,7 @@ a.stat-card-link:hover {
 }
 
 /* ==========================================================================
-   SKILLCONNECT PUBLIC LANDING PAGE
+   22. PUBLIC LANDING PAGE — SCOPED STYLES
    All selectors are scoped to .landing-page to avoid changing app pages.
    ========================================================================== */
 .landing-page {
@@ -985,7 +1126,7 @@ a.stat-card-link:hover {
 
 
 /* ==========================================================================
-   LANDING PAGE REFINEMENTS — BRAND, ICONS, ILLUSTRATIONS, SMOOTH SCROLL
+   23. LANDING PAGE BRANDING, ICONS, ILLUSTRATIONS, AND SCROLLING
    ========================================================================== */
 html:has(body.landing-page) { scroll-behavior: smooth; }
 .landing-page section[id] { scroll-margin-top: 18px; }
@@ -1023,7 +1164,7 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 }
 
 /* ======================================================================
-   FINAL INTEGRATION OVERRIDES
+   24. LANDING PAGE INTEGRATION OVERRIDES — KEEP AT END OF LANDING RULE GROUP
    Keep this block at the end of the landing-page stylesheet.
    Uses the custom SVG logo and the supplied How It Works / About images.
    ====================================================================== */
@@ -1130,7 +1271,7 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 
 
 /* ==========================================================================
-   ABOUT BANNER — STATIC IMAGE WITH REAL, CLICKABLE HTML BUTTONS
+   25. ABOUT BANNER — STATIC IMAGE WITH REAL HTML BUTTONS
    Use assets/images/skillconnect-about.jpeg (the version WITHOUT buttons).
    ========================================================================== */
 
@@ -1246,7 +1387,7 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 
 
 /* ==========================================================================
-   FINAL VISUAL TUNING — FEATURE HEIGHT + SMALLER ABOUT BANNER BUTTONS
+   26. LANDING PAGE VISUAL TUNING
    ========================================================================== */
 
 /* Give the feature section more vertical breathing room, not more width. */
@@ -1319,7 +1460,7 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 
 
 /* ==========================================================================
-   FINAL ABOUT BANNER BUTTON SIZE ADJUSTMENT
+   27. FINAL ABOUT BANNER BUTTON SIZE ADJUSTMENT
    Slightly smaller buttons while preserving their position and responsiveness.
    ========================================================================== */
 .landing-page .lp-about-banner-actions {
