@@ -130,10 +130,23 @@ if (file_exists('includes/header.php')) {
                 <?= $is_own_profile ? 'Manage your profile and showcase your skills.' : 'Explore this learner\'s or trainer\'s profile.' ?>
             </p>
         </div>
-        <a href="dashboard.php" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Back to Dashboard
-        </a>
+        <?php if (!empty($_SESSION['is_admin'])): ?>
+            <?php
+                // Rebuild return query string excluding user_id to preserve filters
+                $returnParams = $_GET;
+                unset($returnParams['user_id']);
+                $returnQs = !empty($returnParams) ? '?' . http_build_query($returnParams) : '';
+            ?>
+            <a href="admin/manage_users.php<?= htmlspecialchars($returnQs, ENT_QUOTES, 'UTF-8') ?>" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Manage Users
+            </a>
+        <?php else: ?>
+            <a href="dashboard.php" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Dashboard
+            </a>
+        <?php endif; ?>
     </header>
 
     <?php if ($user_not_found): ?>

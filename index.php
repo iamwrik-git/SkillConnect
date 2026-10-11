@@ -2,8 +2,12 @@
 require_once 'includes/auth.php';
 
 if (function_exists('isLoggedIn') && isLoggedIn()) {
-    header('Location: dashboard.php');
-    exit();
+    // Prevent normal users from seeing the landing page, 
+    // but allow Administrators to view it.
+    if (empty($_SESSION['is_admin'])) {
+        header('Location: dashboard.php');
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>

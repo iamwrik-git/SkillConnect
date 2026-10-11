@@ -103,8 +103,13 @@ if ($action === 'register') {
             $_SESSION['role'] = $user['role'];
             $_SESSION['is_admin'] = $user['is_admin'];
 
-            header("Location: ../dashboard.php");
-            exit();
+            if ($user['is_admin'] == 1) {
+                header("Location: ../admin/dashboard.php");
+                exit();
+            } else {
+                header("Location: ../dashboard.php");
+                exit();
+            }
         } else {
             // Invalid credentials: Redirect preserving 'login' state
             $_SESSION['error'] = "Sign-in failed. Invalid email or password.";

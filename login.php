@@ -2,7 +2,9 @@
 // login.php
 require_once 'includes/auth.php';
 
-if (isLoggedIn()) {
+// Redirect logged-in trainees and trainers to their dashboard,
+// but allow authenticated administrators to access the login/registration forms.
+if (isLoggedIn() && empty($_SESSION['is_admin'])) {
     header("Location: dashboard.php");
     exit();
 }
