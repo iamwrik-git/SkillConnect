@@ -904,3 +904,66 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 .landing-page .lp-about-banner-actions .lp-button-banner-outline { border-width: 1.5px; }
 @media (max-width: 760px) { .landing-page .lp-about-banner-actions { gap: 6px; } .landing-page .lp-about-banner-actions .lp-button { min-height: clamp(23px, 4.4vw, 29px); padding: 0 clamp(7px, 1.7vw, 11px); font-size: clamp(8px, 1.8vw, 10px); border-width: 1px; } }
 @media (max-width: 420px) { .landing-page .lp-about-banner-actions .lp-button { min-height: 22px; padding-inline: 6px; font-size: 8px; } }
+
+/* ==========================================================================
+   DASHBOARD REFINEMENT — reference layout
+   ========================================================================== */
+.brand-logo {
+    display: block;
+    width: 232px;
+    height: 46px;
+    overflow: visible;
+    flex: 0 0 auto;
+}
+.brand-logo text {
+    font-weight: 750;
+}
+.nav-brand .logo {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+}
+.nav-brand { padding: 0 1.25rem; }
+.nav-brand .logo { gap: 0; }
+.dashboard-page { gap: 24px; }
+.dashboard-hero { min-height: 136px; padding: 1.75rem 2.25rem; border-radius: 12px; }
+.dashboard-hero .hero-title { font-size: 2.1rem; }
+.dashboard-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.stat-card { min-width: 0; padding: 1.15rem 1.25rem; gap: 1rem; }
+.stat-card-link { text-decoration: none; color: inherit; }
+.stat-card-link > div:last-child { margin-left: auto; color: #94a3b8; font-size: 1.25rem; }
+.quick-actions-section .section-title { margin-bottom: 10px; }
+.quick-actions-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.action-card { min-width: 0; padding: 1rem 1.15rem; gap: 1rem; }
+.action-icon { width: 52px; height: 52px; border-radius: 15px; }
+.action-text { min-width: 0; }
+.action-text h3 { font-size: 1rem; }
+.action-text p { font-size: .82rem; line-height: 1.35; }
+.action-arrow { font-size: 1.5rem; flex-shrink: 0; }
+.dashboard-content-grid { gap: 16px; }
+.dashboard-content-grid > .dashboard-column > .card { padding: 1.25rem; margin-bottom: 0; }
+.dashboard-content-grid .card-header { margin-bottom: .75rem; }
+.dashboard-content-grid .card-title { font-size: 1.05rem; }
+.view-all-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary-color); font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.view-all-link:hover { color: var(--primary-hover); }
+.dashboard-content-grid .empty-state { min-height: 176px; padding: 1rem; border-radius: 12px; box-shadow: none; }
+.dashboard-content-grid .empty-state-icon { width: 58px; height: 58px; margin-bottom: .75rem; }
+.dashboard-content-grid .empty-state-icon svg { width: 30px; height: 30px; }
+.dashboard-content-grid .empty-state h3 { font-size: 1.05rem; margin-bottom: .35rem; }
+.dashboard-content-grid .empty-state p { font-size: .84rem; margin-bottom: .75rem; max-width: 360px; }
+.dashboard-content-grid .empty-state-action { margin-top: 0; padding: .55rem 1.4rem; }
+.dashboard-content-grid .activity-section .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@media (max-width: 1200px) {
+    .dashboard-stats, .quick-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 800px) {
+    .dashboard-content-grid { grid-template-columns: 1fr; }
+    .dashboard-hero { padding: 1.5rem; }
+    .dashboard-hero .hero-title { font-size: 1.75rem; }
+    .brand-logo { width: 190px; height: 42px; }
+}
+@media (max-width: 560px) {
+    .dashboard-stats, .quick-actions-grid { grid-template-columns: 1fr; }
+    .nav-brand { width: auto; padding: 0 .75rem; }
+    .brand-logo { width: 150px; height: 36px; }
+}

@@ -86,10 +86,9 @@ $display_accepted = array_slice($accepted_mentorships, 0, 1);
 $display_pending  = array_slice($pending_requests, 0, 2);
 $display_history  = array_slice($rejected_history, 0, 2);
 
-// Include the existing header
-if (file_exists('includes/header.php')) {
-    require_once 'includes/header.php';
-}
+// Load the shared header using an absolute filesystem path.
+$page_title = 'Dashboard | SkillConnect';
+require_once __DIR__ . '/includes/header.php';
 
 // Helper function to resolve profile photo or generate initials
 function getProfilePhotoUrl($photo, $name)

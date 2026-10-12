@@ -11,6 +11,10 @@ $user_role = $_SESSION['role'] ?? 'trainee';
 // Get the current page filename to apply the active blue marker
 $current_page = basename($_SERVER['PHP_SELF']);
 
+// Use the project logo asset and refresh its URL when the file changes.
+$logo_file = __DIR__ . '/../assets/images/skillconnect-logo.svg';
+$logo_version = is_file($logo_file) ? filemtime($logo_file) : time();
+
 // ==========================================
 // FETCH SEARCH AUTO-COMPLETE SUGGESTIONS
 // ==========================================
@@ -44,9 +48,15 @@ if (isset($pdo)) {
         <!-- TOP NAVIGATION -->
         <header class="top-nav">
             <div class="nav-brand">
-                <a href="dashboard.php" class="logo">
-                    <span class="logo-mark">SC</span>
-                    <span class="logo-text">SkillConnect</span>
+                <a href="dashboard.php" class="logo" aria-label="SkillConnect home">
+                    <img
+                        src="assets/images/skillconnect-logo.svg?v=<?= (int) $logo_version ?>"
+                        alt="SkillConnect"
+                        class="logo-image"
+                        width="220"
+                        height="68"
+                        fetchpriority="high"
+                    >
                 </a>
             </div>
 
