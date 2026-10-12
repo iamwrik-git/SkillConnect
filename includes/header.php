@@ -91,20 +91,38 @@ if (isset($pdo)) {
                 </div>
 
                 <!-- Me / Profile Popover -->
+                                <!-- Me / Profile Popover -->
                 <div class="nav-item has-dropdown" data-dropdown="profile">
                     <button type="button" class="nav-btn me-btn" aria-expanded="false">
                         <?php
                             $nav_photo = $_SESSION['profile_photo'] ?? '';
                             $nav_name = $_SESSION['name'] ?? 'User';
-                            if (empty($nav_photo) || $nav_photo === 'default.jpg') {
-                                $nav_avatar_url = "https://ui-avatars.com/api/?name=" . urlencode($nav_name) . "&background=eff6ff&color=2563eb&bold=true";
+                            $show_initials = empty($nav_photo) || $nav_photo === 'default.jpg';
+                            
+                            if ($show_initials) {
+                                // Extract initials natively
+                                $name_parts = array_values(array_filter(explode(' ', trim($nav_name))));
+                                $initials = '';
+                                
+                                if (count($name_parts) >= 2) {
+                                    $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1) . mb_substr(end($name_parts), 0, 1));
+                                } elseif (count($name_parts) === 1 && $name_parts[0] !== '') {
+                                    $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1));
+                                } else {
+                                    $initials = 'U';
+                                }
                             } else {
                                 $nav_avatar_url = 'assets/images/profile/' . htmlspecialchars($nav_photo, ENT_QUOTES, 'UTF-8');
                             }
                         ?>
-                        <img src="<?= $nav_avatar_url ?>" alt="Me" class="avatar-placeholder" style="object-fit: cover;">
+                        <?php if ($show_initials): ?>
+                            <div class="avatar-placeholder initials-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></div>
+                        <?php else: ?>
+                            <img src="<?= $nav_avatar_url ?>" alt="Me" class="avatar-placeholder" style="object-fit: cover;">
+                        <?php endif; ?>
                         <span class="nav-text">Me ▼</span>
                     </button>
+
                     <div class="dropdown-popup profile-popup">
                         <div class="popup-body">
                             <div class="profile-info-block">

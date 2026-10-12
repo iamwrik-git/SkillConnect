@@ -1498,3 +1498,80 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
         font-size: 8px;
     }
 }
+
+/* Update within 04. TOP NAVIGATION, SEARCH, DROPDOWNS, AND BRANDING */
+.avatar-placeholder { width: 32px; height: 32px; border-radius: var(--radius-full); background-color: var(--border-color); display: inline-block; }
+.initials-avatar { display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-light); color: var(--primary-color); font-weight: 700; font-size: 14px; text-transform: uppercase; }
+
+/* ==========================================================================
+   EXACT SIDEBAR DESIGN REFERENCE OVERRIDES
+   ========================================================================== */
+
+/* 1. Desktop: Make the logo area background seamless with the sidebar */
+@media (min-width: 769px) {
+    .top-nav {
+        /* Splits the top nav background so the logo area matches the sidebar */
+        background: linear-gradient(to right, #f4f8fc var(--sidebar-width), var(--surface-color) var(--sidebar-width)) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+    .nav-brand {
+        background-color: transparent !important;
+        border-right: none !important;
+    }
+}
+
+/* 2. Sidebar background with the exact subtle blue blobs from the reference */
+.sidebar {
+    background-color: #f4f8fc !important;
+    background-image: 
+        radial-gradient(circle at -25% 85%, #dcecfe 0%, transparent 45%),
+        radial-gradient(circle at -15% 105%, #bfdbfe 0%, transparent 40%) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+/* 3. Inactive navigation items */
+.sidebar-link {
+    color: #475569 !important;
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+    transition: all 0.25s ease !important;
+}
+.sidebar-link:hover:not(.disabled) {
+    background-color: #e0f0ff !important;
+    color: #1d4ed8 !important;
+}
+
+/* 4. Active navigation item (Pill-shaped vibrant gradient) */
+.sidebar-link.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 14px -2px rgba(37, 99, 235, 0.35) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    border: none !important;
+}
+.sidebar-link.active svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* 5. Muted section headings */
+.sidebar-heading {
+    color: #94a3b8 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+}
+
+/* 6. Logout button matching the light red finish */
+.logout-link {
+    background-color: #fee2e2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 10px !important;
+    transition: all 0.25s ease !important;
+}
+.logout-link:hover {
+    background-color: #fecaca !important;
+    color: #b91c1c !important;
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.1) !important;
+}
