@@ -3,7 +3,6 @@ session_start();
 
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
-require_once '../includes/functions.php';
 
 // Ensure user is logged in
 requireLogin();
@@ -17,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$action = filter_input(INPUT_POST, 'action', FILTER_SANITIZE_STRING);
+$action = $_POST['action'] ?? '';
 
 if ($action === 'send_request') {
     
