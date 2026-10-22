@@ -33,8 +33,9 @@ if (!function_exists('isActive')) {
 </head>
 <body class="admin-body">
 
+    <button type="button" class="admin-sidebar-backdrop" aria-label="Close admin navigation" tabindex="-1"></button>
     <!-- SIDEBAR -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar">
         <div class="sidebar-brand">
             <span class="brand-text"><span class="text-primary">Skill</span>Connect</span>
         </div>
@@ -71,7 +72,9 @@ if (!function_exists('isActive')) {
         <!-- HEADER -->
         <header class="admin-header">
             <div class="header-left">
-                <!-- Mobile trigger if needed in future -->
+                <button type="button" class="admin-menu-toggle" aria-label="Open admin navigation" aria-expanded="false" aria-controls="admin-sidebar">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
             <div class="header-right">
                 <button class="notification-btn" aria-label="Notifications">
@@ -105,6 +108,28 @@ if (!function_exists('isActive')) {
     </main>
 
     <script>
+        // Responsive admin navigation; all existing navigation links are reused.
+        (() => {
+            const toggle = document.querySelector('.admin-menu-toggle');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const backdrop = document.querySelector('.admin-sidebar-backdrop');
+            if (!toggle || !sidebar || !backdrop) return;
+            const close = () => {
+                document.body.classList.remove('admin-sidebar-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Open admin navigation');
+            };
+            toggle.addEventListener('click', () => {
+                const open = document.body.classList.toggle('admin-sidebar-open');
+                toggle.setAttribute('aria-expanded', String(open));
+                toggle.setAttribute('aria-label', open ? 'Close admin navigation' : 'Open admin navigation');
+            });
+            backdrop.addEventListener('click', close);
+            sidebar.querySelectorAll('a').forEach(link => link.addEventListener('click', close));
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 760) close(); });
+        })();
+
         // Simple script to handle delete confirmations
         document.querySelectorAll('.js-confirm-delete').forEach(form => {
             form.addEventListener('submit', function(e) {

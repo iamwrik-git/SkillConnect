@@ -1578,8 +1578,112 @@ img, svg { max-width: 100%; }
 .edit-profile-page #tab-security .info-alert .password-wrapper {
     margin-top: .7rem;
 }
-.edit-profile-page .recovery-modal-backdrop {
+/* Account recovery setup modal: fixed overlay, independent of page layout. */
+.recovery-modal-backdrop {
+    position: fixed;
+    inset: 0;
     z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.48);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+}
+.recovery-modal-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+.recovery-modal-content {
+    position: relative;
+    width: min(100%, 480px);
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    padding: 36px 32px 28px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    color: #0f172a;
+    text-align: center;
+    transform: translateY(10px) scale(.985);
+    transition: transform 180ms ease;
+    outline: none;
+}
+.recovery-modal-backdrop.show .recovery-modal-content { transform: translateY(0) scale(1); }
+.recovery-btn-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    color: #64748b;
+}
+.recovery-btn-close:hover { background: #f1f5f9; color: #0f172a; }
+.recovery-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 4px auto 20px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.recovery-modal-icon svg { width: 32px; height: 32px; }
+.recovery-modal-content h2 {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 1.45rem;
+    line-height: 1.25;
+    font-weight: 750;
+    letter-spacing: -.025em;
+}
+.recovery-modal-content > p {
+    margin: 0 auto;
+    max-width: 390px;
+    color: #64748b;
+    font-size: .95rem;
+    line-height: 1.6;
+}
+.recovery-modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
+.recovery-modal-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 650;
+}
+body.recovery-modal-open { overflow: hidden; }
+@media (max-width: 600px) {
+    .recovery-modal-backdrop { align-items: center; padding: 16px; }
+    .recovery-modal-content {
+        width: 100%;
+        max-height: calc(100dvh - 32px);
+        padding: 34px 22px 22px;
+        border-radius: 16px;
+    }
+    .recovery-modal-content h2 { font-size: 1.3rem; }
+    .recovery-modal-content > p { font-size: .9rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .recovery-modal-backdrop, .recovery-modal-content { transition: none; }
 }
 @media (max-width: 900px) {
     .edit-profile-page .edit-profile-grid {
@@ -1623,4 +1727,1352 @@ img, svg { max-width: 100%; }
     .edit-profile-page #tab-security .info-alert > button {
         width: 100%;
     }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE REPAIR — shared app shell and affected user pages
+   ========================================================================== */
+img, svg, video, canvas { max-width: 100%; }
+.app-layout, .app-body, .main-content, .top-nav, .nav-actions,
+.dashboard-page, .dashboard-page > *, .card, .form-group,
+.edit-profile-page, .edit-profile-page * { min-width: 0; }
+.main-content { width: 100%; }
+.main-content > * { max-width: 100%; }
+.sidebar-backdrop, .mobile-menu-toggle { display: none; }
+
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 20px 32px; }
+    .dashboard-stats { gap: 18px; }
+    .dashboard-hero { gap: 20px; }
+    .top-nav { padding-right: 16px; }
+    .nav-search { margin-inline: 1rem; }
+    .nav-actions { gap: .6rem; }
+    .sidebar-link { gap: 12px; font-size: 1rem; }
+}
+@media (max-width: 768px) {
+    .app-layout { height: 100dvh; min-height: 100vh; overflow: hidden; }
+    .top-nav { height: 60px; min-height: 60px; padding: 0 12px; gap: 10px; }
+    .mobile-menu-toggle {
+        display: inline-flex; flex: 0 0 40px; width: 40px; height: 40px;
+        align-items: center; justify-content: center; flex-direction: column; gap: 5px;
+        border: 1px solid var(--border-color); border-radius: 9px; background: #fff;
+    }
+    .mobile-menu-toggle span { display:block; width:18px; height:2px; border-radius:2px; background:var(--text-main); }
+    .nav-brand { width: auto; flex: 0 1 auto; height: 60px; padding: 0; background: transparent; }
+    .nav-brand .logo-image { width: 145px; height: auto; max-height: 44px; object-fit: contain; }
+    .nav-search { display: none; }
+    .nav-actions { margin-left: auto; gap: 4px; }
+    .nav-btn { padding: 7px; }
+    .nav-text { display: none; }
+    .nav-item[data-dropdown="network"] .nav-btn::before,
+    .nav-item[data-dropdown="notifications"] .nav-btn::before { width: 19px; height: 19px; }
+    .me-btn { padding: 4px; }
+    .me-btn .nav-text { display: none; }
+    .avatar-placeholder { width: 30px; height: 30px; }
+    .app-body { position: relative; min-height: 0; overflow: hidden; }
+    .sidebar {
+        position: fixed; z-index: 1001; top: 0; bottom: 0; left: 0;
+        width: min(300px, 86vw); height: 100dvh; max-height: 100dvh;
+        flex: none; overflow-y: auto; overflow-x: hidden;
+        transform: translateX(-105%); visibility: hidden;
+        transition: transform .22s ease, visibility .22s ease;
+        box-shadow: 12px 0 35px rgba(15,23,42,.16);
+    }
+    body.sidebar-open .sidebar { transform: translateX(0); visibility: visible; }
+    .sidebar-scrollable { overflow-y: auto; padding: 1.25rem 1rem; }
+    .sidebar-section { margin-bottom: 1.5rem; }
+    .sidebar-link { font-size: .98rem; padding: .8rem .85rem; }
+    .sidebar-backdrop {
+        display: block; position: fixed; inset: 0; z-index: 1000;
+        background: rgba(15,23,42,.45); opacity: 0; visibility: hidden;
+        transition: opacity .22s ease, visibility .22s ease;
+    }
+    body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
+    .main-content { padding: 22px 16px 28px; }
+    .dashboard-page { gap: 22px; }
+    .dashboard-hero { padding: 1.5rem; }
+    .dashboard-hero .hero-title { font-size: clamp(1.45rem, 5vw, 2rem); overflow-wrap: anywhere; }
+    .dashboard-hero .hero-subtitle { font-size: 1rem; }
+    .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .stat-card { padding: 1rem; gap: .75rem; }
+    .stat-icon { flex: 0 0 40px; width: 40px; height: 40px; }
+    .dashboard-grid, .quick-actions-grid { grid-template-columns: minmax(0, 1fr); }
+    .card-header { align-items: flex-start; gap: .75rem; flex-wrap: wrap; }
+    .site-footer { padding-inline: 16px; }
+    .page-header, .page-heading, .search-page-header { flex-wrap: wrap; gap: 12px; }
+    .search-controls, .search-form, .filter-bar { width: 100%; max-width: 100%; flex-wrap: wrap; }
+    .search-controls select, .search-controls button, .search-form input, .filter-bar input, .filter-bar select { min-width: 0; max-width: 100%; }
+    .profile-layout, .profile-grid, .edit-profile-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    .profile-hero, .profile-header, .profile-main-header { flex-wrap: wrap; }
+    .edit-profile-page .edit-profile-tabs { display:flex; width:100%; flex-wrap:wrap; }
+    .edit-profile-page .tab-btn { flex:1 1 140px; white-space:normal; }
+    .edit-profile-page .form-group-split { flex-wrap:wrap; }
+    .edit-profile-page .form-group-split > * { min-width:0; flex:1 1 100%; }
+    .edit-profile-page input, .edit-profile-page select, .edit-profile-page textarea,
+    .edit-profile-page button, .edit-profile-page .btn { max-width:100%; }
+    .skills-layout, .skills-grid, .my-skills-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    .skill-form, .skill-add-form { width:100%; max-width:100%; }
+    .table-responsive, .table-wrapper, .table-container { max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    table { max-width:100%; }
+}
+@media (max-width: 480px) {
+    .top-nav { gap: 7px; padding-inline: 8px; }
+    .nav-brand .logo-image { width: 122px; max-height: 40px; }
+    .nav-actions { gap: 0; }
+    .main-content { padding: 16px 12px 24px; }
+    .dashboard-stats { grid-template-columns: minmax(0, 1fr); }
+    .stat-card { padding: .9rem; }
+    .app-layout .card { padding: 1rem; }
+    .dashboard-hero { padding: 1.2rem; }
+    .dashboard-page { gap: 16px; }
+    .edit-profile-page .edit-profile-tabs { gap: .25rem; padding: .25rem; }
+    .edit-profile-page .tab-btn { flex-basis: 0; padding: .6rem .35rem; font-size: .8rem; }
+    .edit-profile-page #tab-security .edit-card { padding: 1rem !important; }
+    .search-form button, .filter-bar .btn, .skill-form button { max-width:100%; }
+}
+
+/* Authentication: retain the desktop split-panel animation, use a compact
+   illustration above the form on phones to prevent overlapping panels. */
+@media (max-width: 700px) {
+    .login-workspace {
+        width: calc(100% - 24px); height: auto; min-height: 0;
+        margin: 12px auto 20px; display:flex; flex-direction:column;
+        overflow: visible; border-radius: 18px;
+    }
+    .login-form-panel {
+        position: relative; order: 2; width:100%; height:auto; min-height:0;
+        padding: 24px 20px 28px; transform:none !important; z-index:20;
+    }
+    .form-view-container { height:auto; min-height:0; }
+    .form-view { position:relative; inset:auto; width:100%; height:auto; min-height:0; }
+    .login-view { display:flex; }
+    .register-view { display:none; }
+    .state-trigger:checked ~ .login-workspace .login-view { display:none; }
+    .state-trigger:checked ~ .login-workspace .register-view { display:flex; }
+    .login-illustration-panel {
+        position:relative; order:1; left:auto; top:auto; width:100%; height:190px;
+        min-height:190px; transform:none !important; box-shadow:none; flex:0 0 190px;
+    }
+    .illustration-brand { padding:18px 12px 0; }
+    .illustration-brand h2 { font-size:25px; }
+    .panel-typography { bottom:14px; padding-inline:16px; }
+    .panel-typography h3 { font-size:15px; margin-bottom:4px; }
+    .panel-typography p { font-size:12px; line-height:1.4; }
+    .form-header { margin-bottom:18px; }
+    .form-header h1 { font-size:25px; }
+    .form-group-split { flex-wrap:wrap; gap:0; }
+    .form-group-split .half-width { flex:1 1 100%; min-width:0; }
+    .modern-selector-group { gap:8px; }
+    .selector-card { min-width:0; padding:10px; }
+    .card-icon { margin-right:8px; }
+}
+
+
+/* Page-specific responsive layouts (selectors verified against current markup). */
+@media (max-width: 768px) {
+    .dashboard-content-grid { grid-template-columns:minmax(0,1fr) !important; }
+    .action-card { min-width:0; }
+    .search-page-wrapper { width:100%; max-width:100%; }
+    .search-header-top, .search-results-header { display:flex; flex-direction:column; align-items:stretch; gap:12px; }
+    .header-callout { width:100%; max-width:100%; }
+    .search-box-content { flex-wrap:wrap; }
+    .search-box-content select, .search-box-content input { min-width:0; width:100%; }
+    .search-submit-btn { width:100%; }
+    .trainer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .trainer-card { min-width:0; }
+    .profile-page-wrapper { width:100%; max-width:100%; }
+    .profile-content-grid { grid-template-columns:minmax(0,1fr) !important; }
+    .profile-identity-card, .profile-card, .profile-details { min-width:0; }
+    .profile-meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .completion-layout { grid-template-columns:minmax(0,1fr) !important; }
+    .my-skills-grid { grid-template-columns:minmax(0,1fr) !important; }
+    .edit-skill-list { width:100%; }
+    .edit-skill-item { flex-wrap:wrap; gap:10px; }
+    .add-skill-flex { flex-wrap:wrap; }
+    .add-skill-flex > * { min-width:0; max-width:100%; }
+    .why-skills-col, .skills-management-col { min-width:0; width:100%; }
+    .search-empty-state, .empty-state { width:100%; max-width:100%; }
+}
+@media (max-width: 480px) {
+    .trainer-grid { grid-template-columns:minmax(0,1fr); }
+    .profile-meta-grid { grid-template-columns:minmax(0,1fr); }
+    .trainer-card-footer { flex-wrap:wrap; }
+    .profile-header-top { flex-wrap:wrap; gap:12px; }
+    .profile-avatar-wrapper { max-width:100%; }
+    .edit-profile-page .edit-profile-tabs { align-items:stretch; }
+    .edit-profile-page .tab-btn { min-width:0; }
+}
+
+/* Mobile authentication layout: floating sign-in card; animated expansion for sign-up. */
+@media (max-width: 700px) {
+    body.auth-page {
+        min-height: 100vh;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        padding: 24px 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body.auth-page .login-workspace {
+        width: calc(100% - 32px);
+        max-width: 520px;
+        height: auto;
+        min-height: 0;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+        transition: min-height .4s ease, border-radius .3s ease;
+    }
+
+    body.auth-page .login-illustration-panel {
+        position: relative;
+        order: 1;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 76px;
+        flex: 0 0 auto;
+        padding: 0;
+        overflow: hidden;
+        transform: none !important;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: none;
+    }
+
+    body.auth-page .auth-illustration-img,
+    body.auth-page .auth-illustration-overlay,
+    body.auth-page .login-illustration-panel .panel-typography {
+        display: none !important;
+    }
+
+    body.auth-page .illustration-brand {
+        position: relative;
+        width: 100%;
+        padding: 14px 20px;
+        text-align: left;
+        z-index: 10;
+    }
+
+    body.auth-page .illustration-brand h2 {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        font-size: 25px;
+    }
+
+    body.auth-page .auth-brand-logo {
+        display: block;
+        width: min(190px, 68%);
+        max-height: 44px;
+        margin: 0;
+        object-fit: contain;
+        object-position: left center;
+    }
+
+    body.auth-page .login-form-panel {
+        position: relative;
+        order: 2;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 26px 24px 28px;
+        transform: none !important;
+        z-index: 20;
+        background: #fff;
+        transition: padding .35s ease;
+    }
+
+    body.auth-page .form-view-container {
+        position: relative;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+    }
+
+    body.auth-page .form-view {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        justify-content: flex-start;
+    }
+
+    body.auth-page .login-view { display: flex; }
+    body.auth-page .register-view { display: none; }
+
+    body.auth-page #form-toggle:checked ~ .login-workspace .login-view {
+        display: none;
+    }
+
+    body.auth-page #form-toggle:checked ~ .login-workspace .register-view {
+        display: flex;
+        animation: auth-signup-expand .42s cubic-bezier(.2,.75,.25,1) both;
+    }
+
+    body.auth-page .form-header { margin-bottom: 18px; }
+    body.auth-page .form-header h1 { font-size: clamp(24px, 6vw, 30px); line-height: 1.15; }
+    body.auth-page .form-header p { font-size: 15px; line-height: 1.55; }
+    body.auth-page .form-group-split { flex-wrap: wrap; gap: 0; }
+    body.auth-page .form-group-split .half-width { flex: 1 1 100%; min-width: 0; }
+    body.auth-page .modern-selector-group { gap: 8px; }
+    body.auth-page .selector-card { min-width: 0; padding: 10px; }
+    body.auth-page .card-icon { margin-right: 8px; }
+
+    /* Let the taller registration form grow naturally while the card opens. */
+    body.auth-page #form-toggle:checked ~ .login-workspace {
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 16px;
+    }
+
+    @keyframes auth-signup-expand {
+        from { opacity: 0; clip-path: inset(8% 0 8% 0); }
+        to { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
+}
+
+@media (max-width: 390px) {
+    body.auth-page .login-workspace { width: calc(100% - 24px); }
+    body.auth-page .login-form-panel { padding: 22px 18px 24px; }
+    body.auth-page .illustration-brand { padding-inline: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.auth-page .login-workspace,
+    body.auth-page .login-form-panel,
+    body.auth-page .register-view {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+
+/* ======================================================================
+   AUTH MOBILE LAYOUT — persistent top brand + floating form card
+   Desktop authentication styling and the landing page remain unchanged.
+   ====================================================================== */
+.auth-mobile-brand { display: none; }
+
+@media (max-width: 900px) {
+    body.auth-page {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 0;
+        background: #f0f5fb;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body.auth-page .auth-mobile-brand {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        width: 100%;
+        min-height: 84px;
+        padding: 16px clamp(20px, 5vw, 36px);
+        background: #fff;
+        border-bottom: 1px solid #e5edf7;
+    }
+
+    body.auth-page .auth-mobile-brand a {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+    }
+
+    body.auth-page .auth-mobile-brand .auth-brand-logo {
+        display: block;
+        width: min(205px, 62vw);
+        max-height: 44px;
+        margin: 0;
+        object-fit: contain;
+        object-position: left center;
+    }
+
+    body.auth-page .login-illustration-panel { display: none !important; }
+
+    body.auth-page .login-workspace {
+        display: flex;
+        flex-direction: column;
+        width: min(560px, calc(100% - 32px));
+        height: auto;
+        min-height: 0;
+        margin: auto;
+        overflow: hidden;
+        border: 1px solid rgba(226, 232, 240, .95);
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .10);
+        transition: border-radius .35s ease, box-shadow .35s ease;
+    }
+
+    body.auth-page .login-form-panel {
+        position: relative;
+        order: 0;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 30px 28px 32px;
+        overflow: visible;
+        transform: none !important;
+        background: #fff;
+    }
+
+    body.auth-page .form-view-container,
+    body.auth-page .form-view {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+    }
+
+    body.auth-page .form-view { justify-content: flex-start; }
+    body.auth-page .login-view { display: flex; }
+    body.auth-page .register-view { display: none; }
+    body.auth-page #form-toggle:checked ~ .login-workspace .login-view { display: none; }
+    body.auth-page #form-toggle:checked ~ .login-workspace .register-view {
+        display: flex;
+        animation: auth-signup-expand .42s cubic-bezier(.2,.75,.25,1) both;
+    }
+
+    body.auth-page #form-toggle:checked ~ .login-workspace {
+        margin-top: 24px;
+        margin-bottom: 24px;
+        border-radius: 18px;
+    }
+
+    body.auth-page .form-header { margin-bottom: 22px; }
+    body.auth-page .form-header h1 { font-size: clamp(26px, 5.8vw, 32px); line-height: 1.15; }
+    body.auth-page .form-header p { font-size: 15px; line-height: 1.55; }
+    body.auth-page .auth-form { width: 100%; max-width: 100%; }
+    body.auth-page .auth-form .form-group { margin-bottom: 17px; }
+    body.auth-page .auth-form .form-input { width: 100%; min-width: 0; min-height: 50px; font-size: 16px; }
+    body.auth-page .password-wrapper { width: 100%; min-width: 0; }
+    body.auth-page .modern-selector-group { flex-direction: column; gap: 10px; }
+    body.auth-page .selector-card { width: 100%; min-width: 0; }
+    body.auth-page .submit-btn { width: 100%; min-height: 52px; }
+    body.auth-page .auth-divider { margin: 24px 0 18px; }
+    body.auth-page .auth-bottom-text { line-height: 1.5; }
+
+    @keyframes auth-signup-expand {
+        from { opacity: 0; clip-path: inset(5% 0 5% 0); }
+        to { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
+}
+
+@media (max-width: 560px) {
+    body.auth-page .auth-mobile-brand { min-height: 76px; padding: 14px 20px; }
+    body.auth-page .auth-mobile-brand .auth-brand-logo { width: min(190px, 62vw); max-height: 40px; }
+    body.auth-page .login-workspace { width: calc(100% - 28px); border-radius: 18px; }
+    body.auth-page .login-form-panel { padding: 25px 22px 28px; }
+}
+
+@media (max-width: 390px) {
+    body.auth-page .login-workspace { width: calc(100% - 24px); }
+    body.auth-page .auth-mobile-brand { padding-inline: 18px; }
+    body.auth-page .login-form-panel { padding: 23px 18px 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.auth-page .login-workspace,
+    body.auth-page .register-view { animation: none !important; transition: none !important; }
+}
+
+
+/* ======================================================================
+   AUTH MOBILE — FLAT, CENTERED DESIGN MATCHING THE APPROVED REFERENCE
+   Mobile-only overrides. Desktop authentication and other pages unchanged.
+   ====================================================================== */
+@media (max-width: 900px) {
+    html:has(body.auth-page) { min-height: 100%; background: #fff; }
+
+    body.auth-page {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden;
+        background: #fff;
+        color: #101a35;
+    }
+
+    body.auth-page .auth-mobile-brand {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 84px;
+        padding: 18px 20px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.97);
+        isolation: isolate;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
+
+    body.auth-page .auth-mobile-brand a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    body.auth-page .auth-mobile-brand .auth-brand-logo {
+        display: block;
+        width: min(230px, 62vw);
+        max-height: 54px;
+        margin: 0 auto;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    body.auth-page .login-illustration-panel { display: none !important; }
+
+    body.auth-page .login-workspace {
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 auto;
+        width: min(540px, calc(100% - 44px));
+        height: auto;
+        min-height: 0;
+        margin: clamp(100px, 10vh, 145px) auto 76px;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        transition: none;
+    }
+
+    body.auth-page .login-form-panel {
+        position: relative;
+        inset: auto;
+        order: 0;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+        overflow: visible;
+        transform: none !important;
+        background: transparent;
+    }
+
+    body.auth-page .form-view-container,
+    body.auth-page .form-view {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        background: transparent;
+    }
+
+    body.auth-page .form-view { justify-content: flex-start; }
+    body.auth-page .login-view { display: flex; }
+    body.auth-page .register-view { display: none; }
+    body.auth-page #form-toggle:checked ~ .login-workspace .login-view { display: none; }
+    body.auth-page #form-toggle:checked ~ .login-workspace .register-view {
+        display: flex;
+        animation: auth-flat-signup-expand .42s cubic-bezier(.2,.75,.25,1) both;
+    }
+
+    /* Login: center the content below the centered brand, without a card. */
+    body.auth-page .login-view {
+        justify-content: center;
+        text-align: center;
+    }
+    body.auth-page .login-view .form-header { margin: 0 auto 30px; max-width: 440px; }
+    body.auth-page .login-view .form-header h1 {
+        margin-bottom: 12px;
+        font-size: clamp(29px, 5.3vw, 38px);
+        line-height: 1.14;
+        letter-spacing: -.04em;
+        color: #101a35;
+    }
+    body.auth-page .login-view .form-header p {
+        color: #647895;
+        font-size: clamp(15px, 2.8vw, 19px);
+        line-height: 1.5;
+    }
+
+    body.auth-page .auth-form { width: 100%; max-width: 100%; text-align: left; }
+    body.auth-page .auth-form .form-group { margin-bottom: 22px; }
+    body.auth-page .auth-form .form-group > label {
+        display: block;
+        margin: 0 0 10px;
+        color: #627692;
+        font-size: 12px;
+        font-weight: 750;
+        line-height: 1.3;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+    body.auth-page .auth-form .form-input {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: 60px;
+        padding: 15px 18px;
+        border: 1px solid #e3edfa;
+        border-radius: 13px;
+        background-color: #edf5ff;
+        color: #101a35;
+        font-size: 17px;
+        line-height: 1.3;
+        box-shadow: none;
+    }
+    body.auth-page .auth-form .form-input::placeholder { color: #8396b4; opacity: 1; }
+    body.auth-page .auth-form .form-input:focus {
+        border-color: #80b2ff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    /* Add the simple leading field icons shown in the approved mockup. */
+    body.auth-page #login-email,
+    body.auth-page #reg-email {
+        padding-left: 56px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='1.5'/%3E%3Cpath d='m3 7 9 7 9-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 19px center;
+        background-size: 23px;
+    }
+    body.auth-page #reg-name {
+        padding-left: 56px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21v-2a8 8 0 0 1 16 0v2z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 19px center;
+        background-size: 23px;
+    }
+    body.auth-page #login-password,
+    body.auth-page #reg-password,
+    body.auth-page #reg-confirm-password {
+        padding-left: 56px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='10' width='14' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 19px center;
+        background-size: 22px;
+    }
+    body.auth-page .password-wrapper .form-input { padding-right: 54px; }
+    body.auth-page .password-toggle-btn {
+        right: 9px;
+        width: 36px;
+        height: 36px;
+        color: #647895;
+        background: transparent;
+    }
+    body.auth-page .password-toggle-btn svg { width: 24px; height: 24px; }
+
+    body.auth-page .form-group-split { display: flex; flex-direction: column; gap: 20px; }
+    body.auth-page .form-group-split .half-width { min-width: 0; width: 100%; }
+    body.auth-page .modern-selector-group { display: flex; flex-direction: row; gap: 12px; }
+    body.auth-page .selector-card {
+        min-width: 0;
+        min-height: 76px;
+        padding: 12px 10px;
+        border: 1px solid #e0e9f6;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: none;
+    }
+    body.auth-page input[type="radio"]:checked + .selector-card {
+        border-color: #2563eb;
+        background: #edf5ff;
+        box-shadow: 0 0 0 1px #2563eb;
+    }
+    body.auth-page .card-icon { flex: 0 0 auto; margin-right: 9px; font-size: 23px; }
+    body.auth-page .card-title { font-size: 15px; line-height: 1.3; }
+    body.auth-page .card-desc { font-size: 12px; line-height: 1.35; }
+
+    body.auth-page .submit-btn {
+        width: 100%;
+        min-height: 60px;
+        margin-top: 3px;
+        padding: 15px 18px;
+        border-radius: 12px;
+        background: #1767f5;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        box-shadow: none;
+    }
+    body.auth-page .submit-btn:hover { background: #0758e8; }
+    body.auth-page .auth-divider { margin: 27px 0 20px; color: #7285a2; font-size: 14px; }
+    body.auth-page .auth-divider::before,
+    body.auth-page .auth-divider::after { border-bottom-color: #d9e3f0; }
+    body.auth-page .auth-divider span { padding: 0 18px; }
+    body.auth-page .auth-bottom-text { text-align: center; color: #647895; font-size: 15px; line-height: 1.55; }
+    body.auth-page .switch-auth-link { color: #0864f6; font-weight: 750; }
+    body.auth-page .inline-error-banner { margin-bottom: 18px; text-align: left; }
+
+    /* Signup intentionally starts nearer the top and uses the available height. */
+    body.auth-page:has(#form-toggle:checked) .auth-mobile-brand { padding-top: 22px; }
+    body.auth-page:has(#form-toggle:checked) .auth-mobile-brand .auth-brand-logo { width: min(220px, 60vw); max-height: 48px; }
+    body.auth-page:has(#form-toggle:checked) .login-workspace {
+        width: min(540px, calc(100% - 44px));
+        margin: 34px auto 30px;
+    }
+    body.auth-page:has(#form-toggle:checked) .register-view { justify-content: flex-start; }
+    body.auth-page:has(#form-toggle:checked) .register-view .form-header { margin-bottom: 25px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .form-header h1 {
+        font-size: clamp(28px, 5.5vw, 36px);
+        line-height: 1.15;
+        letter-spacing: -.04em;
+    }
+    body.auth-page:has(#form-toggle:checked) .register-view .form-header p {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-form .form-group { margin-bottom: 18px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-form .form-group > label { margin-bottom: 9px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-form .form-input { min-height: 58px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-divider { margin-top: 23px; margin-bottom: 17px; }
+
+    @keyframes auth-flat-signup-expand {
+        from { opacity: 0; clip-path: inset(0 0 10% 0); transform: translateY(10px); }
+        to { opacity: 1; clip-path: inset(0); transform: translateY(0); }
+    }
+}
+
+@media (max-width: 560px) {
+    body.auth-page .auth-mobile-brand { padding-top: clamp(42px, 8vh, 86px); }
+    body.auth-page .auth-mobile-brand .auth-brand-logo { width: min(215px, 66vw); max-height: 50px; }
+    body.auth-page .login-workspace { width: calc(100% - 40px); margin-top: clamp(100px, 10vh, 145px); margin-bottom: 76px; }
+    body.auth-page .login-view .form-header { margin-bottom: 25px; }
+    body.auth-page .auth-form .form-group { margin-bottom: 19px; }
+    body.auth-page .auth-form .form-input { min-height: 56px; font-size: 16px; }
+    body.auth-page .submit-btn { min-height: 56px; }
+    body.auth-page:has(#form-toggle:checked) .auth-mobile-brand { padding-top: 20px; }
+    body.auth-page:has(#form-toggle:checked) .login-workspace { width: calc(100% - 40px); margin-top: 28px; margin-bottom: 26px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-form .form-group { margin-bottom: 16px; }
+    body.auth-page:has(#form-toggle:checked) .register-view .auth-form .form-input { min-height: 54px; }
+    body.auth-page .selector-card { padding: 10px 8px; }
+    body.auth-page .card-icon { margin-right: 6px; font-size: 20px; }
+    body.auth-page .card-title { font-size: 14px; }
+    body.auth-page .card-desc { font-size: 11px; }
+}
+
+@media (max-width: 380px) {
+    body.auth-page .login-workspace,
+    body.auth-page:has(#form-toggle:checked) .login-workspace { width: calc(100% - 32px); }
+    body.auth-page .modern-selector-group { gap: 8px; }
+    body.auth-page .selector-card { padding: 9px 6px; }
+    body.auth-page .card-icon { font-size: 18px; margin-right: 5px; }
+    body.auth-page .card-title { font-size: 13px; }
+    body.auth-page .card-desc { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.auth-page .register-view { animation: none !important; }
+}
+
+/* ==========================================================================
+   AUTH FIELD ICONS — consistent on desktop and mobile
+   Keep these rules outside media queries so the same icons appear at every size.
+   ========================================================================== */
+body.auth-page .auth-form #login-email,
+body.auth-page .auth-form #reg-email {
+    text-align: left !important;
+    padding-left: 56px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='1.5'/%3E%3Cpath d='m3 7 9 7 9-7'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 19px center !important;
+    background-size: 23px 23px !important;
+}
+
+body.auth-page .auth-form #reg-name {
+    text-align: left !important;
+    padding-left: 56px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21v-2a8 8 0 0 1 16 0v2z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 19px center !important;
+    background-size: 23px 23px !important;
+}
+
+body.auth-page .auth-form #login-password,
+body.auth-page .auth-form #reg-password,
+body.auth-page .auth-form #reg-confirm-password {
+    text-align: left !important;
+    padding-left: 56px !important;
+    padding-right: 54px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='10' width='14' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 19px center !important;
+    background-size: 22px 22px !important;
+}
+
+@media (max-width: 768px) {
+    body.auth-page .auth-form #login-email,
+    body.auth-page .auth-form #reg-email,
+    body.auth-page .auth-form #reg-name,
+    body.auth-page .auth-form #login-password,
+    body.auth-page .auth-form #reg-password,
+    body.auth-page .auth-form #reg-confirm-password {
+        padding-left: 52px !important;
+        background-position: 16px center !important;
+    }
+}
+
+
+/* AUTH AUTOFILL SAFEGUARDS
+   Keep the mobile brand visible when Chrome/Safari scroll to autofilled credentials.
+   Preserve the field icons and the intended pale-blue input surface during autofill.
+*/
+body.auth-page .auth-mobile-brand,
+body.auth-page .auth-mobile-brand a,
+body.auth-page .auth-mobile-brand .auth-brand-logo {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.auth-page .auth-mobile-brand .auth-brand-logo {
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+body.auth-page .auth-form input:-webkit-autofill,
+body.auth-page .auth-form input:-webkit-autofill:hover,
+body.auth-page .auth-form input:-webkit-autofill:focus,
+body.auth-page .auth-form input:-webkit-autofill:active {
+    -webkit-text-fill-color: #101a35 !important;
+    caret-color: #101a35;
+    -webkit-box-shadow: 0 0 0 1000px #edf5ff inset !important;
+    box-shadow: 0 0 0 1000px #edf5ff inset !important;
+    background-clip: padding-box !important;
+    transition: background-color 99999s ease-out 0s;
+}
+
+body.auth-page .auth-form #login-email:-webkit-autofill,
+body.auth-page .auth-form #reg-email:-webkit-autofill,
+body.auth-page .auth-form #reg-name:-webkit-autofill,
+body.auth-page .auth-form #login-password:-webkit-autofill,
+body.auth-page .auth-form #reg-password:-webkit-autofill,
+body.auth-page .auth-form #reg-confirm-password:-webkit-autofill {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='1.5'/%3E%3Cpath d='m3 7 9 7 9-7'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 19px center !important;
+    background-size: 23px 23px !important;
+}
+
+/* Use the correct lock icon for password fields even when autofilled. */
+body.auth-page .auth-form #login-password:-webkit-autofill,
+body.auth-page .auth-form #reg-password:-webkit-autofill,
+body.auth-page .auth-form #reg-confirm-password:-webkit-autofill {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23627692' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='10' width='14' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 19px center !important;
+    background-size: 22px 22px !important;
+}
+
+@media (max-width: 768px) {
+    body.auth-page .auth-form #login-email:-webkit-autofill,
+    body.auth-page .auth-form #reg-email:-webkit-autofill,
+    body.auth-page .auth-form #reg-name:-webkit-autofill,
+    body.auth-page .auth-form #login-password:-webkit-autofill,
+    body.auth-page .auth-form #reg-password:-webkit-autofill,
+    body.auth-page .auth-form #reg-confirm-password:-webkit-autofill {
+        background-position: 16px center !important;
+    }
+}
+
+
+/* ==========================================================================
+   MOBILE DASHBOARD REFINEMENT
+   Desktop dashboard styling is intentionally unchanged.
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Keep the application header compact and the content naturally scrollable. */
+    .app-layout {
+        height: 100dvh;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .app-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .main-content {
+        min-height: 0;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 18px 14px 26px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-page {
+        gap: 18px;
+    }
+
+    /* Shorter welcome banner on phones. */
+    .dashboard-hero {
+        min-height: 150px;
+        padding: 24px 20px;
+        border-radius: 18px;
+    }
+
+    .dashboard-hero .hero-title {
+        font-size: clamp(1.55rem, 5.8vw, 2rem);
+        line-height: 1.2;
+        margin-bottom: 6px;
+    }
+
+    .dashboard-hero .hero-subtitle {
+        font-size: 1rem;
+        line-height: 1.45;
+    }
+
+    .dashboard-hero .hero-graphic {
+        display: none;
+    }
+
+    /* Statistics remain in a 2 × 2 grid, including narrow phones. */
+    .dashboard-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px;
+    }
+
+    .dashboard-stats .stat-card {
+        min-height: 104px;
+        padding: 14px 12px;
+        gap: 10px;
+        border-radius: 15px;
+        align-items: center;
+    }
+
+    .dashboard-stats .stat-icon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        border-radius: 11px;
+    }
+
+    .dashboard-stats .stat-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .dashboard-stats .stat-value {
+        font-size: 1.45rem;
+        line-height: 1.15;
+    }
+
+    .dashboard-stats .stat-label {
+        font-size: .78rem;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    /* Quick Actions stay available, but use compact, touch-friendly rows. */
+    .quick-actions-section .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+    }
+
+    .quick-actions-section .section-subtitle {
+        margin-bottom: 12px;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px;
+    }
+
+    .action-card {
+        min-height: 82px;
+        padding: 13px 14px;
+        gap: 12px;
+        border-radius: 15px;
+        transform: none;
+    }
+
+    .action-card:hover {
+        transform: none;
+    }
+
+    .action-icon {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: 13px;
+    }
+
+    .action-icon svg {
+        width: 23px;
+        height: 23px;
+    }
+
+    .action-text {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .action-text h3 {
+        font-size: .98rem;
+        line-height: 1.3;
+        margin-bottom: 3px;
+    }
+
+    .action-text p {
+        font-size: .8rem;
+        line-height: 1.35;
+    }
+
+    .action-arrow {
+        flex: 0 0 auto;
+        margin-left: 2px;
+        font-size: 1.5rem;
+    }
+
+    /* Mentors, requests, and history flow in a single column. */
+    .dashboard-content-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px;
+    }
+
+    .dashboard-column {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .dashboard-column .card {
+        margin-bottom: 14px;
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .dashboard-column .card-title {
+        font-size: 1.05rem;
+    }
+
+    .activity-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .activity-item .activity-details {
+        min-width: 0;
+        flex: 1 1 calc(100% - 58px);
+    }
+
+    .activity-item .activity-actions {
+        width: 100%;
+        margin-left: 50px;
+        flex-wrap: wrap;
+    }
+
+    .activity-item .activity-actions .btn,
+    .activity-item .activity-actions form {
+        max-width: 100%;
+    }
+
+    .activity-item .activity-actions form {
+        flex: 1 1 auto;
+    }
+
+    .activity-item .activity-actions form .btn {
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: 22px 12px;
+    }
+
+    .site-footer {
+        flex: 0 0 auto;
+        padding: 12px 10px !important;
+        font-size: .78rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .main-content {
+        padding-inline: 10px;
+    }
+
+    .dashboard-stats {
+        gap: 8px;
+    }
+
+    .dashboard-stats .stat-card {
+        padding: 11px 9px;
+        gap: 8px;
+    }
+
+    .dashboard-stats .stat-icon {
+        width: 33px;
+        height: 33px;
+        flex-basis: 33px;
+    }
+
+    .dashboard-stats .stat-label {
+        font-size: .72rem;
+    }
+
+    .action-card {
+        padding: 11px;
+        gap: 10px;
+    }
+}
+
+/* ========================================================================
+   MOBILE SHELL FIX — SIDEBAR VISIBILITY AND PAGE SCROLLING
+   Keep this block at the very end of the stylesheet so it overrides legacy
+   mobile rules above. Desktop layout is intentionally untouched.
+   ======================================================================== */
+@media (max-width: 768px) {
+    html,
+    body {
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+
+    .app-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100%;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .top-nav {
+        flex: 0 0 60px !important;
+        width: 100%;
+    }
+
+    .app-body {
+        display: flex !important;
+        position: relative !important;
+        flex: 1 1 auto !important;
+        width: 100%;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* The earlier stylesheet hides the sidebar with display:none. Override it
+       so the transform-based drawer can actually slide into view. */
+    .app-body > .sidebar {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 1001 !important;
+        width: min(300px, 86vw) !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        transform: translateX(-105%);
+        visibility: hidden;
+        transition: transform .22s ease, visibility .22s ease;
+        background-color: #f4f8fc;
+    }
+
+    body.sidebar-open .app-body > .sidebar {
+        transform: translateX(0) !important;
+        visibility: visible !important;
+    }
+
+    .app-body > .sidebar .sidebar-scrollable {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar-backdrop {
+        display: block !important;
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 1000 !important;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        padding: 0;
+        border: 0;
+        background: rgba(15, 23, 42, .45) !important;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity .22s ease, visibility .22s ease;
+    }
+
+    body.sidebar-open .sidebar-backdrop {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    .main-content {
+        display: block !important;
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        padding: 18px 14px 30px !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        touch-action: pan-y;
+    }
+
+    .site-footer {
+        display: none;
+    }
+}
+
+
+/* ==========================================================================
+   PASSWORD RECOVERY — scoped styles, reusing the existing authentication theme
+   ========================================================================== */
+.forgot-password-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: -5px 0 14px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+.forgot-password-row a { color: #2563eb; font-weight: 600; }
+.forgot-password-row a:hover { color: #1d4ed8; text-decoration: underline; }
+.recovery-auth-page { min-height: 100vh; padding: 24px 0; display: flex; align-items: center; }
+.recovery-workspace {
+    width: min(1100px, calc(100% - 40px));
+    height: min(780px, calc(100vh - 48px));
+    min-height: 620px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .08), 0 8px 16px rgba(15, 23, 42, .04);
+}
+.recovery-form-panel {
+    position: relative;
+    z-index: 20;
+    width: 50%;
+    min-width: 0;
+    height: 100%;
+    padding: 48px clamp(28px, 4vw, 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    background: #fff;
+}
+.recovery-form-content { width: 100%; max-width: 420px; margin: auto; }
+.recovery-page-icon {
+    width: 54px; height: 54px; margin-bottom: 20px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: #eff6ff; color: #2563eb;
+}
+.recovery-page-icon svg { width: 25px; height: 25px; }
+.recovery-form-content .form-header { margin-bottom: 24px; }
+.recovery-form-content .form-header h1 { font-size: clamp(23px, 2vw, 28px); }
+.recovery-form-content .form-header p { font-size: 14px; line-height: 1.55; }
+.recovery-form .form-group { margin-bottom: 18px; }
+.recovery-form .form-group > label {
+    display: inline-block; margin-bottom: 8px; color: #334155;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+.recovery-form .form-input { min-height: 48px; }
+.recovery-form .submit-btn { gap: 8px; margin-top: 8px; text-decoration: none; }
+.recovery-back-row {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    margin-top: 22px; color: #64748b; font-size: 13px;
+}
+.recovery-back-row span { color: #94a3b8; }
+.recovery-back-row a, .recovery-top-back { color: #2563eb; font-weight: 600; }
+.recovery-back-row a:hover, .recovery-top-back:hover { text-decoration: underline; }
+.recovery-top-back { display: inline-flex; margin-bottom: 22px; font-size: 13px; }
+.recovery-question-display {
+    padding: 13px 14px; border: 1px solid #e2e8f0; border-radius: 8px;
+    background: #f8fafc; color: #334155; font-size: 13px; line-height: 1.5;
+}
+.recovery-password-requirements {
+    margin-top: 8px; padding: 10px 12px; border-radius: 8px;
+    background: #f8fafc; color: #64748b; font-size: 11px; line-height: 1.55;
+}
+.recovery-submit-link { display: flex; align-items: center; justify-content: center; }
+.recovery-success-icon { background: #dcfce7; color: #059669; margin-left: auto; margin-right: auto; }
+.recovery-error-icon { background: #ffe4e6; color: #e11d48; margin-left: auto; margin-right: auto; }
+.recovery-form-content:has(.recovery-success-icon), .recovery-form-content:has(.recovery-error-icon) { text-align: center; }
+.recovery-form-content:has(.recovery-success-icon) .form-header,
+.recovery-form-content:has(.recovery-error-icon) .form-header { margin-bottom: 28px; }
+.recovery-brand-mobile { display: none; }
+.recovery-illustration-panel { position: relative; left: auto; top: auto; width: 50%; height: 100%; flex-shrink: 0; }
+.recovery-illustration-panel .auth-brand-logo { display: block; width: 180px; max-width: 70%; height: auto; max-height: 56px; object-fit: contain; margin: 0 auto; }
+.recovery-form-content .inline-error-banner { margin-bottom: 18px; }
+.recovery-auth-page :is(a, button, input):focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 3px; }
+@media (max-width: 900px) {
+    .recovery-form-panel { padding: 38px 28px; }
+    .recovery-illustration-panel .panel-typography { padding: 0 18px; }
+    .recovery-illustration-panel .panel-typography h3 { font-size: 16px; }
+    .recovery-illustration-panel .panel-typography p { font-size: 12px; }
+}
+@media (max-width: 680px) {
+    .recovery-auth-page { display: block; padding: 0; }
+    .recovery-workspace {
+        width: 100%; min-height: 100vh; height: auto; margin: 0;
+        border-radius: 0; overflow: visible; box-shadow: none; display: block;
+    }
+    .recovery-form-panel {
+        width: 100%; min-height: 100vh; height: auto; padding: 26px 22px 34px;
+        overflow: visible; align-items: flex-start;
+    }
+    .recovery-form-content { max-width: 440px; }
+    .recovery-brand-mobile { display: flex; justify-content: center; margin: 0 auto 34px; }
+    .recovery-brand-mobile img { width: 164px; max-width: 65vw; height: auto; max-height: 46px; object-fit: contain; }
+    .recovery-illustration-panel { display: none; }
+    .recovery-form-content .form-header { margin-bottom: 22px; }
+    .recovery-page-icon { margin-bottom: 16px; }
+    .recovery-top-back { margin-bottom: 18px; }
+}
+@media (max-width: 360px) {
+    .recovery-form-panel { padding-left: 16px; padding-right: 16px; }
+    .recovery-back-row { flex-wrap: wrap; }
 }

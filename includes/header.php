@@ -47,6 +47,9 @@ if (isset($pdo)) {
         
         <!-- TOP NAVIGATION -->
         <header class="top-nav">
+            <button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
+                <span></span><span></span><span></span>
+            </button>
             <div class="nav-brand">
                 <a href="dashboard.php" class="logo" aria-label="SkillConnect home">
                     <img
@@ -156,7 +159,7 @@ if (isset($pdo)) {
         <div class="app-body">
             
             <!-- SIDEBAR -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="app-sidebar">
                 <div class="sidebar-scrollable">
                     
                     <nav class="sidebar-section">
@@ -248,6 +251,9 @@ if (isset($pdo)) {
                     </a>
                 </div>
             </aside>
+
+            <!-- Mobile sidebar backdrop; main.js uses this to close the drawer. -->
+            <button type="button" class="sidebar-backdrop" aria-label="Close navigation menu" tabindex="-1"></button>
 
             <!-- MAIN CONTENT AREA -->
             <main class="main-content">

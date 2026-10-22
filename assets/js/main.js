@@ -2,6 +2,36 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Responsive application navigation: preserve the existing sidebar links.
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const appSidebar = document.querySelector('.app-body > .sidebar');
+    const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+
+    if (menuToggle && appSidebar && sidebarBackdrop) {
+        const closeSidebar = () => {
+            document.body.classList.remove('sidebar-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.setAttribute('aria-label', 'Open navigation menu');
+        };
+        const openSidebar = () => {
+            document.body.classList.add('sidebar-open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            menuToggle.setAttribute('aria-label', 'Close navigation menu');
+        };
+        menuToggle.addEventListener('click', () => {
+            document.body.classList.contains('sidebar-open') ? closeSidebar() : openSidebar();
+        });
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+        appSidebar.querySelectorAll('a').forEach(link => link.addEventListener('click', closeSidebar));
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeSidebar();
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) closeSidebar();
+        });
+    }
+
+
     // =========================================================
     // A1: TOAST NOTIFICATIONS
     // =========================================================
@@ -514,48 +544,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Modal popup logic
+    // Account recovery setup modal.
+    // PHP renders this element only when recovery is unconfigured and the
+    // current PHP session has not shown the prompt for this user.
     const recoveryModal = document.getElementById('recovery-setup-modal');
+
     if (recoveryModal) {
-        // We track local dismissals using browser sessionStorage so it doesn't repeatedly show 
-        // throughout the user's active session if they decline.
-        const isDismissed = sessionStorage.getItem('recoveryModalDismissed');
+        const modalContent = recoveryModal.querySelector('.recovery-modal-content');
+        const closeButtons = recoveryModal.querySelectorAll('#btn-maybe-later, .btn-close-modal');
+        const setupNowButton = recoveryModal.querySelector('#btn-setup-now');
+        let previouslyFocusedElement = null;
+        let modalIsOpen = false;
 
-        if (!isDismissed) {
-            // Short timeout to ensure page loads cleanly before interrupting
-            setTimeout(() => {
-                recoveryModal.classList.add('show');
-            }, 600);
-        }
+        const closeRecoveryModal = () => {
+            if (!modalIsOpen) return;
+            modalIsOpen = false;
+            recoveryModal.classList.remove('show');
+            recoveryModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('recovery-modal-open');
+            document.removeEventListener('keydown', handleRecoveryModalKeydown);
+            if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
+                previouslyFocusedElement.focus({ preventScroll: true });
+            }
+        };
 
-        // Close actions (Maybe Later / X)
-        const closeBtns = recoveryModal.querySelectorAll('#btn-maybe-later, .btn-close-modal');
-        closeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                recoveryModal.classList.remove('show');
-                sessionStorage.setItem('recoveryModalDismissed', 'true');
-            });
+        const handleRecoveryModalKeydown = event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeRecoveryModal();
+                return;
+            }
+            if (event.key === 'Tab' && modalIsOpen && modalContent) {
+                const focusable = Array.from(modalContent.querySelectorAll(
+                    'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )).filter(element => element.offsetParent !== null);
+                if (!focusable.length) {
+                    event.preventDefault();
+                    modalContent.focus();
+                    return;
+                }
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        const openRecoveryModal = () => {
+            if (modalIsOpen) return;
+            previouslyFocusedElement = document.activeElement;
+            modalIsOpen = true;
+            recoveryModal.classList.add('show');
+            recoveryModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('recovery-modal-open');
+            document.addEventListener('keydown', handleRecoveryModalKeydown);
+            window.setTimeout(() => {
+                const closeButton = recoveryModal.querySelector('.btn-close-modal');
+                (closeButton || modalContent || recoveryModal).focus({ preventScroll: true });
+            }, 0);
+        };
+
+        closeButtons.forEach(button => button.addEventListener('click', closeRecoveryModal));
+        recoveryModal.addEventListener('click', event => {
+            if (event.target === recoveryModal) closeRecoveryModal();
         });
 
-        // Primary setup action
-        const setupNowBtn = document.getElementById('btn-setup-now');
-        if (setupNowBtn) {
-            setupNowBtn.addEventListener('click', () => {
-                recoveryModal.classList.remove('show');
-                sessionStorage.setItem('recoveryModalDismissed', 'true');
-                
-                // Navigate seamlessly to the form
-                if (typeof switchTab !== 'undefined') {
-                    switchTab('tab-security');
+        if (setupNowButton) {
+            setupNowButton.addEventListener('click', () => {
+                closeRecoveryModal();
+                const securityTab = document.querySelector('.tab-btn[data-target="tab-security"]');
+                if (securityTab) {
+                    securityTab.click();
+                } else {
+                    window.location.hash = 'security';
                 }
-                
-                // Visually guide the user
-                setTimeout(() => {
+                window.setTimeout(() => {
                     const questionSelect = document.getElementById('security_question');
-                    if (questionSelect) questionSelect.focus();
-                }, 300);
+                    if (questionSelect) {
+                        questionSelect.focus({ preventScroll: true });
+                        questionSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 150);
             });
         }
-    }
 
+        // PHP session state is authoritative; no sessionStorage/localStorage gate.
+        window.setTimeout(openRecoveryModal, 250);
+    }
 });
