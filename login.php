@@ -104,7 +104,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                         </div>
                     <?php endif; ?>
 
-                    <form action="actions/auth_process.php" method="POST" class="auth-form" novalidate>
+                    <form action="actions/auth_process.php" method="POST" class="auth-form" id="register-form">
                         <input type="hidden" name="action" value="register">
 
                         <div class="form-group">
@@ -144,7 +144,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                             <div class="half-width">
                                 <label for="reg-password">Password</label>
                                 <div class="password-wrapper">
-                                    <input type="password" id="reg-password" name="password" class="form-input" required minlength="8" placeholder="••••••••">
+                                    <input type="password" id="reg-password" name="password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                     </button>
@@ -153,7 +153,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                             <div class="half-width">
                                 <label for="reg-confirm-password">Confirm Password</label>
                                 <div class="password-wrapper">
-                                    <input type="password" id="reg-confirm-password" name="confirm_password" class="form-input" required placeholder="••••••••">
+                                    <input type="password" id="reg-confirm-password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                     </button>
@@ -184,7 +184,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
             <!-- Top Brand -->
             <div class="illustration-brand">
-                <h2><span class="text-primary">Skill</span>Connect</h2>
+                <img src="assets/images/skillconnect-logo.svg" alt="SkillConnect" class="auth-brand-logo">
             </div>
 
             <!-- Dynamic Text based on Login/Signup state anchored at the bottom -->
@@ -202,6 +202,107 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
     </div>
 
+    <style>
+        .auth-brand-logo {
+            display: block;
+            width: min(220px, 70%);
+            max-height: 56px;
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+        .auth-form .form-validation-error {
+            color: #b91c1c;
+            font-size: 0.8rem;
+            margin-top: 6px;
+            line-height: 1.35;
+        }
+        .auth-form input[aria-invalid="true"] {
+            border-color: #ef4444;
+        }
+    </style>
     <script src="assets/js/main.js"></script>
+    <script>
+    (() => {
+        const form = document.getElementById('register-form');
+        if (!form) return;
+
+        const password = document.getElementById('reg-password');
+        const confirmPassword = document.getElementById('reg-confirm-password');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        function clearError(input) {
+            input.removeAttribute('aria-invalid');
+            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+            wrapper?.querySelector('.form-validation-error')?.remove();
+        }
+
+        function showError(input, message) {
+            clearError(input);
+            input.setAttribute('aria-invalid', 'true');
+            const error = document.createElement('p');
+            error.className = 'form-validation-error';
+            error.setAttribute('role', 'alert');
+            error.textContent = message;
+            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+            wrapper?.appendChild(error);
+            input.focus();
+        }
+
+        function validateRegistration(event) {
+            clearError(password);
+            clearError(confirmPassword);
+
+            let invalidInput = null;
+            let message = '';
+
+            if (!password.value) {
+                invalidInput = password;
+                message = 'Please enter a password.';
+            } else if (password.value.length < 8) {
+                invalidInput = password;
+                message = 'Password must be at least 8 characters long.';
+            } else if (!confirmPassword.value) {
+                invalidInput = confirmPassword;
+                message = 'Please confirm your password.';
+            } else if (password.value !== confirmPassword.value) {
+                invalidInput = confirmPassword;
+                message = 'Passwords do not match.';
+            }
+
+            if (invalidInput) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                // Restore the button if another script has already changed its label.
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('is-loading', 'loading');
+                    submitButton.removeAttribute('aria-busy');
+                    submitButton.innerHTML = 'Create Account &rarr;';
+                }
+                showError(invalidInput, message);
+                return false;
+            }
+            return true;
+        }
+
+        password.addEventListener('input', () => clearError(password));
+        confirmPassword.addEventListener('input', () => clearError(confirmPassword));
+
+        // Capture-phase click validation runs before generic loading-button handlers.
+        if (submitButton) {
+            submitButton.addEventListener('click', (event) => {
+                if (!validateRegistration(event)) return;
+            }, true);
+        }
+
+        // Also cover keyboard submission and programmatic form submission.
+        form.addEventListener('submit', (event) => {
+            validateRegistration(event);
+        }, true);
+    })();
+    </script>
 </body>
 </html>

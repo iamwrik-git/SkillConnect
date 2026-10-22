@@ -82,7 +82,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .nav-brand { 
     width: var(--sidebar-width); 
     height: var(--header-height); 
-    padding: 0 1.5rem; 
+    padding: 0 1.25rem; 
     border-right: none; 
     display: flex; 
     align-items: center; 
@@ -93,7 +93,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
     margin-bottom: -1px; 
 }
 
-.logo { display: inline-flex; align-items: center; gap: 0.75rem; }
+.logo { display: inline-flex; align-items: center; gap: 0.55rem; }
 
 .logo-mark { 
     color: transparent !important; 
@@ -102,14 +102,14 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
     background-size: contain; 
     background-position: center; 
     background-repeat: no-repeat; 
-    width: 32px; 
-    height: 32px; 
+    width: 24px; 
+    height:   24px; 
     border-radius: 0 !important; 
     display: inline-block; 
 }
 
 .logo-text { 
-    font-size: 1.25rem; 
+    font-size: 1.02rem; 
     font-weight: 700; 
     letter-spacing: -0.5px; 
     background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 35%, var(--text-main) 35%, var(--text-main) 100%); 
@@ -163,30 +163,30 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
     flex-direction: column; 
 }
 
-.sidebar-scrollable { flex: 1; padding: 2rem 1.5rem; overflow: hidden; }
+.sidebar-scrollable { flex: 1; padding: 2rem 1.25rem; overflow: hidden; }
 .sidebar-section { margin-bottom: 2.5rem; }
 
 .sidebar-heading { 
-    font-size: 0.75rem; 
+    font-size: 0.78rem; 
     font-weight: 700; 
     color: #94a3b8; 
     text-transform: uppercase; 
     letter-spacing: 0.1em; 
-    margin-bottom: 1rem; 
+    margin-bottom: 1.2rem; 
     padding-left: 0.75rem; 
 }
 
-.sidebar-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+.sidebar-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
 
 .sidebar-link { 
     display: flex; 
     align-items: center; 
     justify-content: flex-start; 
-    gap: 16px; 
-    padding: 0.85rem 1rem; 
+    gap: 18px; 
+    padding: 0.95rem 1rem; 
     border-radius: 10px; 
     color: #475569; 
-    font-size: 0.95rem; 
+    font-size: 1.08rem; 
     font-weight: 500; 
     transition: all 0.25s ease; 
 }
@@ -550,6 +550,7 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .stay-tuned-wrapper { display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: var(--bg-color); padding: 2rem; }
 .stay-tuned-card { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); padding: 4rem 3rem; text-align: center; max-width: 460px; width: 100%; animation: toastSlideDown 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 .stay-tuned-logo { display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem; text-decoration: none; }
+.stay-tuned-logo-image { display: block; width: 240px; max-width: 100%; height: auto; object-fit: contain; }
 .stay-tuned-logo-mark { width: 48px; height: 48px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='6' cy='7' r='2.5' fill='%232563eb'/%3E%3Ccircle cx='18' cy='5' r='2.5' fill='%232563eb'/%3E%3Ccircle cx='7' cy='19' r='2.5' fill='%232563eb'/%3E%3Cpath d='M6 7 L12 12 L18 5 M12 12 L7 19 M12 12 C19 13 20 19 7 19' fill='none' stroke='%232563eb' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: contain; background-position: center; background-repeat: no-repeat; }
 .stay-tuned-logo-text { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) 42%, var(--text-main) 42%, var(--text-main) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; }
 .stay-tuned-title { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; letter-spacing: -0.025em; }
@@ -966,4 +967,660 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
     .dashboard-stats, .quick-actions-grid { grid-template-columns: 1fr; }
     .nav-brand { width: auto; padding: 0 .75rem; }
     .brand-logo { width: 150px; height: 36px; }
+}
+
+
+/* ========================================================================== 
+   23. DESKTOP LAYOUT NORMALIZATION — CONSISTENT CHROME 100% SIZING
+   This final layer overrides older one-off sizing rules without changing
+   the landing-page design or removing existing component styles.
+   ========================================================================== */
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 320px; }
+
+/* App shell: only the content region scrolls; navigation stays in its lane. */
+.app-layout {
+    width: 100%;
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+.app-body { flex: 1 1 auto; min-width: 0; min-height: 0; }
+.main-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    width: auto;
+    max-width: none;
+    padding: clamp(20px, 2.1vw, 32px) clamp(20px, 2.5vw, 40px) 32px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.sidebar-scrollable { min-height: 0; overflow-x: hidden; overflow-y: auto; }
+.site-footer { flex: 0 0 auto; width: 100%; }
+
+/* Keep page content readable on wide displays instead of letting cards sprawl. */
+.dashboard-page,
+.profile-page-wrapper,
+.edit-profile-page,
+.search-page,
+.mentorships-page,
+.saved-trainers-page,
+.my-skills-page {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+}
+.dashboard-content-grid,
+.profile-content-grid,
+.edit-profile-grid { min-width: 0; }
+.dashboard-content-grid > *,
+.profile-content-grid > *,
+.edit-profile-grid > * { min-width: 0; }
+.card, .edit-card, .profile-card { min-width: 0; }
+img, svg { max-width: 100%; }
+
+/* Authentication pages: avoid a rigid oversized workspace and clipped forms. */
+.auth-page { min-height: 100vh; overflow-x: hidden; }
+.login-workspace {
+    width: min(1100px, calc(100% - 48px));
+    height: min(780px, calc(100vh - 64px));
+    min-height: 650px;
+    margin: 32px auto;
+}
+.login-form-panel { padding: clamp(32px, 4vw, 60px); }
+.auth-form { width: 100%; max-width: 100%; }
+.form-view-container { min-height: 0; }
+
+@media (min-width: 1400px) {
+    .main-content { padding-inline: clamp(32px, 2.5vw, 48px); }
+}
+@media (max-height: 820px) and (min-width: 901px) {
+    .login-workspace { height: auto; min-height: 700px; }
+    .login-form-panel { overflow-y: auto; }
+}
+@media (max-width: 1200px) {
+    .main-content { padding-inline: 24px; }
+    .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .quick-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+    .login-workspace { width: min(720px, calc(100% - 32px)); height: auto; min-height: 0; }
+    .login-form-panel { min-height: 560px; overflow: visible; }
+    .login-illustration-panel { min-height: 280px; }
+}
+@media (max-width: 768px) {
+    .app-layout { height: auto; min-height: 100vh; overflow: visible; }
+    .app-body { display: block; min-height: 0; overflow: visible; }
+    .main-content { display: block !important; min-height: 0; padding: 24px 16px 28px; overflow: visible; }
+    .sidebar-scrollable { overflow-y: auto; }
+    .dashboard-stats, .quick-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dashboard-content-grid, .profile-content-grid, .edit-profile-grid { grid-template-columns: minmax(0, 1fr); }
+    .site-footer { margin-top: 0 !important; padding: 18px 12px !important; }
+}
+@media (max-width: 560px) {
+    .main-content { padding: 20px 12px 24px; }
+    .dashboard-stats, .quick-actions-grid { grid-template-columns: minmax(0, 1fr); }
+    .login-workspace { width: calc(100% - 24px); margin: 12px auto; border-radius: 16px; }
+    .login-form-panel { padding: 28px 20px; min-height: 520px; }
+    .login-illustration-panel { min-height: 220px; }
+    .form-group-split { flex-direction: column; }
+}
+
+
+/* ======================================================================
+   24. COMPACT DESKTOP SCALE — CONSISTENT APP PAGES AT 100% BROWSER ZOOM
+   Scoped to authenticated app/auth pages so the public landing page stays
+   visually unchanged. Reduces oversized spacing and typography together.
+   ====================================================================== */
+@media (min-width: 901px) {
+    .app-layout { font-size: 15px; }
+    .app-layout .main-content {
+        padding: 24px clamp(22px, 2vw, 30px) 28px;
+    }
+    .app-layout .dashboard-page,
+    .app-layout .profile-page-wrapper,
+    .app-layout .edit-profile-page,
+    .app-layout .search-page,
+    .app-layout .mentorships-page,
+    .app-layout .saved-trainers-page,
+    .app-layout .my-skills-page {
+        max-width: 1280px;
+        gap: 20px;
+    }
+    .app-layout .dashboard-hero { padding: 1.75rem 2rem; }
+    .app-layout .dashboard-hero .hero-title { font-size: 2rem; }
+    .app-layout .dashboard-hero .hero-subtitle { font-size: 1rem; }
+    .app-layout .dashboard-page { gap: 22px; }
+    .app-layout .dashboard-stats { gap: 18px; }
+    .app-layout .quick-actions-grid { gap: 18px; }
+    .app-layout .action-card { padding: 1rem 1.15rem; gap: 1rem; }
+    .app-layout .action-icon { width: 48px; height: 48px; }
+    .app-layout .dashboard-content-grid { gap: 20px; }
+    .app-layout .card,
+    .app-layout .profile-card,
+    .app-layout .edit-card { padding: 1.25rem; }
+    .app-layout .profile-content-grid,
+    .app-layout .edit-profile-grid { gap: 20px; }
+    .app-layout .profile-display-photo { width: 104px; height: 104px; }
+    .app-layout .profile-name { font-size: 1.35rem; }
+    .app-layout .page-title,
+    .app-layout .profile-header-top .page-title { font-size: 1.6rem; }
+    .app-layout .form-group { margin-bottom: 1.1rem; }
+    .app-layout .site-footer { padding-block: 12px; font-size: .9rem; }
+}
+
+/* Authentication panel: reduce its footprint without forcing a fixed tall card. */
+@media (min-width: 901px) {
+    .auth-page { font-size: 15px; }
+    .auth-page .login-workspace {
+        width: min(1000px, calc(100% - 56px));
+        height: min(700px, calc(100vh - 56px));
+        min-height: 610px;
+        margin: 28px auto;
+    }
+    .auth-page .login-form-panel { padding: clamp(30px, 3.2vw, 48px); }
+    .auth-page .form-header { margin-bottom: 20px; }
+    .auth-page .form-header h1 { font-size: 26px; }
+    .auth-page .auth-form .form-group { margin-bottom: 13px; }
+    .auth-page .auth-form .form-input { min-height: 44px; padding: 10px 14px; }
+    .auth-page .submit-btn { min-height: 44px; padding: 10px 14px; }
+    .auth-page .auth-divider { margin: 18px 0 13px; }
+}
+
+@media (min-width: 901px) and (max-height: 740px) {
+    .auth-page .login-workspace { height: calc(100vh - 32px); min-height: 0; margin: 16px auto; }
+    .auth-page .login-form-panel { overflow-y: auto; }
+}
+
+
+/* ==========================================================================
+   25. COMPACT DESKTOP NORMALIZATION — 100% BROWSER ZOOM
+   Applies to authenticated pages only; public landing page remains unchanged.
+   ========================================================================== */
+@media (min-width: 901px) {
+    :root {
+        --sidebar-width: 244px;
+        --header-height: 58px;
+    }
+
+    .app-layout { font-size: 14px; }
+
+    .app-layout .main-content {
+        padding: 20px 22px 24px;
+    }
+
+    .app-layout .dashboard-page,
+    .app-layout .profile-page-wrapper,
+    .app-layout .edit-profile-page,
+    .app-layout .search-page,
+    .app-layout .mentorships-page,
+    .app-layout .saved-trainers-page,
+    .app-layout .my-skills-page {
+        max-width: 1160px;
+        gap: 16px;
+    }
+
+    .app-layout .dashboard-page { gap: 18px; }
+    .app-layout .dashboard-hero { padding: 1.4rem 1.7rem; }
+    .app-layout .dashboard-hero .hero-title { font-size: 1.8rem; }
+    .app-layout .dashboard-hero .hero-subtitle { font-size: .95rem; }
+
+    .app-layout .dashboard-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .app-layout .stat-card { padding: 1rem; gap: .8rem; }
+    .app-layout .stat-icon { width: 42px; height: 42px; }
+    .app-layout .stat-value { font-size: 1.35rem; }
+    .app-layout .stat-label { font-size: .8rem; }
+
+    .app-layout .quick-actions-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .app-layout .action-card { padding: .85rem .95rem; gap: .75rem; }
+    .app-layout .action-icon { width: 42px; height: 42px; border-radius: 12px; }
+    .app-layout .action-text h3 { font-size: .98rem; }
+    .app-layout .action-text p { font-size: .78rem; }
+    .app-layout .action-arrow { font-size: 1.35rem; }
+
+    .app-layout .dashboard-content-grid { gap: 16px; }
+    .app-layout .card,
+    .app-layout .profile-card,
+    .app-layout .edit-card { padding: 1.1rem; margin-bottom: 1rem; }
+    .app-layout .card-title { font-size: 1.02rem; }
+    .app-layout .card-subtitle { font-size: .8rem; }
+
+    .app-layout .profile-page-wrapper { gap: 16px; }
+    .app-layout .profile-content-grid,
+    .app-layout .edit-profile-grid { gap: 16px; }
+    .app-layout .profile-display-photo { width: 88px; height: 88px; }
+    .app-layout .profile-name { font-size: 1.2rem; }
+    .app-layout .profile-header-top .page-title,
+    .app-layout .page-title { font-size: 1.45rem; }
+    .app-layout .profile-header-top .page-subtitle { font-size: .85rem; }
+
+    .app-layout .form-group { margin-bottom: .85rem; }
+    .app-layout input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    .app-layout select,
+    .app-layout textarea { font-size: .875rem; }
+    .app-layout .btn { padding: .5rem 1rem; font-size: .82rem; }
+
+    .app-layout .sidebar-scrollable { padding: 1.4rem 1.1rem; overflow-y: auto; }
+    .app-layout .sidebar-section { margin-bottom: 1.7rem; }
+    .app-layout .sidebar-heading { margin-bottom: .65rem; font-size: .68rem; }
+    .app-layout .sidebar-link { gap: 12px; padding: .68rem .8rem; font-size: .86rem; }
+    .app-layout .sidebar-link svg { width: 18px; height: 18px; }
+    .app-layout .sidebar-footer { padding: 1rem; }
+    .app-layout .logout-link { padding: .7rem .8rem; font-size: .86rem; }
+
+    .app-layout .top-nav { padding-right: 1rem; }
+    .app-layout .nav-brand { padding-inline: 1.1rem; }
+    .app-layout .nav-search { max-width: 420px; margin-inline: 1.25rem; }
+    .app-layout .nav-actions { gap: .9rem; }
+    .app-layout .nav-btn { font-size: .82rem; }
+    .app-layout .site-footer { padding-block: 10px; font-size: .82rem; }
+}
+
+/* Authentication pages: compact proportions without scaling/transforms. */
+@media (min-width: 901px) {
+    .auth-page .login-workspace {
+        width: min(940px, calc(100% - 64px));
+        height: min(650px, calc(100vh - 48px));
+        min-height: 570px;
+        margin: 24px auto;
+        border-radius: 20px;
+    }
+    .auth-page .login-form-panel { padding: 34px 42px; }
+    .auth-page .form-header { margin-bottom: 17px; }
+    .auth-page .form-header h1 { font-size: 24px; }
+    .auth-page .form-header p { font-size: 13px; }
+    .auth-page .auth-form .form-group { margin-bottom: 11px; }
+    .auth-page .auth-form .form-group > label { margin-bottom: 6px; font-size: 10px; }
+    .auth-page .auth-form .form-input { min-height: 41px; padding: 9px 12px; font-size: 13px; }
+    .auth-page .password-wrapper .form-input { padding-right: 42px; }
+    .auth-page .selector-card { padding: 9px 11px; }
+    .auth-page .card-icon { margin-right: 8px; font-size: 1.1rem; }
+    .auth-page .card-title { font-size: 13px; }
+    .auth-page .card-desc { font-size: 11px; }
+    .auth-page .submit-btn { min-height: 41px; padding: 9px 12px; font-size: 13px; }
+    .auth-page .auth-divider { margin: 15px 0 11px; }
+    .auth-page .auth-bottom-text { font-size: 13px; }
+    .auth-page .illustration-brand { padding-top: 28px; }
+    .auth-page .illustration-brand h2 { font-size: 30px; }
+    .auth-page .panel-typography { bottom: 26px; padding-inline: 24px; }
+    .auth-page .panel-typography h3 { font-size: 16px; }
+    .auth-page .panel-typography p { font-size: 12px; }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+    .auth-page .login-workspace {
+        height: calc(100vh - 24px);
+        min-height: 0;
+        margin-block: 12px;
+    }
+    .auth-page .login-form-panel { overflow-y: auto; }
+}
+
+/* ======================================================================
+   FINAL DESKTOP COMPACT PASS — target: preferred 90% browser-zoom density
+   Applies only to authenticated and authentication layouts. The public
+   landing page is deliberately excluded from this normalization.
+   ====================================================================== */
+@media (min-width: 901px) {
+    html:has(.app-layout),
+    html:has(.auth-page) {
+        font-size: 90%;
+    }
+
+    /* Keep fixed-pixel layout dimensions in line with the rem reduction. */
+    html:has(.app-layout) {
+        --sidebar-width: 252px;
+        --header-height: 58px;
+    }
+
+    .app-layout .main-content {
+        padding: 26px 2.1rem 2.4rem;
+    }
+
+    .app-layout .dashboard-page { gap: 25px; }
+    .app-layout .dashboard-hero { padding: 2rem 2.4rem; }
+    .app-layout .dashboard-hero .hero-title { font-size: 2rem; }
+    .app-layout .dashboard-stats { gap: 22px; }
+    .app-layout .stat-card { padding: 1.2rem; gap: 1rem; }
+    .app-layout .stat-icon { width: 43px; height: 43px; }
+    .app-layout .quick-actions-grid { gap: 22px; }
+    .app-layout .action-card { padding: 1rem 1.2rem; gap: 1rem; }
+    .app-layout .action-icon { width: 48px; height: 48px; }
+    .app-layout .dashboard-content-grid { gap: 24px; }
+
+    .app-layout .profile-page-wrapper { max-width: 1080px; gap: 1.5rem; }
+    .app-layout .profile-card { padding: 1.6rem; }
+    .app-layout .profile-display-photo { width: 108px; height: 108px; }
+
+    .app-layout .sidebar-scrollable { padding: 1.55rem 1.2rem; }
+    .app-layout .sidebar-section { margin-bottom: 1.9rem; }
+    .app-layout .sidebar-link { gap: 12px; padding: .68rem .82rem; }
+    .app-layout .sidebar-footer { padding: 1.1rem; }
+
+    .app-layout .top-nav { padding-right: 1.1rem; }
+    .app-layout .nav-search { max-width: 390px; margin-inline: 1.4rem; }
+    .app-layout .nav-actions { gap: 1rem; }
+
+    .app-layout .site-footer { padding: .85rem 1rem !important; }
+
+    /* Login / registration panel: reduce fixed dimensions as well as rems. */
+    .auth-page .login-workspace {
+        width: min(846px, calc(100% - 64px));
+        height: min(585px, calc(100vh - 44px));
+        min-height: 520px;
+        margin: 22px auto;
+        border-radius: 18px;
+    }
+    .auth-page .login-form-panel { padding: 30px 36px; }
+    .auth-page .login-illustration-panel { min-width: 0; }
+    .auth-page .auth-illustration-img { object-position: center; }
+    .auth-page .illustration-brand h2 { font-size: 27px; }
+    .auth-page .panel-typography { bottom: 22px; padding-inline: 20px; }
+    .auth-page .panel-typography h3 { font-size: 15px; }
+    .auth-page .panel-typography p { font-size: 11px; }
+}
+
+
+/* ======================================================================
+   LOGIN PAGE ALIGNMENT FIX — vertically center the compact auth card
+   Scoped to authentication pages; the public landing page is unaffected.
+   ====================================================================== */
+@media (min-width: 901px) {
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-block: 24px;
+        box-sizing: border-box;
+    }
+
+    .auth-page .login-workspace {
+        margin-block: 0;
+        flex: 0 0 auto;
+    }
+}
+
+
+/* ==========================================================================
+   EDIT PROFILE — MODERN TABS AND SECURITY PANELS
+   ========================================================================== */
+.edit-profile-page .edit-profile-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.35rem;
+    margin: 0 0 1.5rem;
+    background: #eef2f8;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+.edit-profile-page .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    min-height: 44px;
+    padding: 0.7rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #52627a;
+    background: transparent;
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.edit-profile-page .tab-btn svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    flex: 0 0 19px;
+    stroke: currentColor;
+    stroke-width: 1.9;
+}
+.edit-profile-page .tab-btn:hover {
+    color: #1d4ed8;
+    background: rgba(255,255,255,.7);
+}
+.edit-profile-page .tab-btn.active {
+    color: #1d4ed8;
+    background: #ffffff;
+    border-color: #dbeafe;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .07);
+}
+.edit-profile-page .tab-content { display: none; }
+.edit-profile-page .tab-content.active {
+    display: block;
+    animation: editTabIn .18s ease-out;
+}
+@keyframes editTabIn {
+    from { opacity: .55; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.edit-profile-page .tab-content > .edit-profile-grid {
+    align-items: start;
+}
+.edit-profile-page #tab-security > div {
+    width: 100%;
+    max-width: 920px !important;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+}
+.edit-profile-page #tab-security .edit-card {
+    width: 100%;
+    margin: 0;
+    padding: clamp(1.25rem, 2.2vw, 2rem) !important;
+    border: 1px solid #e1e8f2;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, .035);
+}
+.edit-profile-page .security-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.edit-profile-page .security-header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    min-width: 0;
+}
+.edit-profile-page .security-card-header .header-icon-blue {
+    width: 46px;
+    height: 46px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.edit-profile-page .security-card-header .header-icon-blue svg {
+    width: 22px;
+    height: 22px;
+}
+.edit-profile-page .security-card-header .header-text h2 {
+    margin: 0 0 .3rem !important;
+    color: #0f172a !important;
+    font-size: 1.18rem !important;
+    font-weight: 700;
+    line-height: 1.35;
+}
+.edit-profile-page .security-card-header .header-text p {
+    max-width: 620px;
+    margin: 0 !important;
+    color: #64748b !important;
+    font-size: .9rem !important;
+    line-height: 1.55;
+}
+.edit-profile-page #tab-security .form-group {
+    min-width: 0;
+    margin-bottom: 1.15rem;
+}
+.edit-profile-page #tab-security .form-group-split {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.edit-profile-page #tab-security .form-group-split > .half-width {
+    min-width: 0;
+    flex: 1 1 0;
+}
+.edit-profile-page #tab-security .form-label {
+    display: block;
+    margin-bottom: .5rem;
+    font-size: .88rem;
+    font-weight: 650;
+    color: #25324a;
+}
+.edit-profile-page #tab-security .form-input {
+    min-height: 46px;
+    padding: .75rem .9rem;
+    border: 1px solid #dce4ef;
+    border-radius: 9px;
+    background: #fff;
+    font-size: .92rem;
+}
+.edit-profile-page #tab-security .form-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .11);
+}
+.edit-profile-page #tab-security .password-wrapper .form-input {
+    padding-right: 3rem;
+}
+.edit-profile-page #tab-security .password-toggle-btn {
+    right: .45rem;
+    width: 32px;
+    height: 32px;
+}
+.edit-profile-page #tab-security .password-toggle-btn svg {
+    width: 19px;
+    height: 19px;
+}
+.edit-profile-page .password-reqs {
+    flex-wrap: wrap;
+    align-items: flex-end !important;
+    gap: 1.25rem !important;
+    padding-top: .5rem;
+}
+.edit-profile-page .password-reqs p {
+    margin-bottom: .45rem;
+    color: #334155;
+    font-size: .88rem;
+    font-weight: 600;
+}
+.edit-profile-page .password-reqs ul {
+    display: grid;
+    gap: .35rem;
+    padding: 0;
+    list-style: none;
+    color: #64748b;
+    font-size: .84rem;
+}
+.edit-profile-page .password-reqs li {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+.edit-profile-page .password-reqs li svg {
+    flex: 0 0 14px;
+    color: #10b981;
+}
+.edit-profile-page #tab-security .btn.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: .7rem 1.1rem;
+    border-radius: 9px;
+    font-size: .9rem;
+    font-weight: 650;
+    white-space: nowrap;
+}
+.edit-profile-page .security-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    flex: 0 0 auto;
+    padding: .4rem .7rem;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: .78rem;
+    font-weight: 650;
+}
+.edit-profile-page #tab-security .info-alert {
+    align-items: flex-end !important;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem !important;
+    border-radius: 10px !important;
+}
+.edit-profile-page #tab-security .info-alert > div:first-child {
+    min-width: 0;
+}
+.edit-profile-page #tab-security .info-alert p {
+    line-height: 1.5;
+}
+.edit-profile-page #tab-security .info-alert .password-wrapper {
+    margin-top: .7rem;
+}
+.edit-profile-page .recovery-modal-backdrop {
+    z-index: 10000;
+}
+@media (max-width: 900px) {
+    .edit-profile-page .edit-profile-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .edit-profile-page #tab-security > div {
+        max-width: 100% !important;
+    }
+}
+@media (max-width: 600px) {
+    .edit-profile-page .edit-profile-tabs {
+        display: flex;
+        width: 100%;
+    }
+    .edit-profile-page .tab-btn {
+        flex: 1;
+        padding: .65rem .55rem;
+        font-size: .85rem;
+    }
+    .edit-profile-page #tab-security .form-group-split {
+        flex-direction: column;
+        gap: 0;
+    }
+    .edit-profile-page #tab-security .form-group-split > .half-width {
+        width: 100%;
+    }
+    .edit-profile-page .security-card-header {
+        flex-direction: column;
+    }
+    .edit-profile-page #tab-security .password-reqs {
+        align-items: stretch !important;
+        flex-direction: column;
+    }
+    .edit-profile-page #tab-security .password-reqs > button {
+        width: 100%;
+    }
+    .edit-profile-page #tab-security .info-alert {
+        align-items: stretch !important;
+        flex-direction: column;
+    }
+    .edit-profile-page #tab-security .info-alert > button {
+        width: 100%;
+    }
 }

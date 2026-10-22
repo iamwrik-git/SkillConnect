@@ -19,6 +19,7 @@ if ($action === 'register') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
     $role = $_POST['role'] ?? '';
 
     // Server-side validation
@@ -30,8 +31,13 @@ if ($action === 'register') {
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
         $errors[] = "A valid email address is required.";
     }
-    if (empty($password) || strlen($password) < 8) {
+    if ($password === '' || strlen($password) < 8) {
         $errors[] = "Password must be at least 8 characters long.";
+    }
+    if ($confirm_password === '') {
+        $errors[] = "Please confirm your password.";
+    } elseif (!hash_equals($password, $confirm_password)) {
+        $errors[] = "Passwords do not match.";
     }
     if ($role !== 'trainee' && $role !== 'trainer') {
         $errors[] = "Please select a valid role.";

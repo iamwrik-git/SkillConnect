@@ -26,8 +26,9 @@ requireLogin();
             
             <!-- SkillConnect Logo -->
             <a href="dashboard.php" class="stay-tuned-logo">
-                <div class="stay-tuned-logo-mark"></div>
-                <div class="stay-tuned-logo-text">SkillConnect</div>
+                <img src="assets/images/skillconnect-logo.svg"
+                     alt="SkillConnect"
+                     class="stay-tuned-logo-image">
             </a>
             
             <h1 class="stay-tuned-title">Stay Tuned</h1>

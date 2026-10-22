@@ -336,14 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // A5: LOGIN / SIGNUP PANEL SUPPORT
     // =========================================================
 
-    /*
-     * The existing login/signup transition remains CSS-driven.
-     * This code does not change authentication or form submission.
-     *
-     * The checkbox selector below is optional. If your page already
-     * controls the transition through CSS, no extra JavaScript is needed.
-     */
-
     const stateTrigger = document.querySelector('.state-trigger');
 
     if (stateTrigger) {
@@ -481,5 +473,89 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 0);
         }
     });
+
+    // =========================================================
+    // A7: EDIT PROFILE TABS & ACCOUNT RECOVERY MODAL
+    // =========================================================
+
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    if (tabBtns.length > 0) {
+        // Tab switching logic
+        function switchTab(targetId) {
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            const activeBtn = document.querySelector(`.tab-btn[data-target="${targetId}"]`);
+            const activeContent = document.getElementById(targetId);
+
+            if (activeBtn && activeContent) {
+                activeBtn.classList.add('active');
+                activeContent.classList.add('active');
+                
+                // Update URL hash transparently without page jumping
+                history.replaceState(null, null, `#${targetId.replace('tab-', '')}`);
+            }
+        }
+
+        // Click listeners for tabs
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.getAttribute('data-target'));
+            });
+        });
+
+        // Deep-link routing based on hash string (e.g. redirected from actions)
+        if (window.location.hash === '#security') {
+            switchTab('tab-security');
+        }
+    }
+
+    // Modal popup logic
+    const recoveryModal = document.getElementById('recovery-setup-modal');
+    if (recoveryModal) {
+        // We track local dismissals using browser sessionStorage so it doesn't repeatedly show 
+        // throughout the user's active session if they decline.
+        const isDismissed = sessionStorage.getItem('recoveryModalDismissed');
+
+        if (!isDismissed) {
+            // Short timeout to ensure page loads cleanly before interrupting
+            setTimeout(() => {
+                recoveryModal.classList.add('show');
+            }, 600);
+        }
+
+        // Close actions (Maybe Later / X)
+        const closeBtns = recoveryModal.querySelectorAll('#btn-maybe-later, .btn-close-modal');
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                recoveryModal.classList.remove('show');
+                sessionStorage.setItem('recoveryModalDismissed', 'true');
+            });
+        });
+
+        // Primary setup action
+        const setupNowBtn = document.getElementById('btn-setup-now');
+        if (setupNowBtn) {
+            setupNowBtn.addEventListener('click', () => {
+                recoveryModal.classList.remove('show');
+                sessionStorage.setItem('recoveryModalDismissed', 'true');
+                
+                // Navigate seamlessly to the form
+                if (typeof switchTab !== 'undefined') {
+                    switchTab('tab-security');
+                }
+                
+                // Visually guide the user
+                setTimeout(() => {
+                    const questionSelect = document.getElementById('security_question');
+                    if (questionSelect) questionSelect.focus();
+                }, 300);
+            });
+        }
+    }
 
 });
