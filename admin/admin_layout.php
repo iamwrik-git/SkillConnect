@@ -29,6 +29,7 @@ if (!function_exists('isActive')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Admin Panel') ?> - SkillConnect</title>
+    <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body class="admin-body">

@@ -40,6 +40,7 @@ if (isset($pdo)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></title>
     <!-- Cache buster active for development -->
+    <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
 </head>
 <body>
