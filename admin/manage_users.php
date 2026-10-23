@@ -198,7 +198,7 @@ ob_start();
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                     View
                                 </a>
-                                <form method="POST" class="inline-form js-confirm-delete" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($user['name']) ?>? This cascades to mentorships and skills.">
+                                <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete User" data-confirm-action="Delete User" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="This will permanently remove this user and their associated mentorships and skills. This action cannot be undone.">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                     <input type="hidden" name="action" value="delete_user">
                                     <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">

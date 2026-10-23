@@ -208,7 +208,7 @@ ob_start();
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                         Edit
                                     </button>
-                                    <form method="POST" class="inline-form js-confirm-delete" data-confirm-message="Deleting this skill will also remove it from all users who currently have it associated with their profiles. This action cannot be undone.">
+                                    <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete Skill" data-confirm-action="Delete Skill" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="Deleting this skill will also remove it from all users who currently have it associated with their profiles. This action cannot be undone.">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <input type="hidden" name="action" value="delete_skill">
                                         <input type="hidden" name="skill_id" value="<?= $skill['skill_id'] ?>">

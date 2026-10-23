@@ -74,6 +74,7 @@ if ($action === 'register') {
         $_SESSION['user_id'] = $new_user_id;
         $_SESSION['name'] = $name;
         $_SESSION['role'] = $role;
+        $_SESSION['profile_photo'] = 'default.jpg';
         $_SESSION['is_admin'] = 0;
 
         header('Location: ../dashboard.php');
@@ -97,7 +98,7 @@ if ($action === 'register') {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, role, is_admin FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, role, is_admin, profile_photo FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -107,6 +108,7 @@ if ($action === 'register') {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['name'] = $user['name'];
             $_SESSION['role'] = $user['role'];
+            $_SESSION['profile_photo'] = $user['profile_photo'] ?? 'default.jpg';
             $_SESSION['is_admin'] = $user['is_admin'];
 
             if ($user['is_admin'] == 1) {

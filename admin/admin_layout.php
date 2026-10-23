@@ -29,7 +29,6 @@ if (!function_exists('isActive')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Admin Panel') ?> - SkillConnect</title>
-    <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body class="admin-body">
@@ -108,6 +107,32 @@ if (!function_exists('isActive')) {
         </div>
     </main>
 
+    <!-- Shared SkillConnect confirmation modal for destructive actions. -->
+    <dialog class="sc-confirm-modal" id="sc-confirm-modal" aria-labelledby="sc-confirm-title" aria-describedby="sc-confirm-message">
+        <button type="button" class="sc-confirm-close" id="sc-confirm-close" aria-label="Close confirmation dialog">&times;</button>
+        <div class="sc-confirm-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 10v6m4-6v6" />
+            </svg>
+        </div>
+        <div class="sc-confirm-heading">
+            <span class="sc-confirm-eyebrow">PLEASE CONFIRM</span>
+            <h2 id="sc-confirm-title">Confirm deletion</h2>
+            <p id="sc-confirm-message">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="sc-confirm-warning" id="sc-confirm-warning">
+            <span class="sc-warning-mark" aria-hidden="true">!</span>
+            <p><strong>This action cannot be undone.</strong> The selected record and its associated data may be permanently removed.</p>
+        </div>
+        <div class="sc-confirm-actions">
+            <button type="button" class="sc-confirm-cancel" id="sc-confirm-cancel">Cancel</button>
+            <button type="button" class="sc-confirm-delete" id="sc-confirm-submit">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 10v6m4-6v6"/></svg>
+                <span>Delete</span>
+            </button>
+        </div>
+    </dialog>
+
     <script>
         // Responsive admin navigation; all existing navigation links are reused.
         (() => {
@@ -131,14 +156,59 @@ if (!function_exists('isActive')) {
             window.addEventListener('resize', () => { if (window.innerWidth > 760) close(); });
         })();
 
-        // Simple script to handle delete confirmations
-        document.querySelectorAll('.js-confirm-delete').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (!confirm(this.dataset.confirmMessage || 'Are you sure you want to delete this item?')) {
-                    e.preventDefault();
-                }
+        // Branded confirmation modal. The existing POST form (including CSRF token)
+        // is submitted unchanged only after the user explicitly confirms.
+        (() => {
+            const modal = document.getElementById('sc-confirm-modal');
+            const title = document.getElementById('sc-confirm-title');
+            const message = document.getElementById('sc-confirm-message');
+            const warning = document.getElementById('sc-confirm-warning');
+            const cancel = document.getElementById('sc-confirm-cancel');
+            const close = document.getElementById('sc-confirm-close');
+            const submit = document.getElementById('sc-confirm-submit');
+            const submitLabel = submit?.querySelector('span');
+            if (!modal || !title || !message || !warning || !cancel || !close || !submit || !submitLabel) return;
+
+            let pendingForm = null;
+            const closeModal = () => {
+                if (modal.open) modal.close();
+                pendingForm = null;
+            };
+
+            document.querySelectorAll('form.js-confirm-delete').forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (form.dataset.confirmed === 'true') {
+                        delete form.dataset.confirmed;
+                        return;
+                    }
+                    event.preventDefault();
+                    pendingForm = form;
+                    title.textContent = form.dataset.confirmTitle || 'Confirm deletion';
+                    message.textContent = form.dataset.confirmMessage || 'Are you sure you want to delete this item?';
+                    warning.querySelector('p').textContent = form.dataset.confirmWarning || 'This action cannot be undone. The selected record may be permanently removed.';
+                    submitLabel.textContent = form.dataset.confirmAction || 'Delete';
+                    modal.showModal();
+                    cancel.focus();
+                });
             });
-        });
+
+            cancel.addEventListener('click', closeModal);
+            close.addEventListener('click', closeModal);
+            modal.addEventListener('click', event => {
+                if (event.target === modal) closeModal();
+            });
+            modal.addEventListener('cancel', event => {
+                event.preventDefault();
+                closeModal();
+            });
+            submit.addEventListener('click', () => {
+                if (!pendingForm) return;
+                const form = pendingForm;
+                closeModal();
+                form.dataset.confirmed = 'true';
+                HTMLFormElement.prototype.submit.call(form);
+            });
+        })();
     </script>
 </body>
 </html>

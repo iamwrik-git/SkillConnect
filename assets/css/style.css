@@ -136,6 +136,20 @@ input[type="radio"]:checked + .selector-card { border-color: #2563eb; background
 .avatar-placeholder { width: 32px; height: 32px; border-radius: var(--radius-full); background-color: var(--border-color); display: inline-block; }
 .initials-avatar { display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-light); color: var(--primary-color); font-weight: 700; font-size: 14px; text-transform: uppercase; }
 .dropdown-popup { position: absolute; top: calc(100% + 0.5rem); right: 0; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-dropdown); width: 280px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 50; }
+/* Keep hover menus open while the pointer travels from the trigger to the popup.
+   The bridge belongs to the dropdown wrapper (not the popup), so overflow:hidden
+   on individual popup designs cannot clip it. */
+.nav-item.has-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: max(100%, 300px);
+    height: 12px;
+    pointer-events: auto;
+    z-index: 49;
+}
+
 .nav-item.has-dropdown:hover .dropdown-popup, .nav-item.has-dropdown.show .dropdown-popup { opacity: 1; visibility: visible; transform: translateY(0); }
 .popup-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--text-main); }
 .popup-body { padding: 1.25rem; color: var(--text-secondary); font-size: 0.875rem; }
@@ -3075,4 +3089,126 @@ body.auth-page .auth-form #reg-confirm-password:-webkit-autofill {
 @media (max-width: 360px) {
     .recovery-form-panel { padding-left: 16px; padding-right: 16px; }
     .recovery-back-row { flex-wrap: wrap; }
+}
+
+
+/* ========================================================================
+   PROFILE DROPDOWN — MINIMAL SKILLS CARD
+   Scoped to the profile menu; Network and Notifications styles are unchanged.
+   ======================================================================== */
+.app-layout .profile-menu { position: relative; flex-shrink: 0; z-index: 120; }
+.app-layout .profile-menu .profile-menu-trigger {
+    min-height: 40px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 7px 4px 5px; border: 1px solid transparent; border-radius: 999px;
+    background: transparent; color: #475569; cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease;
+}
+.app-layout .profile-menu .profile-menu-trigger:hover,
+.app-layout .profile-menu.show .profile-menu-trigger,
+.app-layout .profile-menu .profile-menu-trigger[aria-expanded="true"] { background: #f8fafc; border-color: #e2e8f0; }
+.app-layout .profile-menu .profile-menu-label {
+    display: inline-block; max-width: 110px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; font-size: 14px; font-weight: 500;
+}
+.app-layout .profile-menu .profile-nav-avatar { display: block; object-fit: cover; border: 2px solid #eff6ff; }
+.app-layout .profile-menu .dropdown-popup.profile-popup {
+    display: block; position: absolute; top: calc(100% + 8px); right: 0;
+    width: 316px; max-width: min(316px, calc(100vw - 24px)); padding: 0; overflow: visible;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, .13), 0 3px 8px rgba(15, 23, 42, .04);
+    opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(5px);
+    transform-origin: top right; transition: opacity .16s ease, transform .16s ease, visibility .16s ease; z-index: 130;
+}
+/* Invisible hover bridge spans the popup's width, not just the narrow trigger. */
+.app-layout .profile-menu::after {
+    content: ""; position: absolute; top: 100%; right: 0;
+    width: max(100%, 316px); height: 12px; background: transparent;
+}
+.app-layout .profile-menu.show .dropdown-popup.profile-popup,
+.app-layout .profile-menu:hover .dropdown-popup.profile-popup,
+.app-layout .profile-menu:focus-within .dropdown-popup.profile-popup {
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0);
+}
+.app-layout .profile-popup-identity {
+    display: flex; align-items: center; gap: 11px; margin: 0 13px;
+    padding: 13px 0 12px; border-bottom: 1px solid #edf1f6;
+}
+.app-layout .profile-popup-avatar {
+    display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+    flex: 0 0 44px; object-fit: cover; border: 2px solid #f1f5f9; border-radius: 50%;
+    background: #eff6ff; color: #2563eb; font-size: 14px; font-weight: 700;
+}
+.app-layout .profile-popup-user { min-width: 0; flex: 1; }
+.app-layout .profile-popup-name { color: #111827; font-size: 13px; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.app-layout .profile-popup-role {
+    display: inline-flex; align-items: center; margin-top: 4px; padding: 4px 9px;
+    border-radius: 999px; background: #eff6ff; color: #2563eb; font-size: 11px; line-height: 1.15; font-weight: 700;
+}
+.app-layout .profile-popup-skills { padding: 11px 13px 12px; border-bottom: 1px solid #edf1f6; }
+.app-layout .profile-popup-skills-heading {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 9px; color: #1e293b; font-size: 12px; font-weight: 700;
+}
+.app-layout .profile-popup-skill-count { color: #64748b; font-weight: 600; }
+.app-layout .profile-popup-view-all { color: #2563eb; font-size: 11px; font-weight: 600; text-decoration: none; }
+.app-layout .profile-popup-view-all:hover { text-decoration: underline; }
+.app-layout .profile-popup-skill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.app-layout .profile-skill-chip {
+    display: inline-flex; align-items: center; max-width: 100%; min-height: 28px; padding: 5px 9px;
+    border-radius: 8px; font-size: 11px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere;
+}
+.app-layout .profile-skill-chip-0 { color: #1d4ed8; background: #eff6ff; }
+.app-layout .profile-skill-chip-1 { color: #047857; background: #ecfdf5; }
+.app-layout .profile-skill-chip-2 { color: #6d28d9; background: #f5f3ff; }
+.app-layout .profile-popup-no-skills { margin: 0; padding: 8px 10px; border-radius: 8px; background: #f8fafc; color: #64748b; font-size: 12px; }
+.app-layout .profile-popup-actions { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px 12px; }
+.app-layout .profile-menu-link {
+    display: flex; align-items: center; gap: 10px; width: 100%; min-height: 38px; padding: 8px 10px;
+    border: 0; border-radius: 8px; background: transparent; color: #334155; font-size: 12px;
+    font-weight: 600; line-height: 1.3; text-align: left; text-decoration: none;
+    transition: background-color .14s ease, color .14s ease;
+}
+.app-layout .profile-menu-link svg { width: 17px; height: 17px; flex: 0 0 17px; color: #64748b; }
+.app-layout .profile-menu-link.is-featured { color: #1d4ed8; background: #f1f6ff; }
+.app-layout .profile-menu-link.is-featured svg { color: #2563eb; }
+.app-layout .profile-menu-link:hover,
+.app-layout .profile-menu-link:focus-visible { outline: none; background: #eff6ff; color: #1d4ed8; }
+.app-layout .profile-menu-link.profile-menu-logout { color: #dc2626; background: #fff1f2; }
+.app-layout .profile-menu-link.profile-menu-logout svg { color: #dc2626; }
+.app-layout .profile-menu-link.profile-menu-logout:hover,
+.app-layout .profile-menu-link.profile-menu-logout:focus-visible { outline: none; color: #b91c1c; background: #ffe4e6; }
+.app-layout .profile-menu .dropdown-popup.profile-popup a { white-space: normal; }
+@media (max-width: 680px) {
+    .app-layout .profile-menu .dropdown-popup.profile-popup {
+        position: fixed; top: calc(var(--header-height, 64px) + 8px); right: 12px;
+        width: 316px; max-width: calc(100vw - 24px);
+        max-height: calc(100dvh - var(--header-height, 64px) - 24px);
+        overflow-y: auto; overflow-x: hidden; transform-origin: top right;
+    }
+    .app-layout .profile-menu::after { display: none; }
+    .app-layout .profile-menu .profile-menu-label { max-width: 76px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .app-layout .profile-menu *, .app-layout .profile-menu *::before, .app-layout .profile-menu *::after { transition-duration: .01ms !important; }
+}
+
+
+/* Shared logout confirmation — sidebar and profile dropdown */
+.logout-confirm-backdrop { z-index: 12000; background: rgba(15, 23, 42, .48); backdrop-filter: blur(3px); }
+.logout-confirm-content { max-width: 410px; padding: 30px; border: 1px solid rgba(226, 232, 240, .9); border-radius: 18px; }
+.logout-confirm-icon { width: 54px; height: 54px; margin-bottom: 18px; }
+.logout-confirm-icon svg { width: 27px; height: 27px; }
+.logout-confirm-content .confirm-modal-title { margin: 0 0 8px; font-size: 1.25rem; }
+.logout-confirm-content .confirm-modal-message { margin: 0 0 24px; max-width: 320px; }
+.logout-confirm-content .confirm-modal-actions { gap: 10px; }
+.logout-confirm-content .confirm-modal-actions .btn { min-height: 44px; padding: 11px 14px; }
+.logout-confirm-content .confirm-cancel { background: #fff; color: #334155; border-color: #dbe3ee; }
+.logout-confirm-content .confirm-cancel:hover { background: #f8fafc; border-color: #cbd5e1; }
+.logout-confirm-content .confirm-danger { background: #dc2626; border-color: #dc2626; color: #fff; }
+.logout-confirm-content .confirm-danger:hover { background: #b91c1c; border-color: #b91c1c; }
+body.logout-confirm-open { overflow: hidden; }
+@media (max-width: 480px) {
+  .logout-confirm-content { padding: 24px 20px; border-radius: 16px; }
+  .logout-confirm-content .confirm-modal-actions { flex-direction: column-reverse; gap: 9px; }
+  .logout-confirm-content .confirm-modal-actions .btn { width: 100%; }
 }
