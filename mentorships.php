@@ -121,6 +121,21 @@ function getProfilePhotoUrl($photo, $name) {
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                 View Profile
                             </a>
+                            <div class="mentorship-more" data-mentorship-menu>
+                                <button type="button" class="mentorship-more-toggle" aria-label="More mentorship actions" aria-expanded="false" aria-haspopup="true">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+                                </button>
+                                <div class="mentorship-more-menu" hidden>
+                                    <form action="actions/mentorship_process.php" method="POST" class="js-confirm-unlink-mentorship" data-connection-name="<?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?>" data-connection-role="<?= $role === 'trainer' ? 'trainee' : 'mentor' ?>">
+                                        <input type="hidden" name="action" value="unlink_mentorship">
+                                        <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                        <button type="submit" class="mentorship-unlink-action">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>
+                                            <span><strong>Unlink <?= $role === 'trainer' ? 'Trainee' : 'Mentor' ?></strong><small>Remove this connection from your <?= $role === 'trainer' ? 'trainees' : 'mentorships' ?>.</small></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>

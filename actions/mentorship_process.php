@@ -10,6 +10,36 @@ requireLogin();
 // Get the authenticated user ID
 $current_user_id = getCurrentUserId();
 
+/**
+ * Store a notification without allowing a notification-table issue to break
+ * the existing mentorship workflow. Create the notifications table first.
+ */
+function createMentorshipNotification(PDO $pdo, int $recipientId, ?int $requestId, string $type, string $message): void
+{
+    try {
+        $stmt = $pdo->prepare("INSERT INTO notifications
+            (recipient_user_id, request_id, notification_type, message, is_read, created_at)
+            VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)");
+        $stmt->execute([$recipientId, $requestId, $type, $message]);
+    } catch (PDOException $e) {
+        // The request itself must still succeed if notification storage fails.
+        error_log('Mentorship notification creation failed: ' . $e->getMessage());
+    }
+}
+
+function getMentorshipActorName(PDO $pdo, int $userId): string
+{
+    try {
+        $stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $name = $stmt->fetchColumn();
+        return is_string($name) && trim($name) !== '' ? trim($name) : 'A SkillConnect user';
+    } catch (PDOException $e) {
+        error_log('Mentorship notification name lookup failed: ' . $e->getMessage());
+        return 'A SkillConnect user';
+    }
+}
+
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../dashboard.php");
@@ -86,6 +116,15 @@ if ($action === 'send_request') {
         // Insert new pending request (rejected requests are historical and do not block this)
         $stmt = $pdo->prepare("INSERT INTO mentorships (trainer_id, trainee_id, status) VALUES (?, ?, 'pending')");
         $stmt->execute([$trainer_id, $current_user_id]);
+        $request_id = (int) $pdo->lastInsertId();
+        $trainee_name = getMentorshipActorName($pdo, (int) $current_user_id);
+        createMentorshipNotification(
+            $pdo,
+            (int) $trainer_id,
+            $request_id > 0 ? $request_id : null,
+            'mentorship_request',
+            $trainee_name . ' requested your mentorship.'
+        );
 
         $_SESSION['success'] = "Mentorship request sent successfully.";
         header("Location: " . $redirect_url);
@@ -95,6 +134,70 @@ if ($action === 'send_request') {
         error_log("Database Error in send_request: " . $e->getMessage());
         $_SESSION['error'] = "An error occurred while sending your request. Please try again later.";
         header("Location: " . $redirect_url);
+        exit();
+    }
+
+} elseif ($action === 'unlink_mentorship') {
+
+    $request_id = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
+
+    if (!$request_id || $request_id <= 0) {
+        $_SESSION['error'] = "Invalid mentorship connection.";
+        header("Location: ../mentorships.php");
+        exit();
+    }
+
+    try {
+        // Verify the current role from the database rather than trusting form data.
+        $stmt = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
+        $stmt->execute([$current_user_id]);
+        $current_user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$current_user || !in_array($current_user['role'], ['trainee', 'trainer'], true)) {
+            $_SESSION['error'] = "You are not authorized to remove this mentorship connection.";
+            header("Location: ../mentorships.php");
+            exit();
+        }
+
+        // Only the two participants in an accepted connection may unlink it.
+        $ownershipColumn = $current_user['role'] === 'trainee' ? 'trainee_id' : 'trainer_id';
+        $stmt = $pdo->prepare("
+            SELECT request_id, status
+            FROM mentorships
+            WHERE request_id = ? AND {$ownershipColumn} = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$request_id, $current_user_id]);
+        $connection = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$connection || $connection['status'] !== 'accepted') {
+            $_SESSION['error'] = "Accepted mentorship connection not found or access denied.";
+            header("Location: ../mentorships.php");
+            exit();
+        }
+
+        // Unlinking removes only this accepted relationship; no other requests are changed.
+        $delete = $pdo->prepare("
+            DELETE FROM mentorships
+            WHERE request_id = ? AND {$ownershipColumn} = ? AND status = 'accepted'
+        ");
+        $delete->execute([$request_id, $current_user_id]);
+
+        if ($delete->rowCount() === 1) {
+            $_SESSION['success'] = $current_user['role'] === 'trainer'
+                ? "Trainee unlinked successfully."
+                : "Mentor unlinked successfully.";
+        } else {
+            $_SESSION['error'] = "The mentorship connection could not be removed. Please try again.";
+        }
+
+        header("Location: ../mentorships.php");
+        exit();
+
+    } catch (PDOException $e) {
+        error_log("Database Error in unlink_mentorship: " . $e->getMessage());
+        $_SESSION['error'] = "An error occurred while removing the mentorship connection. Please try again later.";
+        header("Location: ../mentorships.php");
         exit();
     }
 
@@ -125,7 +228,7 @@ if ($action === 'send_request') {
 
         // Fetch the request and join with users to verify the trainee's role
         $stmt = $pdo->prepare("
-            SELECT m.status, trainee.role AS trainee_role 
+            SELECT m.status, m.trainee_id, trainee.role AS trainee_role, trainee.name AS trainee_name
             FROM mentorships m
             JOIN users trainee ON m.trainee_id = trainee.user_id
             WHERE m.request_id = ? 
@@ -166,6 +269,18 @@ if ($action === 'send_request') {
         $update_stmt->execute([$new_status, $request_id, $current_user_id]);
 
         if ($update_stmt->rowCount() > 0) {
+            $trainer_name = getMentorshipActorName($pdo, (int) $current_user_id);
+            $notification_type = $new_status === 'accepted' ? 'mentorship_accepted' : 'mentorship_rejected';
+            $notification_message = $new_status === 'accepted'
+                ? $trainer_name . ' accepted your mentorship request.'
+                : $trainer_name . ' rejected your mentorship request.';
+            createMentorshipNotification(
+                $pdo,
+                (int) $request['trainee_id'],
+                (int) $request_id,
+                $notification_type,
+                $notification_message
+            );
             $_SESSION['success'] = $success_message;
         } else {
             $_SESSION['error'] = "Could not update the request. It may have already been processed.";

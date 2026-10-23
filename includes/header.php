@@ -72,6 +72,54 @@ if (isset($pdo, $_SESSION['user_id'])) {
     }
 }
 
+// Notifications are stored separately from mentorship records. If the table
+// has not been created yet, keep the rest of the site usable and show an empty panel.
+$nav_notifications = [];
+$nav_unread_notifications = 0;
+if (isset($pdo, $_SESSION['user_id'])) {
+    try {
+        $notificationCountStmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM notifications WHERE recipient_user_id = ? AND is_read = 0"
+        );
+        $notificationCountStmt->execute([(int) $_SESSION['user_id']]);
+        $nav_unread_notifications = (int) $notificationCountStmt->fetchColumn();
+
+        $notificationListStmt = $pdo->prepare("
+            SELECT notification_id, request_id, notification_type, message, is_read, created_at
+            FROM notifications
+            WHERE recipient_user_id = ?
+            ORDER BY created_at DESC, notification_id DESC
+            LIMIT 5
+        ");
+        $notificationListStmt->execute([(int) $_SESSION['user_id']]);
+        $nav_notifications = $notificationListStmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Expected until the user creates the notifications table using the supplied SQL.
+        error_log('Header notifications fetch failed: ' . $e->getMessage());
+    }
+}
+
+if (session_status() === PHP_SESSION_ACTIVE && empty($_SESSION['notification_csrf'])) {
+    $_SESSION['notification_csrf'] = bin2hex(random_bytes(32));
+}
+$notification_csrf = $_SESSION['notification_csrf'] ?? '';
+$notificationTimeLabel = static function ($createdAt): string {
+    try {
+        $created = new DateTime((string) $createdAt);
+        $seconds = max(0, time() - $created->getTimestamp());
+        if ($seconds < 60) return 'Just now';
+        if ($seconds < 3600) return (int) floor($seconds / 60) . ' min ago';
+        if ($seconds < 86400) return (int) floor($seconds / 3600) . ' hr ago';
+        if ($seconds < 604800) {
+            $days = (int) floor($seconds / 86400);
+            return $days . ' day' . ($days === 1 ? '' : 's') . ' ago';
+        }
+        return $created->format('M j');
+    } catch (Throwable $e) {
+        return '';
+    }
+};
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,8 +145,8 @@ if (isset($pdo, $_SESSION['user_id'])) {
                         src="assets/images/skillconnect-logo.svg?v=<?= (int) $logo_version ?>"
                         alt="SkillConnect"
                         class="logo-image"
-                        width="220"
-                        height="68"
+                        width="190"
+                        height="59"
                         fetchpriority="high"
                     >
                 </a>
@@ -117,12 +165,12 @@ if (isset($pdo, $_SESSION['user_id'])) {
             </div>
 
             <div class="nav-actions">
-                <!-- Network Dropdown (UI Only) -->
-                <div class="nav-item has-dropdown" data-dropdown="network">
-                    <button type="button" class="nav-btn" aria-expanded="false">
+                <!-- Network Dropdown — click controlled for consistency with Notifications -->
+                <div class="nav-item has-dropdown network-menu" data-dropdown="network">
+                    <button type="button" class="nav-btn network-menu-trigger" aria-expanded="false" aria-controls="network-dropdown" aria-haspopup="true" id="network-menu-trigger">
                         <span class="nav-text">Network</span>
                     </button>
-                    <div class="dropdown-popup">
+                    <div class="dropdown-popup network-popup" id="network-dropdown" aria-hidden="true" aria-labelledby="network-menu-trigger">
                         <div class="popup-header">Global Network</div>
                         <div class="popup-body">
                             <p>Discover people across SkillConnect.</p>
@@ -131,17 +179,84 @@ if (isset($pdo, $_SESSION['user_id'])) {
                     </div>
                 </div>
 
-                <!-- Notifications Dropdown (UI Only) -->
-                <div class="nav-item has-dropdown" data-dropdown="notifications">
-                    <button type="button" class="nav-btn" aria-expanded="false">
+                <!-- Role-aware mentorship notifications -->
+                <div class="nav-item has-dropdown notification-menu" data-dropdown="notifications">
+                    <button type="button" class="nav-btn notification-menu-trigger" aria-expanded="false" aria-controls="notifications-dropdown" aria-haspopup="true" id="notifications-menu-trigger">
                         <span class="nav-text">Notifications</span>
+                        <?php if ($nav_unread_notifications > 0): ?>
+                            <span class="notification-dot" aria-label="<?= (int) $nav_unread_notifications ?> unread notifications"></span>
+                        <?php endif; ?>
                     </button>
-                    <div class="dropdown-popup">
-                        <div class="popup-header">Notifications</div>
-                        <div class="popup-body">
-                            <p>No notifications yet.</p>
+                    <div class="dropdown-popup notification-popup" id="notifications-dropdown" aria-hidden="true" aria-labelledby="notifications-menu-trigger">
+                        <div class="notification-popup-header">
+                            <div>
+                                <h2>Notifications</h2>
+                                <?php if ($nav_unread_notifications > 0): ?>
+                                    <p><?= (int) $nav_unread_notifications ?> unread notification<?= $nav_unread_notifications === 1 ? '' : 's' ?></p>
+                                <?php endif; ?>
+                            </div>
+                            <form method="post" action="notifications_action.php" class="notification-header-action">
+                                <input type="hidden" name="action" value="mark_all_read">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($notification_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                                <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
+                                <button type="submit" <?= $nav_unread_notifications === 0 ? 'disabled aria-disabled="true"' : '' ?>>Mark all as read</button>
+                            </form>
+                        </div>
+                        <div class="notification-list">
+                            <?php if (empty($nav_notifications)): ?>
+                                <div class="notification-empty">
+                                    <span class="notification-empty-icon" aria-hidden="true">✓</span>
+                                    <strong>No notifications yet.</strong>
+                                    <span>Mentorship updates will appear here.</span>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($nav_notifications as $notification): ?>
+                                    <?php
+                                        $notificationType = (string) ($notification['notification_type'] ?? 'mentorship_request');
+                                        $notificationIcon = $notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request');
+                                        $notificationIsUnread = (int) ($notification['is_read'] ?? 0) === 0;
+                                    ?>
+                                    <a class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>" href="notifications_action.php?action=open&amp;id=<?= (int) $notification['notification_id'] ?>">
+                                        <span class="notification-item-icon <?= htmlspecialchars($notificationIcon, ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true">
+                                            <?php if ($notificationIcon === 'accepted'): ?>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+                                            <?php elseif ($notificationIcon === 'rejected'): ?>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m9 9 6 6m0-6-6 6"></path></svg>
+                                            <?php else: ?>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6m-3-3h6"></path></svg>
+                                            <?php endif; ?>
+                                        </span>
+                                        <span class="notification-item-content">
+                                            <span class="notification-item-message"><?= htmlspecialchars((string) $notification['message'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            <span class="notification-item-time"><?= htmlspecialchars($notificationTimeLabel($notification['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                                        </span>
+                                        <?php if ($notificationIsUnread): ?><span class="notification-item-unread-dot" aria-label="Unread"></span><?php endif; ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <div class="notification-popup-footer">
+                            <span>Only mentorship updates.</span>
+                            <?php if (!empty($nav_notifications)): ?>
+                                <form method="post" action="notifications_action.php" class="notification-clear-form" id="notification-clear-form">
+                                    <input type="hidden" name="action" value="clear_all">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($notification_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
+                                    <button type="submit" id="notification-clear-trigger">Clear all</button>
+                                </form>
+                            <?php endif; ?>
                         </div>
                     </div>
+                    <dialog class="notification-confirm-dialog" id="notification-clear-confirm" aria-labelledby="notification-clear-title">
+                        <div class="notification-confirm-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6m4-6v6"></path><path d="m6 7 1 13h10l1-13"></path><path d="M9 7V4h6v3"></path></svg>
+                        </div>
+                        <h2 id="notification-clear-title">Clear notifications?</h2>
+                        <div class="notification-confirm-actions">
+                            <button type="button" class="notification-confirm-cancel" id="notification-clear-cancel">Cancel</button>
+                            <button type="button" class="notification-confirm-accept" id="notification-clear-accept">Clear all</button>
+                        </div>
+                    </dialog>
                 </div>
 
                 <!-- Profile dropdown -->
@@ -227,6 +342,107 @@ if (isset($pdo, $_SESSION['user_id'])) {
 
                 <script>
                 (() => {
+                    const trigger = document.getElementById('network-menu-trigger');
+                    const menu = document.getElementById('network-dropdown');
+                    const wrapper = trigger && trigger.closest('.network-menu');
+                    if (!trigger || !menu || !wrapper || wrapper.dataset.networkReady === 'true') return;
+                    wrapper.dataset.networkReady = 'true';
+                    const setOpen = (open) => {
+                        wrapper.classList.toggle('show', open);
+                        trigger.setAttribute('aria-expanded', String(open));
+                        menu.setAttribute('aria-hidden', String(!open));
+                    };
+                    trigger.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const notifications = document.querySelector('.notification-menu');
+                        if (notifications) {
+                            notifications.classList.remove('show');
+                            const notificationTrigger = document.getElementById('notifications-menu-trigger');
+                            const notificationMenu = document.getElementById('notifications-dropdown');
+                            if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
+                            if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
+                        }
+                        setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                    });
+                    document.addEventListener('click', (event) => {
+                        if (!wrapper.contains(event.target)) setOpen(false);
+                    });
+                    document.addEventListener('keydown', (event) => {
+                        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+                            setOpen(false);
+                            trigger.focus();
+                        }
+                    });
+                })();
+                </script>
+                <script>
+                (() => {
+                    const clearForm = document.getElementById('notification-clear-form');
+                    const clearTrigger = document.getElementById('notification-clear-trigger');
+                    const dialog = document.getElementById('notification-clear-confirm');
+                    const cancelButton = document.getElementById('notification-clear-cancel');
+                    const acceptButton = document.getElementById('notification-clear-accept');
+                    if (clearForm && clearTrigger && dialog && cancelButton && acceptButton && !clearForm.dataset.confirmReady) {
+                        clearForm.dataset.confirmReady = 'true';
+                        clearForm.addEventListener('submit', (event) => {
+                            event.preventDefault();
+                            if (typeof dialog.showModal === 'function') dialog.showModal();
+                            else if (window.confirm('Clear notifications? Mentorship requests will not be affected.')) clearForm.submit();
+                        });
+                        cancelButton.addEventListener('click', () => dialog.close());
+                        acceptButton.addEventListener('click', () => {
+                            dialog.close();
+                            clearForm.submit();
+                        });
+                        dialog.addEventListener('click', (event) => {
+                            if (event.target === dialog) dialog.close();
+                        });
+                    }
+                })();
+                </script>
+                <script>
+                (() => {
+                    const trigger = document.getElementById('notifications-menu-trigger');
+                    const menu = document.getElementById('notifications-dropdown');
+                    const wrapper = trigger && trigger.closest('.notification-menu');
+                    if (!trigger || !menu || !wrapper || wrapper.dataset.notificationsReady === 'true') return;
+                    wrapper.dataset.notificationsReady = 'true';
+
+                    const setOpen = (open) => {
+                        wrapper.classList.toggle('show', open);
+                        trigger.setAttribute('aria-expanded', String(open));
+                        menu.setAttribute('aria-hidden', String(!open));
+                    };
+
+                    // Notifications are click-controlled on desktop and mobile.
+                    // This prevents the notification panel from activating the adjacent profile hover menu.
+                    trigger.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const network = document.querySelector('.network-menu');
+                        if (network) {
+                            network.classList.remove('show');
+                            const networkTrigger = document.getElementById('network-menu-trigger');
+                            const networkMenu = document.getElementById('network-dropdown');
+                            if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
+                            if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
+                        }
+                        setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                    });
+                    document.addEventListener('click', (event) => {
+                        if (!wrapper.contains(event.target)) setOpen(false);
+                    });
+                    document.addEventListener('keydown', (event) => {
+                        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+                            setOpen(false);
+                            trigger.focus();
+                        }
+                    });
+                })();
+                </script>
+                <script>
+                (() => {
                     const trigger = document.getElementById('profile-menu-trigger');
                     const menu = document.getElementById('profile-dropdown');
                     const wrapper = trigger && trigger.closest('.profile-menu');
@@ -240,24 +456,15 @@ if (isset($pdo, $_SESSION['user_id'])) {
                         menu.setAttribute('aria-hidden', String(!open));
                     };
 
-                    // Desktop uses hover/focus; the wide invisible bridge keeps the popup reachable.
-                    wrapper.addEventListener('pointerenter', () => {
-                        if (hoverMode.matches) setOpen(true);
-                    });
-                    wrapper.addEventListener('pointerleave', () => {
-                        if (hoverMode.matches && !wrapper.contains(document.activeElement)) setOpen(false);
-                    });
-                    wrapper.addEventListener('focusin', () => setOpen(true));
-                    wrapper.addEventListener('focusout', (event) => {
-                        if (!wrapper.contains(event.relatedTarget) && hoverMode.matches) setOpen(false);
-                    });
-
-                    // Touch/mobile has no hover, so tap toggles the menu.
+                    // Keep the profile dropdown hover-friendly on desktop, with click support
+                    // for touch devices. The notification panel is click-only and stays separated.
                     trigger.addEventListener('click', (event) => {
                         event.preventDefault();
-                        if (hoverMode.matches) return;
                         event.stopPropagation();
                         setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                    });
+                    wrapper.addEventListener('focusout', (event) => {
+                        if (!wrapper.contains(event.relatedTarget)) setOpen(false);
                     });
                     document.addEventListener('click', (event) => {
                         if (!wrapper.contains(event.target)) setOpen(false);

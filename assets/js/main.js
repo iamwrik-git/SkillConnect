@@ -489,6 +489,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // -----------------------------------------------------
+        // Unlink accepted mentorship confirmation
+        // -----------------------------------------------------
+        const unlinkMentorshipForm =
+            e.target.closest('.js-confirm-unlink-mentorship');
+
+        if (unlinkMentorshipForm) {
+            e.preventDefault();
+
+            const connectionName =
+                unlinkMentorshipForm.getAttribute('data-connection-name') || 'this user';
+            const connectionRole =
+                unlinkMentorshipForm.getAttribute('data-connection-role') || 'connection';
+
+            showConfirmationModal({
+                title: `Unlink ${connectionRole === 'trainee' ? 'Trainee' : 'Mentor'}?`,
+                message: `Are you sure you want to remove ${connectionName} from your ${connectionRole === 'trainee' ? 'accepted trainees' : 'mentorships'}? This will end the accepted mentorship connection.`,
+                confirmText: 'Unlink',
+                confirmClass: 'confirm-danger'
+            }, () => {
+                const submitBtn = unlinkMentorshipForm.querySelector('button[type="submit"]');
+                if (submitBtn) setButtonLoadingState(submitBtn);
+                unlinkMentorshipForm.submit();
+            });
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
         // Standard form loading states
         // -----------------------------------------------------
 
@@ -636,4 +665,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // PHP session state is authoritative; no sessionStorage/localStorage gate.
         window.setTimeout(openRecoveryModal, 250);
     }
+
+    // =========================================================
+    // A8: ACCEPTED MENTORSHIP ACTION MENU + UNLINK CONFIRMATION
+    // =========================================================
+    document.querySelectorAll('[data-mentorship-menu]').forEach(menu => {
+        const toggle = menu.querySelector('.mentorship-more-toggle');
+        const popup = menu.querySelector('.mentorship-more-menu');
+        if (!toggle || !popup) return;
+
+        const closeMenu = () => {
+            popup.hidden = true;
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+
+        toggle.addEventListener('click', event => {
+            event.stopPropagation();
+            const shouldOpen = popup.hidden;
+            document.querySelectorAll('.mentorship-more-menu').forEach(otherPopup => {
+                otherPopup.hidden = true;
+                const otherToggle = otherPopup.parentElement.querySelector('.mentorship-more-toggle');
+                if (otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+            });
+            popup.hidden = !shouldOpen;
+            toggle.setAttribute('aria-expanded', String(shouldOpen));
+        });
+
+        document.addEventListener('click', event => {
+            if (!menu.contains(event.target)) closeMenu();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeMenu();
+                toggle.focus();
+            }
+        });
+    });
+
+
 });

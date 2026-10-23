@@ -25,21 +25,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
 <header class="lp-header">
     <div class="lp-container lp-nav">
         <a class="lp-brand" href="index.php" aria-label="SkillConnect home">
-            <span class="lp-brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 64 64" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 47 L29 35 L44 13"/>
-                        <path d="M29 35 L13 22"/>
-                        <path d="M29 35 L47 42"/>
-                    </g>
-                    <circle cx="14" cy="47" r="10" fill="currentColor"/>
-                    <circle cx="13" cy="22" r="10" fill="currentColor"/>
-                    <circle cx="44" cy="13" r="10" fill="currentColor"/>
-                    <circle cx="47" cy="42" r="10" fill="currentColor"/>
-                    <circle cx="29" cy="35" r="8" fill="currentColor"/>
-                </svg>
-            </span>
-            <span class="lp-brand-word"><span>Skill</span><b>Connect</b></span>
+            <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:51px;width:auto;max-width:100%;object-fit:contain;">
         </a>
 
         <nav class="lp-nav-links" aria-label="Main navigation">
@@ -174,21 +160,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
         <div class="lp-footer-main">
             <div class="lp-footer-brand">
                 <a class="lp-brand" href="index.php">
-                    <span class="lp-brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 64 64" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 47 L29 35 L44 13"/>
-                        <path d="M29 35 L13 22"/>
-                        <path d="M29 35 L47 42"/>
-                    </g>
-                    <circle cx="14" cy="47" r="10" fill="currentColor"/>
-                    <circle cx="13" cy="22" r="10" fill="currentColor"/>
-                    <circle cx="44" cy="13" r="10" fill="currentColor"/>
-                    <circle cx="47" cy="42" r="10" fill="currentColor"/>
-                    <circle cx="29" cy="35" r="8" fill="currentColor"/>
-                </svg>
-            </span>
-            <span class="lp-brand-word"><span>Skill</span><b>Connect</b></span>
+                    <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:51px;width:auto;max-width:100%;object-fit:contain;">
                 </a>
                 <p>A platform to learn, connect and grow together.</p>
             </div>
