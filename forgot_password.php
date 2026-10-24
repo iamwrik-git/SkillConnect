@@ -23,8 +23,8 @@ function fp_configured(array $user): bool {
 }
 $error = $_SESSION['recovery_error'] ?? '';
 unset($_SESSION['recovery_error']);
-$unavailable = !empty($_SESSION['recovery_unavailable']);
-unset($_SESSION['recovery_unavailable']);
+$submittedEmail = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = $_POST['csrf_token'] ?? '';
     if (!is_string($token) || !is_string($_SESSION['csrf_token'] ?? null) || !hash_equals($_SESSION['csrf_token'], $token)) {
@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $emailInput = $_POST['email'] ?? '';
         $email = is_string($emailInput) ? trim($emailInput) : '';
+        $submittedEmail = $email;
         if ($email === '' || strlen($email) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Enter a valid email address.';
         } else {
@@ -42,16 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$email]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!$user || !fp_configured($user)) {
-                    $_SESSION['recovery_unavailable'] = true;
-                    header('Location: forgot_password.php'); exit;
+                    $error = "We couldn't find a configured recovery method for this account. Please verify the email address or contact support.";
+                } else {
+                    session_regenerate_id(true);
+                    $_SESSION['password_recovery'] = [
+                        'user_id' => (int)$user['user_id'], 'started_at' => time(),
+                        'expires_at' => time() + 900, 'verified' => false, 'attempts' => 0,
+                        'flow_id' => bin2hex(random_bytes(32))
+                    ];
+                    header('Location: verify_recovery.php'); exit;
                 }
-                session_regenerate_id(true);
-                $_SESSION['password_recovery'] = [
-                    'user_id' => (int)$user['user_id'], 'started_at' => time(),
-                    'expires_at' => time() + 900, 'verified' => false, 'attempts' => 0,
-                    'flow_id' => bin2hex(random_bytes(32))
-                ];
-                header('Location: verify_recovery.php'); exit;
             } catch (PDOException $e) {
                 error_log('Recovery account lookup failed: ' . $e->getMessage());
                 $error = 'An unexpected error occurred. Please try again later.';
@@ -355,10 +356,7 @@ $csrf = fp_csrf();
 
 </head>
 <body class="auth-page recovery-auth-page"><div class="login-workspace recovery-workspace"><main class="recovery-form-panel"><a class="recovery-brand-mobile" href="login.php" aria-label="SkillConnect home"><img src="assets/images/skillconnect-logo.svg" alt="SkillConnect"></a><section class="recovery-form-content">
-<?php if ($unavailable): ?>
-<div class="recovery-page-icon recovery-error-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg></div><div class="form-header"><h1>Account Recovery Not Available</h1><p>We couldn’t find a configured recovery method for this account. Please contact the administrator for assistance.</p></div><a class="submit-btn recovery-submit-link" href="login.php">Back to Sign In <span aria-hidden="true">→</span></a>
-<?php else: ?>
 <div class="recovery-page-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div class="form-header"><h1>Reset Your Password</h1><p>Enter the email address associated with your SkillConnect account.</p></div>
 <?php if ($error !== ''): ?><div class="inline-error-banner" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
-<form action="forgot_password.php" method="post" class="auth-form recovery-form"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>"><div class="form-group"><label for="recovery-email">Email Address</label><input class="form-input" type="email" id="recovery-email" name="email" autocomplete="email" maxlength="100" placeholder="Enter your registered email" required></div><button type="submit" class="submit-btn">Continue <span aria-hidden="true">→</span></button></form><div class="recovery-back-row"><span>or</span><a href="login.php">Back to Sign In</a></div>
-<?php endif; ?></section></main><aside class="login-illustration-panel recovery-illustration-panel" aria-label="SkillConnect learning community"><img src="assets/images/skillconnect-auth-login.jpg" alt="Learner using a laptop to explore programming and technology" class="auth-illustration-img"><div class="auth-illustration-overlay"></div><div class="illustration-brand"><img src="assets/images/skillconnect-logo.svg" alt="SkillConnect" class="auth-brand-logo"></div><div class="panel-typography"><h3>Learn from Experts. Build Real Skills.</h3><p>Connect with skilled trainers, gain hands-on knowledge and grow with a supportive community.</p></div></aside></div></body></html>
+<form action="forgot_password.php" method="post" class="auth-form recovery-form"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>"><div class="form-group"><label for="recovery-email">Email Address</label><input class="form-input" type="email" id="recovery-email" name="email" value="<?= htmlspecialchars($submittedEmail, ENT_QUOTES, 'UTF-8') ?>" autocomplete="email" maxlength="100" placeholder="Enter your registered email" required></div><button type="submit" class="submit-btn">Continue <span aria-hidden="true">→</span></button></form><div class="recovery-back-row"><span>or</span><a href="login.php">Back to Sign In</a></div>
+</section></main><aside class="login-illustration-panel recovery-illustration-panel" aria-label="SkillConnect learning community"><img src="assets/images/skillconnect-auth-login.jpg" alt="Learner using a laptop to explore programming and technology" class="auth-illustration-img"><div class="auth-illustration-overlay"></div><div class="illustration-brand"><img src="assets/images/skillconnect-logo.svg" alt="SkillConnect" class="auth-brand-logo"></div><div class="panel-typography"><h3>Learn from Experts. Build Real Skills.</h3><p>Connect with skilled trainers, gain hands-on knowledge and grow with a supportive community.</p></div></aside></div></body></html>

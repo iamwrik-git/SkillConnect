@@ -86,11 +86,13 @@ if (!$user_not_found && !$is_own_profile && $current_user_role === 'trainee' && 
 }
 
 // Helper function to resolve profile photo or generate UI-Avatar Initials
-function getProfilePhotoUrl($photo, $name) {
-    if (empty($photo) || $photo === 'default.jpg') {
-        return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
+if (!function_exists('getProfilePhotoUrl')) {
+    function getProfilePhotoUrl($photo, $name) {
+        if (empty($photo) || $photo === 'default.jpg') {
+            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
+        }
+        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
     }
-    return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
 }
 
 // 7. Output Header

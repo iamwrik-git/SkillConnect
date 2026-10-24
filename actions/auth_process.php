@@ -8,8 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
-    exit; }
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
+}
 
 require_once(__DIR__ . '/../includes/db_connect.php');
 
@@ -40,14 +42,14 @@ if ($action === 'register') {
     // Server-side validation
     $errors = [];
 
-    if (empty($name) || strlen($name) > 255) {
-        $errors[] = "A valid name is required.";
+    if (empty($name) || strlen($name) > 100) {
+        $errors[] = "Name is required and must not exceed 100 characters.";
     }
-    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-        $errors[] = "A valid email address is required.";
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100) {
+        $errors[] = "A valid email address (max 100 characters) is required.";
     }
-    if ($password === '' || strlen($password) < 8) {
-        $errors[] = "Password must be at least 8 characters long.";
+    if ($password === '' || strlen($password) < 8 || !preg_match('/[0-9]/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors[] = "Password must be at least 8 characters and include a number and special character.";
     }
     if ($confirm_password === '') {
         $errors[] = "Please confirm your password.";

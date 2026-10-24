@@ -46,18 +46,31 @@ try {
     $stmt->execute([$current_user_id]);
     $fetched_trainers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch skills for these trainers
+    // Fetch skills for these trainers in a single batch query (eliminate N+1 query pattern)
     if (!empty($fetched_trainers)) {
-        foreach ($fetched_trainers as $t) {
-            $t_id = $t['user_id'];
-            $tsStmt = $pdo->prepare("
-                SELECT s.skill_name 
-                FROM skills s 
-                JOIN user_skills us ON s.skill_id = us.skill_id 
-                WHERE us.user_id = ?
+        $trainerIds = array_values(array_unique(array_map('intval', array_column($fetched_trainers, 'user_id'))));
+        $skillsByTrainer = [];
+
+        if (!empty($trainerIds)) {
+            $placeholders = implode(',', array_fill(0, count($trainerIds), '?'));
+            $skillsStmt = $pdo->prepare("
+                SELECT us.user_id, s.skill_name 
+                FROM user_skills us 
+                JOIN skills s ON s.skill_id = us.skill_id 
+                WHERE us.user_id IN ($placeholders)
+                ORDER BY s.skill_name ASC
             ");
-            $tsStmt->execute([$t_id]);
-            $t['skills'] = $tsStmt->fetchAll(PDO::FETCH_COLUMN);
+            $skillsStmt->execute($trainerIds);
+
+            foreach ($skillsStmt->fetchAll(PDO::FETCH_ASSOC) as $skillRow) {
+                $trainerId = (int) $skillRow['user_id'];
+                $skillsByTrainer[$trainerId][] = $skillRow['skill_name'];
+            }
+        }
+
+        foreach ($fetched_trainers as $t) {
+            $t_id = (int) $t['user_id'];
+            $t['skills'] = $skillsByTrainer[$t_id] ?? [];
             $trainers[] = $t;
         }
     }
@@ -180,7 +193,7 @@ if (file_exists('includes/header.php')) {
                             <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
-                            <input type="hidden" name="return_to" value="../saved_trainers.php">
+                            <input type="hidden" name="return_to" value="saved_trainers.php">
                             <button type="submit" class="btn btn-danger-light" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" data-loading-text="Removing...">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                 Remove

@@ -20,8 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             // Note: Cascade deletion rules on the DB should handle user_skills and mentorships.
             // If they are not natively cascading in the schema, doing it explicitly:
             $pdo->beginTransaction();
+            // Clean up notifications sent to this user or referencing their mentorship requests
+            $pdo->prepare("DELETE FROM notifications WHERE recipient_user_id = ?")->execute([$deleteId]);
+            $pdo->prepare("DELETE FROM notifications WHERE request_id IN (SELECT request_id FROM mentorships WHERE trainer_id = ? OR trainee_id = ?)")->execute([$deleteId, $deleteId]);
+
             $pdo->prepare("DELETE FROM user_skills WHERE user_id = ?")->execute([$deleteId]);
             $pdo->prepare("DELETE FROM mentorships WHERE trainer_id = ? OR trainee_id = ?")->execute([$deleteId, $deleteId]);
+            $pdo->prepare("DELETE FROM saved_trainers WHERE user_id = ? OR trainer_id = ?")->execute([$deleteId, $deleteId]);
             
             $stmt = $pdo->prepare("DELETE FROM users WHERE user_id = ?");
             $stmt->execute([$deleteId]);

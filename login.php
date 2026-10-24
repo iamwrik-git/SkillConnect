@@ -123,12 +123,12 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                         <div class="form-group">
                             <label for="reg-name">Full Name</label>
-                            <input type="text" id="reg-name" name="name" class="form-input" value="<?= htmlspecialchars($signupName, ENT_QUOTES, 'UTF-8') ?>" required autocomplete="name" placeholder="Enter your name">
+                            <input type="text" id="reg-name" name="name" class="form-input" value="<?= htmlspecialchars($signupName, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="name" placeholder="Enter your name">
                         </div>
 
                         <div class="form-group">
                             <label for="reg-email">Email Address</label>
-                            <input type="email" id="reg-email" name="email" class="form-input" value="<?= htmlspecialchars($signupEmail, ENT_QUOTES, 'UTF-8') ?>" required autocomplete="email" placeholder="name@example.com">
+                            <input type="email" id="reg-email" name="email" class="form-input" value="<?= htmlspecialchars($signupEmail, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="email" placeholder="name@example.com">
                         </div>
 
                         <div class="form-group">
@@ -273,9 +273,9 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
             if (!password.value) {
                 invalidInput = password;
                 message = 'Please enter a password.';
-            } else if (password.value.length < 8) {
+            } else if (password.value.length < 8 || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
                 invalidInput = password;
-                message = 'Password must be at least 8 characters long.';
+                message = 'Password must be at least 8 characters and include a number and special character.';
             } else if (!confirmPassword.value) {
                 invalidInput = confirmPassword;
                 message = 'Please confirm your password.';

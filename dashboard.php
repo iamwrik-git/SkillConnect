@@ -149,12 +149,14 @@ $page_title = 'Dashboard | SkillConnect';
 require_once __DIR__ . '/includes/header.php';
 
 // Helper function to resolve profile photo or generate initials
-function getProfilePhotoUrl($photo, $name)
-{
-    if (empty($photo) || $photo === 'default.jpg') {
-        return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
+if (!function_exists('getProfilePhotoUrl')) {
+    function getProfilePhotoUrl($photo, $name)
+    {
+        if (empty($photo) || $photo === 'default.jpg') {
+            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
+        }
+        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
     }
-    return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
 }
 ?>
 
@@ -530,10 +532,20 @@ function getProfilePhotoUrl($photo, $name)
                                 </div>
                                 <?php if ($role === 'trainer'): ?>
                                     <div class="activity-actions form-group-inline">
-                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form"><input type="hidden" name="action" value="accept_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-primary btn-sm" data-loading-text="Accepting...">Accept</button></form>
-                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form js-confirm-reject-request"><input type="hidden" name="action" value="reject_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-secondary btn-sm" data-loading-text="Rejecting...">Reject</button></form>
+                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form">
+                                            <input type="hidden" name="action" value="accept_request">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                            <input type="hidden" name="return_to" value="dashboard.php">
+                                            <button type="submit" class="btn btn-primary btn-sm" data-loading-text="Accepting...">Accept</button>
+                                        </form>
+                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form js-confirm-reject-request">
+                                            <input type="hidden" name="action" value="reject_request">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                            <input type="hidden" name="return_to" value="dashboard.php">
+                                            <button type="submit" class="btn btn-secondary btn-sm" data-loading-text="Rejecting...">Reject</button>
+                                        </form>
                                     </div>
                                 <?php else: ?><span class="badge badge-warning">Pending</span><?php endif; ?>
                             </div>

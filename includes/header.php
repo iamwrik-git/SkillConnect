@@ -335,7 +335,7 @@ $notificationTimeLabel = static function ($createdAt): string {
                                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                 <span>View Profile</span>
                             </a>
-                            <a href="logout.php" class="profile-menu-link profile-menu-logout" role="menuitem" data-confirm-logout>
+                            <a href="logout.php?csrf_token=<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>" class="profile-menu-link profile-menu-logout" role="menuitem" data-confirm-logout>
                                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                                 <span>Log out</span>
                             </a>
@@ -358,15 +358,26 @@ $notificationTimeLabel = static function ($createdAt): string {
                     trigger.addEventListener('click', (event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        const notifications = document.querySelector('.notification-menu');
-                        if (notifications) {
-                            notifications.classList.remove('show');
-                            const notificationTrigger = document.getElementById('notifications-menu-trigger');
-                            const notificationMenu = document.getElementById('notifications-dropdown');
-                            if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
-                            if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
+                        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                        if (willOpen) {
+                            const notifications = document.querySelector('.notification-menu');
+                            if (notifications) {
+                                notifications.classList.remove('show');
+                                const notificationTrigger = document.getElementById('notifications-menu-trigger');
+                                const notificationMenu = document.getElementById('notifications-dropdown');
+                                if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
+                                if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
+                            }
+                            const profile = document.querySelector('.profile-menu');
+                            if (profile) {
+                                profile.classList.remove('show');
+                                const profileTrigger = document.getElementById('profile-menu-trigger');
+                                const profileMenu = document.getElementById('profile-dropdown');
+                                if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
+                                if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
+                            }
                         }
-                        setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                        setOpen(willOpen);
                     });
                     document.addEventListener('click', (event) => {
                         if (!wrapper.contains(event.target)) setOpen(false);
@@ -423,15 +434,26 @@ $notificationTimeLabel = static function ($createdAt): string {
                     trigger.addEventListener('click', (event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        const network = document.querySelector('.network-menu');
-                        if (network) {
-                            network.classList.remove('show');
-                            const networkTrigger = document.getElementById('network-menu-trigger');
-                            const networkMenu = document.getElementById('network-dropdown');
-                            if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
-                            if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
+                        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                        if (willOpen) {
+                            const network = document.querySelector('.network-menu');
+                            if (network) {
+                                network.classList.remove('show');
+                                const networkTrigger = document.getElementById('network-menu-trigger');
+                                const networkMenu = document.getElementById('network-dropdown');
+                                if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
+                                if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
+                            }
+                            const profile = document.querySelector('.profile-menu');
+                            if (profile) {
+                                profile.classList.remove('show');
+                                const profileTrigger = document.getElementById('profile-menu-trigger');
+                                const profileMenu = document.getElementById('profile-dropdown');
+                                if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
+                                if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
+                            }
                         }
-                        setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                        setOpen(willOpen);
                     });
                     document.addEventListener('click', (event) => {
                         if (!wrapper.contains(event.target)) setOpen(false);
@@ -453,7 +475,28 @@ $notificationTimeLabel = static function ($createdAt): string {
                     wrapper.dataset.profileMenuReady = 'true';
 
                     const hoverMode = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+                    const closeOtherMenus = () => {
+                        const network = document.querySelector('.network-menu');
+                        if (network) {
+                            network.classList.remove('show');
+                            const networkTrigger = document.getElementById('network-menu-trigger');
+                            const networkMenu = document.getElementById('network-dropdown');
+                            if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
+                            if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
+                        }
+                        const notifications = document.querySelector('.notification-menu');
+                        if (notifications) {
+                            notifications.classList.remove('show');
+                            const notificationTrigger = document.getElementById('notifications-menu-trigger');
+                            const notificationMenu = document.getElementById('notifications-dropdown');
+                            if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
+                            if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
+                        }
+                    };
+
                     const setOpen = (open) => {
+                        if (open) closeOtherMenus();
                         wrapper.classList.toggle('show', open);
                         trigger.setAttribute('aria-expanded', String(open));
                         menu.setAttribute('aria-hidden', String(!open));
@@ -465,6 +508,9 @@ $notificationTimeLabel = static function ($createdAt): string {
                         event.preventDefault();
                         event.stopPropagation();
                         setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                    });
+                    wrapper.addEventListener('mouseenter', () => {
+                        if (hoverMode.matches) closeOtherMenus();
                     });
                     wrapper.addEventListener('focusout', (event) => {
                         if (!wrapper.contains(event.relatedTarget)) setOpen(false);
@@ -576,7 +622,7 @@ $notificationTimeLabel = static function ($createdAt): string {
                 </div>
 
                 <div class="sidebar-footer">
-                    <a href="logout.php" class="logout-link" data-confirm-logout>
+                    <a href="logout.php?csrf_token=<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>" class="logout-link" data-confirm-logout>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         <span>Logout</span>
                     </a>
@@ -596,7 +642,10 @@ $notificationTimeLabel = static function ($createdAt): string {
                     <p class="confirm-modal-message" id="logout-confirm-message">Are you sure you want to log out? You will need to sign in again to access your account.</p>
                     <div class="confirm-modal-actions">
                         <button type="button" class="btn confirm-cancel" id="logout-cancel-btn">Stay logged in</button>
-                        <button type="button" class="btn confirm-danger" id="logout-confirm-btn">Log out</button>
+                        <form id="logout-action-form" method="POST" action="logout.php" style="display:inline; margin:0;">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                            <button type="submit" class="btn confirm-danger" id="logout-confirm-btn">Log out</button>
+                        </form>
                     </div>
                 </section>
             </div>
@@ -636,7 +685,15 @@ $notificationTimeLabel = static function ($createdAt): string {
                 });
 
                 cancelButton.addEventListener('click', closeModal);
-                confirmButton.addEventListener('click', () => { window.location.href = logoutUrl; });
+                confirmButton.addEventListener('click', (event) => {
+                    const form = document.getElementById('logout-action-form');
+                    if (form) {
+                        event.preventDefault();
+                        form.submit();
+                    } else {
+                        window.location.href = logoutUrl;
+                    }
+                });
                 modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
                 document.addEventListener('keydown', (event) => {
                     if (!modal.classList.contains('show')) return;

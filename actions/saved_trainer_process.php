@@ -38,9 +38,24 @@ if (is_string($returnRaw)) {
         if ($page === 'search.php' && isset($parsed['query'])) {
             parse_str($parsed['query'], $query);
             $safeQuery = [];
-            if (isset($query['q']) && is_string($query['q'])) $safeQuery['q'] = substr($query['q'], 0, 100);
-            if (isset($query['page']) && filter_var($query['page'], FILTER_VALIDATE_INT) && (int)$query['page'] > 0) $safeQuery['page'] = (int)$query['page'];
-            if ($safeQuery) $return_to .= '?' . http_build_query($safeQuery);
+            if (isset($query['q']) && is_string($query['q'])) {
+                $q = trim($query['q']);
+                if ($q !== '') {
+                    $safeQuery['q'] = substr($q, 0, 100);
+                }
+            }
+            if (isset($query['skill_id']) && filter_var($query['skill_id'], FILTER_VALIDATE_INT) && (int)$query['skill_id'] > 0) {
+                $safeQuery['skill_id'] = (int)$query['skill_id'];
+            }
+            if (isset($query['sort']) && in_array($query['sort'], ['name_asc', 'name_desc', 'exp_asc', 'exp_desc'], true)) {
+                $safeQuery['sort'] = $query['sort'];
+            }
+            if (isset($query['page']) && filter_var($query['page'], FILTER_VALIDATE_INT) && (int)$query['page'] > 0) {
+                $safeQuery['page'] = (int)$query['page'];
+            }
+            if ($safeQuery) {
+                $return_to .= '?' . http_build_query($safeQuery);
+            }
         }
     }
 }

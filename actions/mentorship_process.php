@@ -10,33 +10,37 @@ requireLogin();
 // Get the authenticated user ID
 $current_user_id = getCurrentUserId();
 
-/**
- * Store a notification without allowing a notification-table issue to break
- * the existing mentorship workflow. Create the notifications table first.
- */
-function createMentorshipNotification(PDO $pdo, int $recipientId, ?int $requestId, string $type, string $message): void
-{
-    try {
-        $stmt = $pdo->prepare("INSERT INTO notifications
-            (recipient_user_id, request_id, notification_type, message, is_read, created_at)
-            VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)");
-        $stmt->execute([$recipientId, $requestId, $type, $message]);
-    } catch (PDOException $e) {
-        // The request itself must still succeed if notification storage fails.
-        error_log('Mentorship notification creation failed: ' . $e->getMessage());
+if (!function_exists('createMentorshipNotification')) {
+    /**
+     * Store a notification without allowing a notification-table issue to break
+     * the existing mentorship workflow. Create the notifications table first.
+     */
+    function createMentorshipNotification(PDO $pdo, int $recipientId, ?int $requestId, string $type, string $message): void
+    {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO notifications
+                (recipient_user_id, request_id, notification_type, message, is_read, created_at)
+                VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)");
+            $stmt->execute([$recipientId, $requestId, $type, $message]);
+        } catch (PDOException $e) {
+            // The request itself must still succeed if notification storage fails.
+            error_log('Mentorship notification creation failed: ' . $e->getMessage());
+        }
     }
 }
 
-function getMentorshipActorName(PDO $pdo, int $userId): string
-{
-    try {
-        $stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ? LIMIT 1");
-        $stmt->execute([$userId]);
-        $name = $stmt->fetchColumn();
-        return is_string($name) && trim($name) !== '' ? trim($name) : 'A SkillConnect user';
-    } catch (PDOException $e) {
-        error_log('Mentorship notification name lookup failed: ' . $e->getMessage());
-        return 'A SkillConnect user';
+if (!function_exists('getMentorshipActorName')) {
+    function getMentorshipActorName(PDO $pdo, int $userId): string
+    {
+        try {
+            $stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ? LIMIT 1");
+            $stmt->execute([$userId]);
+            $name = $stmt->fetchColumn();
+            return is_string($name) && trim($name) !== '' ? trim($name) : 'A SkillConnect user';
+        } catch (PDOException $e) {
+            error_log('Mentorship notification name lookup failed: ' . $e->getMessage());
+            return 'A SkillConnect user';
+        }
     }
 }
 
@@ -46,21 +50,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
-    exit; }
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
+}
 
 $action = $_POST['action'] ?? '';
 
 if ($action === 'send_request') {
-    
+
     $trainer_id = filter_input(INPUT_POST, 'trainer_id', FILTER_VALIDATE_INT);
-    
+
     if (!$trainer_id || $trainer_id <= 0) {
         $_SESSION['error'] = "Invalid trainer ID.";
         header("Location: ../dashboard.php");
         exit();
     }
-    
+
     $redirect_url = "../profile.php?user_id=" . $trainer_id;
 
     // Prevent self-mentorship
@@ -109,7 +115,7 @@ if ($action === 'send_request') {
             AND status IN ('pending', 'accepted')
         ");
         $stmt->execute([$current_user_id, $trainer_id]);
-        
+
         if ($stmt->fetch()) {
             $_SESSION['error'] = "You already have an active or pending mentorship request with this trainer.";
             header("Location: " . $redirect_url);
@@ -132,14 +138,12 @@ if ($action === 'send_request') {
         $_SESSION['success'] = "Mentorship request sent successfully.";
         header("Location: " . $redirect_url);
         exit();
-
     } catch (PDOException $e) {
         error_log("Database Error in send_request: " . $e->getMessage());
         $_SESSION['error'] = "An error occurred while sending your request. Please try again later.";
         header("Location: " . $redirect_url);
         exit();
     }
-
 } elseif ($action === 'unlink_mentorship') {
 
     $request_id = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
@@ -179,7 +183,11 @@ if ($action === 'send_request') {
             exit();
         }
 
-        // Unlinking removes only this accepted relationship; no other requests are changed.
+        // Unlinking removes only this accepted relationship; clean up associated notifications in an atomic transaction
+        $pdo->beginTransaction();
+        $deleteNotif = $pdo->prepare("DELETE FROM notifications WHERE request_id = ?");
+        $deleteNotif->execute([$request_id]);
+
         $delete = $pdo->prepare("
             DELETE FROM mentorships
             WHERE request_id = ? AND {$ownershipColumn} = ? AND status = 'accepted'
@@ -187,30 +195,38 @@ if ($action === 'send_request') {
         $delete->execute([$request_id, $current_user_id]);
 
         if ($delete->rowCount() === 1) {
+            $pdo->commit();
             $_SESSION['success'] = $current_user['role'] === 'trainer'
                 ? "Trainee unlinked successfully."
                 : "Mentor unlinked successfully.";
         } else {
+            $pdo->rollBack();
             $_SESSION['error'] = "The mentorship connection could not be removed. Please try again.";
         }
 
         header("Location: ../mentorships.php");
         exit();
-
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         error_log("Database Error in unlink_mentorship: " . $e->getMessage());
         $_SESSION['error'] = "An error occurred while removing the mentorship connection. Please try again later.";
         header("Location: ../mentorships.php");
         exit();
     }
-
 } elseif ($action === 'accept_request' || $action === 'reject_request') {
-    
+
     $request_id = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
-    
+    $returnRaw = $_POST['return_to'] ?? '';
+    $return_to = 'dashboard.php';
+    if ($returnRaw === 'mentorships.php' || $returnRaw === '../mentorships.php') {
+        $return_to = 'mentorships.php';
+    }
+
     if (!$request_id || $request_id <= 0) {
         $_SESSION['error'] = "Invalid request ID.";
-        header("Location: ../dashboard.php");
+        header("Location: ../" . $return_to);
         exit();
     }
 
@@ -225,7 +241,7 @@ if ($action === 'send_request') {
 
         if (!$current_user || $current_user['role'] !== 'trainer') {
             $_SESSION['error'] = "Only trainers can accept or reject requests.";
-            header("Location: ../dashboard.php");
+            header("Location: ../" . $return_to);
             exit();
         }
 
@@ -243,21 +259,21 @@ if ($action === 'send_request') {
         // Verify request exists and is owned by the current trainer
         if (!$request) {
             $_SESSION['error'] = "Mentorship request not found or access denied.";
-            header("Location: ../dashboard.php");
+            header("Location: ../" . $return_to);
             exit();
         }
 
         // Verify status is pending
         if ($request['status'] !== 'pending') {
             $_SESSION['error'] = "Only pending requests can be modified.";
-            header("Location: ../dashboard.php");
+            header("Location: ../" . $return_to);
             exit();
         }
 
         // Verify the trainee is still a valid trainee
         if ($request['trainee_role'] !== 'trainee') {
             $_SESSION['error'] = "The sender of this request is no longer a valid trainee.";
-            header("Location: ../dashboard.php");
+            header("Location: ../" . $return_to);
             exit();
         }
 
@@ -289,16 +305,14 @@ if ($action === 'send_request') {
             $_SESSION['error'] = "Could not update the request. It may have already been processed.";
         }
 
-        header("Location: ../dashboard.php");
+        header("Location: ../" . $return_to);
         exit();
-
     } catch (PDOException $e) {
         error_log("Database Error in " . $action . ": " . $e->getMessage());
         $_SESSION['error'] = "An error occurred while processing the request. Please try again later.";
-        header("Location: ../dashboard.php");
+        header("Location: ../" . $return_to);
         exit();
     }
-
 } else {
     // Unrecognized action
     $_SESSION['error'] = "Invalid action.";

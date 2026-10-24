@@ -67,11 +67,13 @@ if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
 
-function getProfilePhotoUrl($photo, $name) {
-    if (empty($photo) || $photo === 'default.jpg') {
-        return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
+if (!function_exists('getProfilePhotoUrl')) {
+    function getProfilePhotoUrl($photo, $name) {
+        if (empty($photo) || $photo === 'default.jpg') {
+            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
+        }
+        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
     }
-    return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
 }
 ?>
 
@@ -186,6 +188,7 @@ function getProfilePhotoUrl($photo, $name) {
                                     <input type="hidden" name="action" value="accept_request">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                    <input type="hidden" name="return_to" value="mentorships.php">
                                     <button type="submit" class="btn btn-accept btn-sm" data-loading-text="Accepting...">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> 
                                         Accept
@@ -195,6 +198,7 @@ function getProfilePhotoUrl($photo, $name) {
                                     <input type="hidden" name="action" value="reject_request">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
+                                    <input type="hidden" name="return_to" value="mentorships.php">
                                     <button type="submit" class="btn btn-reject btn-sm" data-loading-text="Rejecting...">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> 
                                         Reject

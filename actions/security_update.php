@@ -112,43 +112,56 @@ try {
             exit();
         }
 
+        $existing_question = (string) ($user['security_question'] ?? '');
         $has_existing = !empty($user['security_answer_hash']);
 
         $allowedQuestions = ['school', 'pet', 'nickname', 'city'];
         if (!is_string($question) || !in_array($question, $allowedQuestions, true)) {
-            $_SESSION['error'] = "Please select a security question.";
+            $_SESSION['error'] = "Please select a valid security question.";
             header("Location: ../edit_profile.php#security");
             exit();
         }
 
-        if (!$has_existing && empty($answer)) {
-            $_SESSION['error'] = "Please provide a security answer.";
-            header("Location: ../edit_profile.php#security");
-            exit();
+        $question_changed = ($question !== $existing_question);
+
+        // If question is new or changed, an answer and confirmation are strictly required
+        if (!$has_existing || $question_changed) {
+            if (trim($answer) === '') {
+                $_SESSION['error'] = "Please provide an answer for your security question.";
+                header("Location: ../edit_profile.php#security");
+                exit();
+            }
+            if (trim($confirm) === '') {
+                $_SESSION['error'] = "Please confirm your security answer.";
+                header("Location: ../edit_profile.php#security");
+                exit();
+            }
         }
 
-        if (!empty($answer)) {
-            if (!is_string($answer) || !is_string($confirm) || normalizeSecurityAnswer($answer) !== normalizeSecurityAnswer($confirm)) {
+        // If an answer was entered (or required because of new/changed question)
+        if (trim($answer) !== '') {
+            if (trim($confirm) === '' || !hash_equals(normalizeSecurityAnswer($answer), normalizeSecurityAnswer($confirm))) {
                 $_SESSION['error'] = "Security answers do not match.";
                 header("Location: ../edit_profile.php#security");
                 exit();
             }
-            
+
             // Normalize before hashing (lowercase and trim)
             $normalized_answer = normalizeSecurityAnswer($answer);
             $answer_hash = password_hash($normalized_answer, PASSWORD_DEFAULT);
 
             $updateStmt = $pdo->prepare("UPDATE users SET security_question = ?, security_answer_hash = ? WHERE user_id = ?");
             $updateStmt->execute([$question, $answer_hash, $user_id]);
-        } else {
-            // Update question only (keep existing answer)
-            $updateStmt = $pdo->prepare("UPDATE users SET security_question = ? WHERE user_id = ?");
-            $updateStmt->execute([$question, $user_id]);
-        }
 
-        $_SESSION['success'] = "Account recovery settings successfully updated.";
-        header("Location: ../edit_profile.php#security");
-        exit();
+            $_SESSION['success'] = "Account recovery settings successfully updated.";
+            header("Location: ../edit_profile.php#security");
+            exit();
+        } else {
+            // User did not change question and did not enter a new answer
+            $_SESSION['success'] = "Account recovery settings are already up to date.";
+            header("Location: ../edit_profile.php#security");
+            exit();
+        }
     }
 
 } catch (PDOException $e) {

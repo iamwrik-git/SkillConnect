@@ -14,7 +14,9 @@ function isLoggedIn()
 function requireLogin()
 {
     if (!isLoggedIn()) {
-        header("Location: ../login.php");
+        $scriptDirectory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));
+        $prefix = in_array(basename($scriptDirectory), ['actions', 'admin'], true) ? '../' : '';
+        header("Location: " . $prefix . "login.php");
         exit();
     }
 
@@ -25,7 +27,7 @@ function requireLogin()
         $currentScript = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
         if (!in_array($currentScript, ['dashboard.php', 'onboarding_process.php'], true)) {
             $scriptDirectory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));
-            if (basename($scriptDirectory) === 'actions') {
+            if (in_array(basename($scriptDirectory), ['actions', 'admin'], true)) {
                 $scriptDirectory = dirname($scriptDirectory);
             }
             $dashboardPath = rtrim($scriptDirectory, '/');
@@ -50,7 +52,9 @@ function requireAdmin()
 {
     requireLogin();
     if (empty($_SESSION['is_admin'])) {
-        header("Location: ../dashboard.php");
+        $scriptDirectory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));
+        $prefix = in_array(basename($scriptDirectory), ['actions', 'admin'], true) ? '../' : '';
+        header("Location: " . $prefix . "dashboard.php");
         exit();
     }
 }
