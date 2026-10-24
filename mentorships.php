@@ -128,6 +128,7 @@ function getProfilePhotoUrl($photo, $name) {
                                 <div class="mentorship-more-menu" hidden>
                                     <form action="actions/mentorship_process.php" method="POST" class="js-confirm-unlink-mentorship" data-connection-name="<?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?>" data-connection-role="<?= $role === 'trainer' ? 'trainee' : 'mentor' ?>">
                                         <input type="hidden" name="action" value="unlink_mentorship">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                         <button type="submit" class="mentorship-unlink-action">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>
@@ -183,6 +184,7 @@ function getProfilePhotoUrl($photo, $name) {
                             <?php else: ?>
                                 <form action="actions/mentorship_process.php" method="POST" style="margin:0;">
                                     <input type="hidden" name="action" value="accept_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                     <button type="submit" class="btn btn-accept btn-sm" data-loading-text="Accepting...">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> 
@@ -191,6 +193,7 @@ function getProfilePhotoUrl($photo, $name) {
                                 </form>
                                 <form action="actions/mentorship_process.php" method="POST" class="js-confirm-reject-request" style="margin:0;">
                                     <input type="hidden" name="action" value="reject_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                     <button type="submit" class="btn btn-reject btn-sm" data-loading-text="Rejecting...">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> 

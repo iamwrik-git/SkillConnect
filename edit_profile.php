@@ -2,15 +2,10 @@
 // edit_profile.php
 
 // 1. Session initialization and core includes
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
-// Generate CSRF token for the new security forms
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrf_token = $_SESSION['csrf_token'];
+// Generate a session-bound CSRF token for all profile/security forms.
+$csrf_token = csrfToken();
 
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -31,11 +26,14 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        die("System error: Authenticated user record could not be found.");
+        error_log('Profile fetch returned no user row for an authenticated session.');
+        skillConnectErrorResponse(404, 'This account is no longer available. Please sign in again.');
+        exit;
     }
 } catch (PDOException $e) {
     error_log("Profile Fetch Error: " . $e->getMessage());
-    die("An unexpected error occurred while loading your profile.");
+    skillConnectErrorResponse(500, 'We could not load your profile right now. Please try again later.');
+    exit;
 }
 
 // 3b. Determine Account Recovery Status
@@ -165,6 +163,7 @@ if (file_exists('includes/header.php')) {
                 
                 <form action="actions/profile_update.php" method="POST" enctype="multipart/form-data" class="edit-profile-form" novalidate>
                     <input type="hidden" name="action" value="update_profile">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="photo-upload-container">
                         <img src="<?= getProfilePhotoUrl($user['profile_photo'] ?? '',$user['name']) ?>" alt="Profile Photo" class="photo-preview">

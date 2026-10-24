@@ -99,10 +99,7 @@ if (isset($pdo, $_SESSION['user_id'])) {
     }
 }
 
-if (session_status() === PHP_SESSION_ACTIVE && empty($_SESSION['notification_csrf'])) {
-    $_SESSION['notification_csrf'] = bin2hex(random_bytes(32));
-}
-$notification_csrf = $_SESSION['notification_csrf'] ?? '';
+$notification_csrf = csrfToken('notification_csrf');
 $notificationTimeLabel = static function ($createdAt): string {
     try {
         $created = new DateTime((string) $createdAt);
@@ -216,7 +213,12 @@ $notificationTimeLabel = static function ($createdAt): string {
                                         $notificationIcon = $notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request');
                                         $notificationIsUnread = (int) ($notification['is_read'] ?? 0) === 0;
                                     ?>
-                                    <a class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>" href="notifications_action.php?action=open&amp;id=<?= (int) $notification['notification_id'] ?>">
+                                    <form method="post" action="notifications_action.php" class="notification-item-form">
+                                    <input type="hidden" name="action" value="open">
+                                    <input type="hidden" name="notification_id" value="<?= (int) $notification['notification_id'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($notification_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
+                                    <button type="submit" class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>">
                                         <span class="notification-item-icon <?= htmlspecialchars($notificationIcon, ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true">
                                             <?php if ($notificationIcon === 'accepted'): ?>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
@@ -231,7 +233,8 @@ $notificationTimeLabel = static function ($createdAt): string {
                                             <span class="notification-item-time"><?= htmlspecialchars($notificationTimeLabel($notification['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
                                         </span>
                                         <?php if ($notificationIsUnread): ?><span class="notification-item-unread-dot" aria-label="Unread"></span><?php endif; ?>
-                                    </a>
+                                    </button>
+                                    </form>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </div>

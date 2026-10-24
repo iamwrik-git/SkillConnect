@@ -1,9 +1,7 @@
 <?php 
 
 //Correctly check session status before starting it
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 // Add both auth_process & db_connect securely
 require_once(__DIR__ . '/../includes/auth.php');
@@ -20,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../my_skills.php");
     exit();
 }
+
+if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit; }
 
 // Get the user action 
 $action = $_POST['action'] ?? '';

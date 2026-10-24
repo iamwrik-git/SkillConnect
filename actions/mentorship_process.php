@@ -1,5 +1,5 @@
 <?php  // Need Review
-session_start();
+require_once __DIR__ . '/../includes/session.php';
 
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
@@ -45,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../dashboard.php");
     exit();
 }
+
+if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit; }
 
 $action = $_POST['action'] ?? '';
 

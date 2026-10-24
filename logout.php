@@ -2,9 +2,7 @@
 // logout.php - Securely terminates the user session
 
 // Start the session if it hasn't been started yet
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
 // Unset all session variables to remove user data instantly from memory
 $_SESSION = [];

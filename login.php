@@ -72,6 +72,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                     <form action="actions/auth_process.php" method="POST" class="auth-form" novalidate>
                         <input type="hidden" name="action" value="login">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-group">
                             <label for="login-email">Email Address</label>
@@ -118,6 +119,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                     <form action="actions/auth_process.php" method="POST" class="auth-form" id="register-form">
                         <input type="hidden" name="action" value="register">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-group">
                             <label for="reg-name">Full Name</label>

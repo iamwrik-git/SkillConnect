@@ -6,8 +6,9 @@ require_once '../includes/db_connect.php';
 
 // Handle Actions (Add, Edit, Delete)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("Invalid CSRF token.");
+    if (!csrfValid($_POST['csrf_token'] ?? null)) {
+        skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+        exit;
     }
     
     $action = $_POST['action'];
@@ -123,7 +124,7 @@ ob_start();
         <div class="admin-card add-skill-card">
             <h3 class="card-title text-sm mb-2">Add New Skill</h3>
             <form method="POST" class="add-skill-form">
-                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="action" value="add_skill">
                 <div class="input-with-button">
                     <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
@@ -192,7 +193,7 @@ ob_start();
                             <td>
                                 <!-- Editable Form -->
                                 <form method="POST" class="edit-skill-inline" style="display: none;" id="edit-form-<?= $skill['skill_id'] ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="action" value="edit_skill">
                                     <input type="hidden" name="skill_id" value="<?= $skill['skill_id'] ?>">
                                     <input type="text" name="skill_name" value="<?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?>" required maxlength="50" class="inline-edit-input">
@@ -209,7 +210,7 @@ ob_start();
                                         Edit
                                     </button>
                                     <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete Skill" data-confirm-action="Delete Skill" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="Deleting this skill will also remove it from all users who currently have it associated with their profiles. This action cannot be undone.">
-                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="action" value="delete_skill">
                                         <input type="hidden" name="skill_id" value="<?= $skill['skill_id'] ?>">
                                         <button type="submit" class="btn-action btn-delete">

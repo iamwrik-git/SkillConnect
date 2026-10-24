@@ -1,5 +1,5 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+require_once __DIR__ . '/includes/session.php';
 
 // Explicitly cancel an in-progress recovery flow when the user goes back.
 if (isset($_GET['cancel_recovery']) && $_GET['cancel_recovery'] === '1') {
@@ -27,10 +27,13 @@ $unavailable = !empty($_SESSION['recovery_unavailable']);
 unset($_SESSION['recovery_unavailable']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = $_POST['csrf_token'] ?? '';
-    if (!is_string($token) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+    if (!is_string($token) || !is_string($_SESSION['csrf_token'] ?? null) || !hash_equals($_SESSION['csrf_token'], $token)) {
         $error = 'Your session expired. Please try again.';
+    } elseif (rateLimitExceeded('recovery_start_ip', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 15, 1800)) {
+        $error = 'Too many recovery attempts. Please wait before trying again.';
     } else {
-        $email = trim((string)($_POST['email'] ?? ''));
+        $emailInput = $_POST['email'] ?? '';
+        $email = is_string($emailInput) ? trim($emailInput) : '';
         if ($email === '' || strlen($email) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Enter a valid email address.';
         } else {

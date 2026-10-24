@@ -6,14 +6,29 @@ require_once '../includes/db_connect.php';
 
 // Fetch Statistics
 try {
-    $totalUsers = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-    $trainees = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'trainee'")->fetchColumn();
-    $trainers = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'trainer'")->fetchColumn();
-    $totalRequests = $pdo->query("SELECT COUNT(*) FROM mentorships")->fetchColumn();
+    // Aggregate related dashboard counters together to reduce database round trips.
+    $userStats = $pdo->query("
+        SELECT COUNT(*) AS total_users,
+               COALESCE(SUM(CASE WHEN role = 'trainee' THEN 1 ELSE 0 END), 0) AS trainees,
+               COALESCE(SUM(CASE WHEN role = 'trainer' THEN 1 ELSE 0 END), 0) AS trainers
+        FROM users
+    ")->fetch(PDO::FETCH_ASSOC);
 
-    $pending = $pdo->query("SELECT COUNT(*) FROM mentorships WHERE status = 'pending'")->fetchColumn();
-    $accepted = $pdo->query("SELECT COUNT(*) FROM mentorships WHERE status = 'accepted'")->fetchColumn();
-    $rejected = $pdo->query("SELECT COUNT(*) FROM mentorships WHERE status = 'rejected'")->fetchColumn();
+    $requestStats = $pdo->query("
+        SELECT COUNT(*) AS total_requests,
+               COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
+               COALESCE(SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END), 0) AS accepted,
+               COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected
+        FROM mentorships
+    ")->fetch(PDO::FETCH_ASSOC);
+
+    $totalUsers = (int) ($userStats['total_users'] ?? 0);
+    $trainees = (int) ($userStats['trainees'] ?? 0);
+    $trainers = (int) ($userStats['trainers'] ?? 0);
+    $totalRequests = (int) ($requestStats['total_requests'] ?? 0);
+    $pending = (int) ($requestStats['pending'] ?? 0);
+    $accepted = (int) ($requestStats['accepted'] ?? 0);
+    $rejected = (int) ($requestStats['rejected'] ?? 0);
 
     $pendingPct = $totalRequests > 0 ? round(($pending / $totalRequests) * 100) : 0;
     $acceptedPct = $totalRequests > 0 ? round(($accepted / $totalRequests) * 100) : 0;

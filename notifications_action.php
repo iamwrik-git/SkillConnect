@@ -1,37 +1,21 @@
 <?php
-session_start();
+require_once __DIR__ . '/includes/session.php';
 
 require_once __DIR__ . '/includes/db_connect.php';
 require_once __DIR__ . '/includes/auth.php';
 requireLogin();
 
 $userId = (int) getCurrentUserId();
-$action = (string) ($_POST['action'] ?? $_GET['action'] ?? '');
+$action = is_string($_POST['action'] ?? null) ? $_POST['action'] : '';
 
 $allowedReturnPages = [
     'dashboard.php', 'mentorships.php', 'profile.php', 'search.php',
     'my_skills.php', 'saved_trainers.php', 'edit_profile.php', 'stay_tuned.php'
 ];
-$returnTo = basename((string) ($_POST['return_to'] ?? 'dashboard.php'));
+$returnRaw = $_POST['return_to'] ?? 'dashboard.php';
+$returnTo = is_string($returnRaw) ? basename($returnRaw) : 'dashboard.php';
 if (!in_array($returnTo, $allowedReturnPages, true)) {
     $returnTo = 'dashboard.php';
-}
-
-if ($action === 'open' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    $notificationId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-    if ($notificationId && $notificationId > 0) {
-        try {
-            $stmt = $pdo->prepare(
-                'UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND recipient_user_id = ?'
-            );
-            $stmt->execute([$notificationId, $userId]);
-        } catch (PDOException $e) {
-            error_log('Notification open action failed: ' . $e->getMessage());
-            $_SESSION['error'] = 'Notifications are temporarily unavailable.';
-        }
-    }
-    header('Location: mentorships.php');
-    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,11 +23,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$submittedToken = (string) ($_POST['csrf_token'] ?? '');
-$sessionToken = (string) ($_SESSION['notification_csrf'] ?? '');
-if ($submittedToken === '' || $sessionToken === '' || !hash_equals($sessionToken, $submittedToken)) {
-    http_response_code(403);
-    exit('Invalid security token. Refresh the page and try again.');
+$submittedToken = $_POST['csrf_token'] ?? null;
+$sessionToken = $_SESSION['notification_csrf'] ?? null;
+if (!is_string($submittedToken) || !is_string($sessionToken) || $submittedToken === '' || !hash_equals($sessionToken, $submittedToken)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
+}
+
+if ($action === 'open') {
+    $notificationId = filter_var($_POST['notification_id'] ?? null, FILTER_VALIDATE_INT);
+    if ($notificationId && $notificationId > 0) {
+        try {
+            $stmt = $pdo->prepare('UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND recipient_user_id = ?');
+            $stmt->execute([$notificationId, $userId]);
+        } catch (PDOException $e) {
+            error_log('Notification open action failed: ' . $e->getMessage());
+            $_SESSION['error'] = 'Notifications are temporarily unavailable.';
+        }
+    }
+    header('Location: ' . $returnTo);
+    exit;
 }
 
 try {
@@ -59,7 +58,7 @@ try {
     }
 } catch (PDOException $e) {
     error_log('Notification action failed: ' . $e->getMessage());
-    $_SESSION['error'] = 'Notifications are temporarily unavailable. Check that the notifications table has been created.';
+    $_SESSION['error'] = 'Notifications are temporarily unavailable. Please try again later.';
 }
 
 header('Location: ' . $returnTo);

@@ -3,9 +3,7 @@
 
 //Very common code
 //Check the session, Start if not started
-if(session_status() === PHP_SESSION_NONE){
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 //Connect db_connect & auth.php files
 require_once '../includes/db_connect.php';
@@ -16,14 +14,20 @@ requireLogin();
 $user_id = getCurrentUserId(); //Get the current user id via session [source: auth.php]
 
 //Check if the action passed method is not post or the action is not == update profile 
-if($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'update_profile'){
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !is_string($_POST['action'] ?? null) || $_POST['action'] !== 'update_profile') {
     header("Location: ../edit_profile.php");
     exit();
 }
 
-$name = trim($_POST['name'] ?? ''); //trim spaces from updated name
-$bio = trim($_POST['bio'] ?? ''); //trim spaces from bio
-$exp_level = $_POST['exp_level'] ?? null; //set the exp_level if its updated, keep null if not
+if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit; }
+
+$nameInput = $_POST['name'] ?? '';
+$bioInput = $_POST['bio'] ?? '';
+$expInput = $_POST['exp_level'] ?? null;
+$name = is_string($nameInput) ? trim($nameInput) : '';
+$bio = is_string($bioInput) ? trim($bioInput) : '';
+$exp_level = is_string($expInput) ? $expInput : null; //set the exp_level if its updated, keep null if not
 
 //catch '' string from html form input & set it to null
 if($exp_level === ''){
@@ -62,7 +66,7 @@ try {
 } catch (PDOException $e) {
     //this common block handle any database error & throw massage
     error_log("Database Error (Fetch User): ".$e->getMessage());
-    $_SESSION['error'] = "An unexpected database error occurred.";
+    $_SESSION['error'] = "We could not update your profile right now. Please try again later.";
     header("Location: ../edit_profile.php");
     exit();
 }
@@ -90,8 +94,8 @@ if(isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLO
         exit();
     }
 
-    //validate that photo is <2MB (2*1024kb*1224byts)
-    if ($file['size'] > 2097152) {
+    // Reject malformed upload metadata and oversized images.
+    if (!isset($file['tmp_name'], $file['size']) || !is_uploaded_file($file['tmp_name']) || !is_int($file['size']) || $file['size'] > 2097152) {
         $_SESSION['error'] = "Profile photo must be 2MB or smaller.";
         header("Location: ../edit_profile.php");
         exit();
@@ -109,8 +113,16 @@ if(isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLO
 
 
     $allowed_mime_types = ['image/jpeg', 'image/png', 'image/webp'];
+    $dimensions = [$image_info[0] ?? 0, $image_info[1] ?? 0];
+    if ($dimensions[0] < 1 || $dimensions[1] < 1 || $dimensions[0] > 5000 || $dimensions[1] > 5000 || ($dimensions[0] * $dimensions[1]) > 20000000) {
+        $_SESSION['error'] = 'Image dimensions are too large. Please choose a smaller image.';
+        header('Location: ../edit_profile.php');
+        exit();
+    }
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $detectedMime = $finfo->file($file['tmp_name']);
     //if user try to put any other file format than jpeg/png/wbmp throw error
-    if (!in_array($image_info['mime'], $allowed_mime_types, true)) {
+    if (!in_array($image_info['mime'], $allowed_mime_types, true) || !in_array($detectedMime, $allowed_mime_types, true) || $detectedMime !== $image_info['mime']) {
         $_SESSION['error'] = "Only JPG, PNG, and WEBP image formats are allowed.";
         header("Location: ../edit_profile.php");
         exit();

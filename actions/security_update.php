@@ -1,9 +1,7 @@
 <?php
 // actions/security_update.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
@@ -18,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // CSRF Protection validation
-if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
     $_SESSION['error'] = "Invalid security token. Please try again.";
     header("Location: ../edit_profile.php#security");
     exit();
@@ -52,9 +50,12 @@ try {
     // 1. CHANGE PASSWORD
     // ==========================================
     if ($action === 'update_password') {
-        $current_password = $_POST['current_password'] ?? '';
-        $new_password     = $_POST['new_password'] ?? '';
-        $confirm_password = $_POST['confirm_new_password'] ?? '';
+        $currentInput = $_POST['current_password'] ?? '';
+        $newInput = $_POST['new_password'] ?? '';
+        $confirmInput = $_POST['confirm_new_password'] ?? '';
+        $current_password = is_string($currentInput) ? $currentInput : '';
+        $new_password = is_string($newInput) ? $newInput : '';
+        $confirm_password = is_string($confirmInput) ? $confirmInput : '';
 
         if (!password_verify($current_password, $current_db_password)) {
             $_SESSION['error'] = "Incorrect current password.";
@@ -88,14 +89,18 @@ try {
     // 2. ACCOUNT RECOVERY
     // ==========================================
     elseif ($action === 'update_recovery') {
-        $question         = $_POST['security_question'] ?? '';
-        $answer           = $_POST['security_answer'] ?? '';
-        $confirm          = $_POST['confirm_security_answer'] ?? '';
-        $current_password = $_POST['current_password_recovery'] ?? '';
+        $questionInput = $_POST['security_question'] ?? '';
+        $answerInput = $_POST['security_answer'] ?? '';
+        $confirmInput = $_POST['confirm_security_answer'] ?? '';
+        $currentInput = $_POST['current_password_recovery'] ?? '';
+        $question = is_string($questionInput) ? $questionInput : '';
+        $answer = is_string($answerInput) ? $answerInput : '';
+        $confirm = is_string($confirmInput) ? $confirmInput : '';
+        $current_password = is_string($currentInput) ? $currentInput : '';
 
         // Check if recovery columns exist to prevent PDO crash
         if (!array_key_exists('security_question', $user) || !array_key_exists('security_answer_hash', $user)) {
-            $_SESSION['error'] = "Database schema error: Recovery columns are missing. Please ensure 'security_question' and 'security_answer_hash' exist in the users table.";
+            $_SESSION['error'] = "Account recovery settings are temporarily unavailable. Please try again later.";
             header("Location: ../edit_profile.php#security");
             exit();
         }
@@ -109,7 +114,8 @@ try {
 
         $has_existing = !empty($user['security_answer_hash']);
 
-        if (empty($question)) {
+        $allowedQuestions = ['school', 'pet', 'nickname', 'city'];
+        if (!is_string($question) || !in_array($question, $allowedQuestions, true)) {
             $_SESSION['error'] = "Please select a security question.";
             header("Location: ../edit_profile.php#security");
             exit();
@@ -122,14 +128,14 @@ try {
         }
 
         if (!empty($answer)) {
-            if ($answer !== $confirm) {
+            if (!is_string($answer) || !is_string($confirm) || normalizeSecurityAnswer($answer) !== normalizeSecurityAnswer($confirm)) {
                 $_SESSION['error'] = "Security answers do not match.";
                 header("Location: ../edit_profile.php#security");
                 exit();
             }
             
             // Normalize before hashing (lowercase and trim)
-            $normalized_answer = strtolower(trim($answer));
+            $normalized_answer = normalizeSecurityAnswer($answer);
             $answer_hash = password_hash($normalized_answer, PASSWORD_DEFAULT);
 
             $updateStmt = $pdo->prepare("UPDATE users SET security_question = ?, security_answer_hash = ? WHERE user_id = ?");
@@ -147,7 +153,7 @@ try {
 
 } catch (PDOException $e) {
     error_log("Security Update Error: " . $e->getMessage());
-    $_SESSION['error'] = "An unexpected database error occurred. Please try again.";
+    $_SESSION['error'] = "We could not update your account settings. Please try again later.";
     header("Location: ../edit_profile.php#security");
     exit();
 }

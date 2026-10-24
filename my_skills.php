@@ -1,9 +1,7 @@
 <?php
 // my_skills.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -128,6 +126,7 @@ if (file_exists('includes/header.php')) {
                                     <!-- A2 Confirmation Target Form -->
                                     <form action="actions/skill_process.php" method="POST" style="margin:0;" class="js-confirm-remove-skill" data-skill-name="<?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="action" value="remove_skill">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="skill_id" value="<?= (int)$skill['skill_id'] ?>">
                                         <button type="submit" class="btn-remove-skill" data-loading-text="Removing...">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -159,6 +158,7 @@ if (file_exists('includes/header.php')) {
                 <?php else: ?>
                     <form action="actions/skill_process.php" method="POST" class="add-skill-flex" novalidate style="margin-left: 2.2rem; gap: 1rem;">
                         <input type="hidden" name="action" value="add_skill">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                         
                         <select name="skill_id" required class="form-input" style="flex: 1; padding: 0.8rem 1rem;">
                             <option value="">-- Select a Skill --</option>

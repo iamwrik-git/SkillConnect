@@ -5,9 +5,7 @@
 // Return True if Logged in, false otherwise
 function isLoggedIn()
 {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+    require_once __DIR__ . '/session.php';
     return isset($_SESSION['user_id']);
 }
 
@@ -44,18 +42,6 @@ function getCurrentUserId()
         return $_SESSION['user_id'];
     }
     return null; // Explicitly return null if not logged in
-}
-
-// Restrict user to a specific role
-// Require login first
-function requireRole(string $role)
-{
-    requireLogin(); //Ensures user is logged in before checking roles
-
-    if (!isset($_SESSION['role']) || $_SESSION['role'] !== $role) {
-        header("Location: ../dashboard.php");
-        exit();
-    }
 }
 
 // Restrict admin log in only

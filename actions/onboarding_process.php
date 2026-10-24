@@ -1,7 +1,5 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/auth.php';
@@ -13,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$submittedToken = (string) ($_POST['csrf_token'] ?? '');
-$sessionToken = (string) ($_SESSION['onboarding_csrf'] ?? '');
-if ($submittedToken === '' || $sessionToken === '' || !hash_equals($sessionToken, $submittedToken)) {
+$submittedToken = $_POST['csrf_token'] ?? null;
+$sessionToken = $_SESSION['onboarding_csrf'] ?? null;
+if (!is_string($submittedToken) || !is_string($sessionToken) || $submittedToken === '' || !hash_equals($sessionToken, $submittedToken)) {
     $_SESSION['onboarding_error'] = 'Your session expired. Please try again.';
     header('Location: ../dashboard.php');
     exit;
@@ -26,8 +24,9 @@ try {
     $userStmt->execute([$userId]);
     $user = $userStmt->fetch(PDO::FETCH_ASSOC);
     if (!$user) {
-        http_response_code(404);
-        exit('Account not found.');
+        error_log('Onboarding request could not find the authenticated user record.');
+        skillConnectErrorResponse(404, 'This account is no longer available. Please sign in again.');
+        exit;
     }
     if ((int) ($user['onboarding_completed'] ?? 1) === 1) {
         $_SESSION['onboarding_completed'] = 1;
@@ -35,7 +34,8 @@ try {
         exit;
     }
 
-    $action = (string) ($_POST['action'] ?? '');
+    $actionInput = $_POST['action'] ?? '';
+    $action = is_string($actionInput) ? $actionInput : '';
     if ($action === 'save_profile') {
         $name = trim((string) ($_POST['full_name'] ?? ''));
         $level = (string) ($_POST['exp_level'] ?? '');
@@ -61,19 +61,22 @@ try {
         if (!$profileComplete) {
             $_SESSION['onboarding_error'] = 'Complete your profile before setting up account recovery.';
         } else {
-            $question = (string) ($_POST['security_question'] ?? '');
-            $answer = trim((string) ($_POST['security_answer'] ?? ''));
-            $confirm = trim((string) ($_POST['confirm_security_answer'] ?? ''));
+            $questionInput = $_POST['security_question'] ?? '';
+            $answerInput = $_POST['security_answer'] ?? '';
+            $confirmInput = $_POST['confirm_security_answer'] ?? '';
+            $question = is_string($questionInput) ? $questionInput : '';
+            $answer = is_string($answerInput) ? trim($answerInput) : '';
+            $confirm = is_string($confirmInput) ? trim($confirmInput) : '';
             $allowedQuestions = ['school', 'pet', 'nickname', 'city'];
             if (!in_array($question, $allowedQuestions, true)) {
                 $_SESSION['onboarding_error'] = 'Choose a security question.';
             } elseif ($answer === '' || strlen($answer) > 255) {
                 $_SESSION['onboarding_error'] = 'Enter your security answer (maximum 255 characters).';
-            } elseif (!hash_equals(strtolower(trim($answer)), strtolower(trim($confirm)))) {
+            } elseif (!hash_equals(normalizeSecurityAnswer($answer), normalizeSecurityAnswer($confirm))) {
                 $_SESSION['onboarding_error'] = 'Security answers do not match.';
             } else {
                 // Security answers are case-insensitive; store the normalized answer for recovery too.
-                $answerHash = password_hash(strtolower(trim($answer)), PASSWORD_DEFAULT);
+                $answerHash = password_hash(normalizeSecurityAnswer($answer), PASSWORD_DEFAULT);
                 $update = $pdo->prepare('UPDATE users SET security_question = ?, security_answer_hash = ?, onboarding_completed = 1 WHERE user_id = ?');
                 $update->execute([$question, $answerHash, $userId]);
                 $_SESSION['onboarding_completed'] = 1;

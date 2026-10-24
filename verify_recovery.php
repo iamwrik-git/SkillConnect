@@ -1,5 +1,5 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/db_connect.php';
 function vr_csrf(): string { if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); return $_SESSION['csrf_token']; }
 function vr_questions(): array { return ['school' => 'What was the name of your first school?', 'pet' => 'What was the name of your first pet?', 'nickname' => 'What was your childhood nickname?', 'city' => 'In what city were you born?']; }
@@ -11,10 +11,20 @@ if (!empty($flow['verified'])) { header('Location: reset_password.php'); exit; }
 $error = $_SESSION['recovery_error'] ?? ''; unset($_SESSION['recovery_error']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = $_POST['csrf_token'] ?? '';
-    if (!is_string($token) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+    if (!is_string($token) || !is_string($_SESSION['csrf_token'] ?? null) || !hash_equals($_SESSION['csrf_token'], $token)) {
         unset($_SESSION['password_recovery']); $_SESSION['recovery_error'] = 'Your session token expired. Please start again.'; header('Location: forgot_password.php'); exit;
     }
-    $answer = trim((string)($_POST['answer'] ?? ''));
+    $flowForLimit = $_SESSION['password_recovery'] ?? [];
+    $ipForLimit = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $accountForLimit = is_array($flowForLimit) ? (string) ($flowForLimit['user_id'] ?? 'unknown') : 'unknown';
+    $recoveryLimitKey = hash('sha256', $ipForLimit . '|' . $accountForLimit);
+    if (rateLimitExceeded('recovery_ip', $ipForLimit, 20, 1800) || rateLimitExceeded('recovery_answer', $recoveryLimitKey, 8, 1800)) {
+        unset($_SESSION['password_recovery']);
+        $_SESSION['recovery_error'] = 'Too many recovery attempts. Please wait before starting again.';
+        header('Location: forgot_password.php'); exit;
+    }
+    $answerInput = $_POST['answer'] ?? '';
+    $answer = is_string($answerInput) ? trim($answerInput) : '';
     if ($answer === '' || strlen($answer) > 255) $error = 'Enter your security answer.';
     else {
         $_SESSION['recovery_failed_attempts'] = (int)($_SESSION['recovery_failed_attempts'] ?? 0);
@@ -25,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('SELECT security_question, security_answer_hash FROM users WHERE user_id = ? LIMIT 1');
             $stmt->execute([(int)$flow['user_id']]); $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$user || !vr_configured($user)) { unset($_SESSION['password_recovery']); $_SESSION['recovery_unavailable'] = true; header('Location: forgot_password.php'); exit; }
-            if (password_verify(strtolower(trim($answer)), $user['security_answer_hash'])) {
+            if (password_verify(normalizeSecurityAnswer($answer), $user['security_answer_hash'])) {
                 $flow['verified'] = true; $flow['verified_at'] = time(); unset($_SESSION['recovery_failed_attempts']); session_regenerate_id(true); header('Location: reset_password.php'); exit;
             }
             $flow['attempts'] = (int)($flow['attempts'] ?? 0) + 1; $_SESSION['recovery_failed_attempts']++;
@@ -35,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 try { $stmt = $pdo->prepare('SELECT security_question, security_answer_hash FROM users WHERE user_id = ? LIMIT 1'); $stmt->execute([(int)$flow['user_id']]); $user = $stmt->fetch(PDO::FETCH_ASSOC); }
-catch (PDOException $e) { error_log('Recovery question lookup failed: ' . $e->getMessage()); http_response_code(500); exit('An unexpected error occurred. Please try again later.'); }
+catch (PDOException $e) { error_log('Recovery question lookup failed: ' . $e->getMessage()); skillConnectErrorResponse(500, 'We could not verify your recovery details right now. Please try again later.'); exit; }
 if (!$user || !vr_configured($user)) { unset($_SESSION['password_recovery']); $_SESSION['recovery_unavailable'] = true; header('Location: forgot_password.php'); exit; }
 $questionText = vr_questions()[$user['security_question']]; $csrf = vr_csrf();
 ?>

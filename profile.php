@@ -2,9 +2,7 @@
 // profile.php
 
 // 1. Session initialization and core includes
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -214,6 +212,7 @@ if (file_exists('includes/header.php')) {
                         <!-- STRICTLY PRESERVED POST ACTION WITH A3 LOADING STATE -->
                         <form method="POST" action="actions/mentorship_process.php" class="profile-action-form">
                             <input type="hidden" name="action" value="send_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="trainer_id" value="<?= (int)$target_user_id ?>">
                             <button type="submit" class="profile-btn profile-btn-primary" data-loading-text="Sending...">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>

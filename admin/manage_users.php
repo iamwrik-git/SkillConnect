@@ -6,8 +6,9 @@ require_once '../includes/db_connect.php';
 
 // Handle Deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("Invalid CSRF token.");
+    if (!csrfValid($_POST['csrf_token'] ?? null)) {
+        skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+        exit;
     }
     
     $deleteId = (int)$_POST['user_id'];
@@ -28,7 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             
             $_SESSION['admin_success'] = "User successfully deleted.";
         } catch (PDOException $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log("Delete User Error: " . $e->getMessage());
             $_SESSION['admin_error'] = "Failed to delete user.";
         }
@@ -62,10 +65,16 @@ if ($roleFilter === 'trainee' || $roleFilter === 'trainer') {
 $whereClause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 try {
-    // Stats
-    $totalUsersCount = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-    $traineesCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'trainee'")->fetchColumn();
-    $trainersCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'trainer'")->fetchColumn();
+    // Retrieve all user counters in one aggregate query.
+    $userStats = $pdo->query("
+        SELECT COUNT(*) AS total_users,
+               COALESCE(SUM(CASE WHEN role = 'trainee' THEN 1 ELSE 0 END), 0) AS trainees,
+               COALESCE(SUM(CASE WHEN role = 'trainer' THEN 1 ELSE 0 END), 0) AS trainers
+        FROM users
+    ")->fetch(PDO::FETCH_ASSOC);
+    $totalUsersCount = (int) ($userStats['total_users'] ?? 0);
+    $traineesCount = (int) ($userStats['trainees'] ?? 0);
+    $trainersCount = (int) ($userStats['trainers'] ?? 0);
 
     // Pagination Count
     $countStmt = $pdo->prepare("SELECT COUNT(*) FROM users $whereClause");
@@ -199,7 +208,7 @@ ob_start();
                                     View
                                 </a>
                                 <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete User" data-confirm-action="Delete User" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="This will permanently remove this user and their associated mentorships and skills. This action cannot be undone.">
-                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="action" value="delete_user">
                                     <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
                                     <button type="submit" class="btn-action btn-delete" <?= $user['user_id'] == $_SESSION['user_id'] ? 'disabled title="Cannot delete yourself"' : '' ?>>

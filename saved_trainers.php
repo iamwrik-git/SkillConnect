@@ -1,9 +1,7 @@
 <?php
 // saved_trainers.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -180,6 +178,7 @@ if (file_exists('includes/header.php')) {
                         
                         <form action="actions/saved_trainer_process.php" method="POST" class="mentorship-request-form js-confirm-remove-saved" data-trainer-name="<?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?>" style="flex: 1; margin: 0; display: flex;">
                             <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
                             <input type="hidden" name="return_to" value="../saved_trainers.php">
                             <button type="submit" class="btn btn-danger-light" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" data-loading-text="Removing...">

@@ -59,7 +59,8 @@ try {
 } catch (PDOException $e) {
     error_log('Onboarding state lookup failed: ' . $e->getMessage());
     http_response_code(500);
-    exit('Unable to load account setup. Please check the SkillConnect database migration and try again.');
+    skillConnectErrorResponse(500, 'We could not load your dashboard right now. Please try again later.');
+    exit;
 }
 
 // 4. Fetch Database Information
@@ -244,7 +245,7 @@ function getProfilePhotoUrl($photo, $name)
 
     <?php if ($db_error): ?>
         <section class="card error-card">
-            <h3 class="card-title text-danger">Database Error</h3>
+            <h3 class="card-title text-danger">Dashboard Data Unavailable</h3>
             <p>We encountered an issue loading your dashboard data. Please try again later.</p>
         </section>
     <?php elseif (!in_array($role, ['trainee', 'trainer'])): ?>
@@ -529,8 +530,10 @@ function getProfilePhotoUrl($photo, $name)
                                 </div>
                                 <?php if ($role === 'trainer'): ?>
                                     <div class="activity-actions form-group-inline">
-                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form"><input type="hidden" name="action" value="accept_request"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-primary btn-sm" data-loading-text="Accepting...">Accept</button></form>
-                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form js-confirm-reject-request"><input type="hidden" name="action" value="reject_request"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-secondary btn-sm" data-loading-text="Rejecting...">Reject</button></form>
+                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form"><input type="hidden" name="action" value="accept_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-primary btn-sm" data-loading-text="Accepting...">Accept</button></form>
+                                        <form action="actions/mentorship_process.php" method="POST" class="mentorship-form inline-form js-confirm-reject-request"><input type="hidden" name="action" value="reject_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>"><button type="submit" class="btn btn-secondary btn-sm" data-loading-text="Rejecting...">Reject</button></form>
                                     </div>
                                 <?php else: ?><span class="badge badge-warning">Pending</span><?php endif; ?>
                             </div>

@@ -1,9 +1,7 @@
 <?php
 // actions/saved_trainer_process.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
@@ -27,13 +25,29 @@ if ($role !== 'trainee') {
 }
 
 // Sanitize and validate inputs
-$action = filter_input(INPUT_POST, 'action', FILTER_SANITIZE_STRING);
+$action = is_string($_POST['action'] ?? null) ? trim($_POST['action']) : '';
 $trainer_id = filter_input(INPUT_POST, 'trainer_id', FILTER_VALIDATE_INT);
-$return_to = $_POST['return_to'] ?? '../search.php';
+$returnRaw = $_POST['return_to'] ?? '../search.php';
+$return_to = '../search.php';
+if (is_string($returnRaw)) {
+    $parsed = parse_url($returnRaw);
+    $page = basename((string) ($parsed['path'] ?? ''));
+    $allowedPages = ['search.php', 'saved_trainers.php'];
+    if (empty($parsed['scheme']) && empty($parsed['host']) && empty($parsed['user']) && empty($parsed['pass']) && in_array($page, $allowedPages, true)) {
+        $return_to = '../' . $page;
+        if ($page === 'search.php' && isset($parsed['query'])) {
+            parse_str($parsed['query'], $query);
+            $safeQuery = [];
+            if (isset($query['q']) && is_string($query['q'])) $safeQuery['q'] = substr($query['q'], 0, 100);
+            if (isset($query['page']) && filter_var($query['page'], FILTER_VALIDATE_INT) && (int)$query['page'] > 0) $safeQuery['page'] = (int)$query['page'];
+            if ($safeQuery) $return_to .= '?' . http_build_query($safeQuery);
+        }
+    }
+}
 
-// Prevent open redirects
-if (strpos($return_to, 'http') === 0 || strpos($return_to, '//') === 0) {
-    $return_to = '../search.php';
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
 }
 
 if (!$trainer_id || $trainer_id <= 0) {

@@ -1,9 +1,8 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/db_connect.php';
 function rp_csrf(): string { if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); return $_SESSION['csrf_token']; }
 function rp_questions(): array { return ['school' => 'What was the name of your first school?', 'pet' => 'What was the name of your first pet?', 'nickname' => 'What was your childhood nickname?', 'city' => 'In what city were you born?']; }
-function rp_configured(array $u): bool { return !empty($u['security_question']) && array_key_exists((string)$u['security_question'], rp_questions()) && !empty($u['security_answer_hash']) && !empty(password_get_info((string)$u['security_answer_hash'])['algo']); }
 function rp_active(): bool { $f = $_SESSION['password_recovery'] ?? null; if (!is_array($f) || empty($f['user_id']) || empty($f['expires_at']) || !is_int($f['expires_at']) || $f['expires_at'] < time() || empty($f['verified']) || empty($f['verified_at']) || $f['verified_at'] + 900 < time()) { unset($_SESSION['password_recovery']); return false; } return true; }
 $success = !empty($_SESSION['recovery_reset_success']); if ($success) unset($_SESSION['recovery_reset_success']);
 $error = $_SESSION['recovery_error'] ?? ''; unset($_SESSION['recovery_error']);

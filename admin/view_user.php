@@ -35,7 +35,7 @@ try {
 
 } catch (PDOException $e) {
     error_log("View User Error: " . $e->getMessage());
-    $_SESSION['admin_error'] = "Database error retrieving user.";
+    $_SESSION['admin_error'] = "We could not load that user right now. Please try again later.";
     header("Location: manage_users.php");
     exit();
 }

@@ -2,9 +2,7 @@
 // search.php
 
 // 1. Session initialization and core includes
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/includes/session.php';
 
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
@@ -148,19 +146,32 @@ elseif (!empty($search_query)) {
     }
 }
 
-// Attach skills to the fetched trainers for the UI cards
+// Load all matched trainers' skills in one query instead of issuing one query per trainer.
 if (!empty($fetched_trainers)) {
-    foreach ($fetched_trainers as $t) {
-        $t_id = $t['user_id'];
-        $tsStmt = $pdo->prepare("
-            SELECT s.skill_name 
-            FROM skills s 
-            JOIN user_skills us ON s.skill_id = us.skill_id 
-            WHERE us.user_id = ?
+    $trainerIds = array_values(array_unique(array_map('intval', array_column($fetched_trainers, 'user_id'))));
+    $skillsByTrainer = [];
+
+    if ($trainerIds) {
+        $placeholders = implode(',', array_fill(0, count($trainerIds), '?'));
+        $skillsStmt = $pdo->prepare("
+            SELECT us.user_id, s.skill_name
+            FROM user_skills us
+            JOIN skills s ON s.skill_id = us.skill_id
+            WHERE us.user_id IN ($placeholders)
         ");
-        $tsStmt->execute([$t_id]);
-        $t['skills'] = $tsStmt->fetchAll(PDO::FETCH_COLUMN);
-        $trainers[] = $t;
+        $skillsStmt->execute($trainerIds);
+
+        foreach ($skillsStmt->fetchAll(PDO::FETCH_ASSOC) as $skillRow) {
+            $trainerId = (int) $skillRow['user_id'];
+            $skillsByTrainer[$trainerId][] = $skillRow['skill_name'];
+        }
+    }
+
+    // Preserve the original trainer result order while attaching the preloaded skills.
+    foreach ($fetched_trainers as $trainer) {
+        $trainerId = (int) $trainer['user_id'];
+        $trainer['skills'] = $skillsByTrainer[$trainerId] ?? [];
+        $trainers[] = $trainer;
     }
 }
 
@@ -333,6 +344,7 @@ if (file_exists('includes/header.php')) {
                                 <?php if ($current_user_role === 'trainee'): ?>
                                     <form action="actions/saved_trainer_process.php" method="POST" class="bookmark-form" style="position: absolute; top: -4px; right: -4px; margin: 0;">
                                         <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
                                         
                                         <?php if (in_array($trainer['user_id'], $saved_trainers)): ?>
@@ -383,6 +395,7 @@ if (file_exists('includes/header.php')) {
                                 
                                 <form action="actions/mentorship_process.php" method="POST" class="mentorship-request-form">
                                     <input type="hidden" name="action" value="send_request">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
                                     <button type="submit" class="btn btn-primary" data-loading-text="Requesting...">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>

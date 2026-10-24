@@ -1,8 +1,6 @@
 <?php
 // Start a session
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
 // If request method is other than post, send back to login
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,17 +8,34 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit; }
+
 require_once(__DIR__ . '/../includes/db_connect.php');
 
 $action = $_POST['action'] ?? '';
+$clientIp = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+$emailForLimit = is_string($_POST['email'] ?? null) ? strtolower(trim($_POST['email'])) : '';
+$loginLimitKey = hash('sha256', $clientIp . '|' . $emailForLimit);
+if ($action === 'login' && (rateLimitExceeded('login', $loginLimitKey, 10, 900) || rateLimitExceeded('login_ip', $clientIp, 30, 900))) {
+    $_SESSION['error'] = 'Too many sign-in attempts. Please wait 15 minutes before trying again.';
+    header('Location: ../login.php?mode=login');
+    exit();
+}
+
 
 if ($action === 'register') {
     // Sanitize the inputs
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-    $role = $_POST['role'] ?? '';
+    $nameInput = $_POST['name'] ?? '';
+    $emailInput = $_POST['email'] ?? '';
+    $passwordInput = $_POST['password'] ?? '';
+    $confirmInput = $_POST['confirm_password'] ?? '';
+    $roleInput = $_POST['role'] ?? '';
+    $name = is_string($nameInput) ? trim($nameInput) : '';
+    $email = is_string($emailInput) ? trim($emailInput) : '';
+    $password = is_string($passwordInput) ? $passwordInput : '';
+    $confirm_password = is_string($confirmInput) ? $confirmInput : '';
+    $role = is_string($roleInput) ? $roleInput : '';
 
     // Server-side validation
     $errors = [];
@@ -90,8 +105,10 @@ if ($action === 'register') {
         exit();
     }
 } elseif ($action === 'login') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $emailInput = $_POST['email'] ?? '';
+    $passwordInput = $_POST['password'] ?? '';
+    $email = is_string($emailInput) ? trim($emailInput) : '';
+    $password = is_string($passwordInput) ? $passwordInput : '';
 
     if (empty($email) || empty($password)) {
         $_SESSION['error'] = "Please provide both email & password.";
@@ -106,6 +123,8 @@ if ($action === 'register') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            clearRateLimit('login', $loginLimitKey);
+            clearRateLimit('login_ip', $clientIp);
             session_regenerate_id(true);
 
             $_SESSION['user_id'] = $user['user_id'];

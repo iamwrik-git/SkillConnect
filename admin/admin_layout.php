@@ -1,13 +1,9 @@
 <?php
 // admin/admin_layout.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/session.php';
 
-// Generate CSRF token if not exists
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+// Ensure a valid session-bound CSRF token exists for administrative forms.
+$admin_csrf_token = csrfToken();
 
 // Determine admin name and avatar
 $adminName = $_SESSION['name'] ?? 'Admin';

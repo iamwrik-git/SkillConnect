@@ -882,8 +882,6 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
 .landing-page .lp-brand-mark { display: inline-flex; flex: 0 0 31px; align-items: center; justify-content: center; width: 31px; height: 31px; color: #0874ed; transform: none; }
 .landing-page .lp-brand-mark svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .landing-page .lp-brand-word { display: inline-flex; gap: 0; color: #111d3e; font-weight: 800; letter-spacing: -.8px; }
-.landing-page .lp-brand-word > span { color: #0866ee; }
-.landing-page .lp-brand-word > b { color: #111d3e; font-weight: 800; }
 .landing-page .lp-steps.lp-steps-image { display: block; width: 100%; max-width: 1180px; margin: 0 auto; }
 .landing-page .lp-how-image { display: block; width: 100%; height: auto; max-height: 480px; margin: 0 auto; object-fit: contain; }
 .landing-page .lp-cta-decoration.lp-cta-image-wrap { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; min-height: 0; height: 100%; margin: 0; overflow: hidden; background: transparent; }
@@ -922,7 +920,6 @@ html:has(body.landing-page) { scroll-behavior: smooth; }
    ========================================================================== */
 .landing-page .lp-about-banner-actions { gap: clamp(7px, 1vw, 14px); }
 .landing-page .lp-about-banner-actions .lp-button { min-height: clamp(28px, 3vw, 44px); padding: 0 clamp(10px, 1.7vw, 25px); font-size: clamp(9px, 1vw, 15px); border-radius: clamp(4px, .45vw, 7px); }
-.landing-page .lp-about-banner-actions .lp-button-banner-outline { border-width: 1.5px; }
 @media (max-width: 760px) { .landing-page .lp-about-banner-actions { gap: 6px; } .landing-page .lp-about-banner-actions .lp-button { min-height: clamp(23px, 4.4vw, 29px); padding: 0 clamp(7px, 1.7vw, 11px); font-size: clamp(8px, 1.8vw, 10px); border-width: 1px; } }
 @media (max-width: 420px) { .landing-page .lp-about-banner-actions .lp-button { min-height: 22px; padding-inline: 6px; font-size: 8px; } }
 
@@ -3841,7 +3838,6 @@ body.logout-confirm-open { overflow: hidden; }
     margin-top: 13px;
 }
 .app-layout .notification-confirm-actions button {
-    min-height: 36px;
     min-height: 32px;
     padding: 6px 10px;
     border-radius: 8px;
@@ -3974,3 +3970,21 @@ body.sc-onboarding-active { overflow: hidden !important; }
     .sc-onboarding-form { gap: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .sc-onboarding-modal { animation: none; } .sc-onboarding-submit { transition: none; } }
+
+/* Security update: notification rows are POST buttons, not state-changing GET links. */
+.app-layout .notification-item-form { margin: 0; width: 100%; }
+.app-layout .notification-item-form .notification-item {
+    display: flex;
+    width: 100%;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+}
+.app-layout .notification-item-form .notification-item:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: -2px;
+}
