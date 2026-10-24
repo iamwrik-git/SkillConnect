@@ -43,7 +43,8 @@ $recovery_configured = !empty($user['security_question'])
 
 // Helper for UI-Avatars (Fallback for profile photo)
 if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name) {
+    function getProfilePhotoUrl($photo, $name)
+    {
         if (empty($photo) || $photo === 'default.jpg') {
             return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
         }
@@ -81,16 +82,16 @@ $skillPts = min(3, $current_skill_count);
 if ($hasPhoto) $points += 1;
 if ($hasName)  $points += 1;
 if ($hasEmail) $points += 1;
-if ($hasExp)$points += 1;
-if ($hasBio)$points += 1;
-$points +=$skillPts;
+if ($hasExp) $points += 1;
+if ($hasBio) $points += 1;
+$points += $skillPts;
 
 $maxPoints = 8;
 $completionPercentage = round(($points / $maxPoints) * 100);
 
 $circleRadius = 45;
-$circleCircumference = 2 * pi() *$circleRadius;
-$circleOffset =$circleCircumference - (($completionPercentage / 100) *$circleCircumference);
+$circleCircumference = 2 * pi() * $circleRadius;
+$circleOffset = $circleCircumference - (($completionPercentage / 100) * $circleCircumference);
 
 // 6. Output Header
 $page_title = 'Edit Profile - SkillConnect';
@@ -112,7 +113,7 @@ if (file_exists('includes/header.php')) {
     <!-- Profile settings navigation -->
     <nav class="edit-profile-tabs" aria-label="Profile settings sections" role="tablist">
         <button type="button" class="tab-btn active" id="tab-personal-button"
-                role="tab" aria-selected="true" tabindex="0" aria-controls="tab-personal" data-target="tab-personal">
+            role="tab" aria-selected="true" tabindex="0" aria-controls="tab-personal" data-target="tab-personal">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="8" r="4"></circle>
                 <path d="M4.5 21v-1.5a7.5 7.5 0 0 1 15 0V21"></path>
@@ -120,7 +121,7 @@ if (file_exists('includes/header.php')) {
             <span>Personal Information</span>
         </button>
         <button type="button" class="tab-btn" id="tab-security-button"
-                role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-security" data-target="tab-security">
+            role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-security" data-target="tab-security">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
                 <rect x="9" y="10" width="6" height="5" rx="1"></rect>
@@ -149,24 +150,27 @@ if (file_exists('includes/header.php')) {
     <!-- TAB 1: Personal Information -->
     <div id="tab-personal" class="tab-content active">
         <div class="edit-profile-grid">
-            
+
             <section class="card edit-card">
                 <div class="edit-card-header">
                     <div class="header-icon-blue">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                     </div>
                     <div class="header-text">
                         <h2>Personal Information</h2>
                         <p>Update your basic details and profile information.</p>
                     </div>
                 </div>
-                
+
                 <form action="actions/profile_update.php" method="POST" enctype="multipart/form-data" class="edit-profile-form" novalidate>
                     <input type="hidden" name="action" value="update_profile">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="photo-upload-container">
-                        <img src="<?= getProfilePhotoUrl($user['profile_photo'] ?? '',$user['name']) ?>" alt="Profile Photo" class="photo-preview">
+                        <img src="<?= getProfilePhotoUrl($user['profile_photo'] ?? '', $user['name']) ?>" alt="Profile Photo" class="photo-preview">
                         <div class="photo-upload-controls">
                             <h3>Profile Photo</h3>
                             <p>Upload a new profile photo (JPG, PNG, WEBP)</p>
@@ -214,7 +218,11 @@ if (file_exists('includes/header.php')) {
                 <section class="card edit-card profile-completion-card">
                     <div class="edit-card-header" style="border-bottom: none; padding-bottom: 0.5rem; margin-bottom: 1rem;">
                         <div class="header-icon-orange">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="9" y1="21" x2="9" y2="9"></line>
+                            </svg>
                         </div>
                         <div class="header-text" style="flex:1;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -229,9 +237,9 @@ if (file_exists('includes/header.php')) {
                             <div class="circular-chart-wrapper">
                                 <svg class="circular-chart" viewBox="0 0 120 120" width="120" height="120">
                                     <circle class="circle-bg" cx="60" cy="60" r="<?= $circleRadius ?>" fill="none" stroke="#e2e8f0" stroke-width="12"></circle>
-                                    <circle class="circle-progress" cx="60" cy="60" r="<?= $circleRadius ?>" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round" 
-                                        stroke-dasharray="<?= $circleCircumference ?>" 
-                                        stroke-dashoffset="<?= $circleOffset ?>" 
+                                    <circle class="circle-progress" cx="60" cy="60" r="<?= $circleRadius ?>" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round"
+                                        stroke-dasharray="<?= $circleCircumference ?>"
+                                        stroke-dashoffset="<?= $circleOffset ?>"
                                         transform="rotate(-90 60 60)"></circle>
                                 </svg>
                                 <div class="percentage-text"><?= $completionPercentage ?>%</div>
@@ -243,25 +251,30 @@ if (file_exists('includes/header.php')) {
                         </div>
 
                         <div class="completion-list-col">
-                            <?php 
+                            <?php
                             $checklistItems = [
-                                ['label' => 'Profile Photo', 'done' => $hasPhoto, 'status' =>$hasPhoto ? 'Completed' : 'Pending'],
-                                ['label' => 'Full Name', 'done' => $hasName, 'status' =>$hasName ? 'Completed' : 'Pending'],
-                                ['label' => 'Email Address', 'done' => $hasEmail, 'status' =>$hasEmail ? 'Completed' : 'Pending'],
-                                ['label' => 'Experience Level', 'done' => $hasExp, 'status' =>$hasExp ? 'Completed' : 'Pending'],
-                                ['label' => 'Bio', 'done' => $hasBio, 'status' =>$hasBio ? 'Completed' : 'Pending'],
-                                ['label' => 'Add 3 Skills', 'done' => ($skillPts === 3), 'status' =>$skillPts . '/3 added']
+                                ['label' => 'Profile Photo', 'done' => $hasPhoto, 'status' => $hasPhoto ? 'Completed' : 'Pending'],
+                                ['label' => 'Full Name', 'done' => $hasName, 'status' => $hasName ? 'Completed' : 'Pending'],
+                                ['label' => 'Email Address', 'done' => $hasEmail, 'status' => $hasEmail ? 'Completed' : 'Pending'],
+                                ['label' => 'Experience Level', 'done' => $hasExp, 'status' => $hasExp ? 'Completed' : 'Pending'],
+                                ['label' => 'Bio', 'done' => $hasBio, 'status' => $hasBio ? 'Completed' : 'Pending'],
+                                ['label' => 'Add 3 Skills', 'done' => ($skillPts === 3), 'status' => $skillPts . '/3 added']
                             ];
-                            
-                            foreach ($checklistItems as$item): 
-                                $isDone =$item['done'];
+
+                            foreach ($checklistItems as $item):
+                                $isDone = $item['done'];
                             ?>
                                 <div class="checklist-item">
                                     <div class="item-label">
                                         <?php if ($isDone): ?>
-                                            <svg class="check-icon done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#10b981"></circle><polyline points="8 12 11 15 16 9" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+                                            <svg class="check-icon done" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" fill="#10b981"></circle>
+                                                <polyline points="8 12 11 15 16 9" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                                            </svg>
                                         <?php else: ?>
-                                            <svg class="check-icon pending" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#cbd5e1" stroke-width="2"></circle></svg>
+                                            <svg class="check-icon pending" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" fill="none" stroke="#cbd5e1" stroke-width="2"></circle>
+                                            </svg>
                                         <?php endif; ?>
                                         <span><?= $item['label'] ?></span>
                                     </div>
@@ -273,9 +286,13 @@ if (file_exists('includes/header.php')) {
                 </section>
 
                 <section class="card edit-card manage-skills-card">
-                     <div class="edit-card-header" style="border-bottom: none; margin-bottom: 0.5rem; padding-bottom: 0;">
+                    <div class="edit-card-header" style="border-bottom: none; margin-bottom: 0.5rem; padding-bottom: 0;">
                         <div class="header-icon-blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
                         </div>
                         <div class="header-text">
                             <h2>Manage Your Skills</h2>
@@ -297,13 +314,15 @@ if (file_exists('includes/header.php')) {
     <!-- TAB 2: Security -->
     <div id="tab-security" class="tab-content">
         <div style="max-width: 850px;">
-            
+
             <!-- Change Password Card -->
             <section class="card edit-card">
                 <div class="security-card-header">
                     <div class="security-header-left">
                         <div class="header-icon-blue">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                            </svg>
                         </div>
                         <div class="header-text">
                             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a;">Change Password</h2>
@@ -321,7 +340,10 @@ if (file_exists('includes/header.php')) {
                         <div class="password-wrapper">
                             <input type="password" id="current_password" name="current_password" required class="form-input" placeholder="Enter your current password">
                             <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -332,7 +354,10 @@ if (file_exists('includes/header.php')) {
                             <div class="password-wrapper">
                                 <input type="password" id="new_password" name="new_password" required minlength="8" class="form-input" placeholder="Enter new password">
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -341,7 +366,10 @@ if (file_exists('includes/header.php')) {
                             <div class="password-wrapper">
                                 <input type="password" id="confirm_new_password" name="confirm_new_password" required minlength="8" class="form-input" placeholder="Re-enter new password">
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -351,9 +379,15 @@ if (file_exists('includes/header.php')) {
                         <div>
                             <p>Password requirements:</p>
                             <ul>
-                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> At least 8 characters</li>
-                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Include a number</li>
-                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Include a special character (e.g. @, #, $, %)</li>
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg> At least 8 characters</li>
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg> Include a number</li>
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg> Include a special character (e.g. @, #, $, %)</li>
                             </ul>
                         </div>
                         <button type="submit" class="btn btn-primary" data-loading-text="Updating...">Update Password</button>
@@ -366,7 +400,9 @@ if (file_exists('includes/header.php')) {
                 <div class="security-card-header">
                     <div class="security-header-left">
                         <div class="header-icon-blue">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
                         </div>
                         <div class="header-text">
                             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a;">Account Recovery</h2>
@@ -375,7 +411,9 @@ if (file_exists('includes/header.php')) {
                     </div>
                     <?php if ($recovery_configured): ?>
                         <div class="security-status-badge">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
                             Recovery configured
                         </div>
                     <?php endif; ?>
@@ -402,7 +440,10 @@ if (file_exists('includes/header.php')) {
                             <div class="password-wrapper">
                                 <input type="password" id="security_answer" name="security_answer" class="form-input" placeholder="<?= $recovery_configured ? 'Enter new answer (leave blank to keep current)' : 'Enter your answer' ?>" <?= $recovery_configured ? '' : 'required' ?>>
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show answer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -411,7 +452,10 @@ if (file_exists('includes/header.php')) {
                             <div class="password-wrapper">
                                 <input type="password" id="confirm_security_answer" name="confirm_security_answer" class="form-input" placeholder="<?= $recovery_configured ? 'Re-enter new answer' : 'Re-enter your answer' ?>" <?= $recovery_configured ? '' : 'required' ?>>
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show answer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -419,13 +463,20 @@ if (file_exists('includes/header.php')) {
 
                     <div class="info-alert" style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 1.25rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 1rem;">
                         <div style="display: flex; gap: 12px; align-items: flex-start; flex: 1;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 3px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 3px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
                             <div style="flex: 1;">
                                 <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #475569;">To change your recovery answer, you may be required to enter your current password for security.</p>
                                 <div class="password-wrapper" style="max-width: 350px;">
                                     <input type="password" name="current_password_recovery" required class="form-input" placeholder="Enter current password" style="padding: 0.6rem 1rem; font-size: 0.875rem;">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -441,48 +492,48 @@ if (file_exists('includes/header.php')) {
 
 <!-- Inline Javascript for Tabs and Modal to bypass browser caching -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. TAB SWITCHING LOGIC
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. TAB SWITCHING LOGIC
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
 
-    if (tabBtns.length > 0) {
-        function switchTab(targetId) {
+        if (tabBtns.length > 0) {
+            function switchTab(targetId) {
+                tabBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                    btn.setAttribute('tabindex', '-1');
+                });
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                const activeBtn = document.querySelector(`.tab-btn[data-target="${targetId}"]`);
+                const activeContent = document.getElementById(targetId);
+
+                if (activeBtn && activeContent) {
+                    activeBtn.classList.add('active');
+                    activeBtn.setAttribute('aria-selected', 'true');
+                    activeBtn.setAttribute('tabindex', '0');
+                    activeContent.classList.add('active');
+
+                    history.replaceState(null, null, `#${targetId.replace('tab-', '')}`);
+                }
+            }
+
             tabBtns.forEach(btn => {
-                btn.classList.remove('active');
-                btn.setAttribute('aria-selected', 'false');
-                btn.setAttribute('tabindex', '-1');
+                btn.addEventListener('click', () => {
+                    switchTab(btn.getAttribute('data-target'));
+                });
             });
-            tabContents.forEach(content => content.classList.remove('active'));
 
-            const activeBtn = document.querySelector(`.tab-btn[data-target="${targetId}"]`);
-            const activeContent = document.getElementById(targetId);
-
-            if (activeBtn && activeContent) {
-                activeBtn.classList.add('active');
-                activeBtn.setAttribute('aria-selected', 'true');
-                activeBtn.setAttribute('tabindex', '0');
-                activeContent.classList.add('active');
-                
-                history.replaceState(null, null, `#${targetId.replace('tab-', '')}`);
+            // Deep-link routing 
+            if (window.location.hash === '#security') {
+                switchTab('tab-security');
             }
         }
-
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                switchTab(btn.getAttribute('data-target'));
-            });
-        });
-
-        // Deep-link routing 
-        if (window.location.hash === '#security') {
-            switchTab('tab-security');
-        }
-    }
-});
+    });
 </script>
 
-<?php 
+<?php
 // 7. Output Footer
 if (file_exists('includes/footer.php')) {
     require_once 'includes/footer.php';

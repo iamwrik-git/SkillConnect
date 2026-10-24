@@ -94,7 +94,7 @@ try {
         // Use INSERT IGNORE to leverage the DB unique constraint and handle duplicates gracefully
         $stmt = $pdo->prepare("INSERT IGNORE INTO saved_trainers (user_id, trainer_id) VALUES (?, ?)");
         $stmt->execute([$current_user_id, $trainer_id]);
-        
+
         if ($stmt->rowCount() > 0) {
             $_SESSION['success'] = "Trainer bookmarked successfully.";
         }
@@ -103,14 +103,13 @@ try {
     } elseif ($action === 'remove') {
         $stmt = $pdo->prepare("DELETE FROM saved_trainers WHERE user_id = ? AND trainer_id = ?");
         $stmt->execute([$current_user_id, $trainer_id]);
-        
+
         if ($stmt->rowCount() > 0) {
             $_SESSION['success'] = "Trainer removed from saved list.";
         }
     } else {
         $_SESSION['error'] = "Invalid action specified.";
     }
-
 } catch (PDOException $e) {
     error_log("Database Error in saved_trainer_process: " . $e->getMessage());
     $_SESSION['error'] = "An unexpected error occurred. Please try again later.";

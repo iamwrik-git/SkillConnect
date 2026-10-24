@@ -46,7 +46,7 @@ try {
             ORDER BY m.created_at DESC
         ");
     }
-    
+
     $stmt->execute([$user_id]);
     $all_mentorships = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -68,7 +68,8 @@ if (file_exists('includes/header.php')) {
 }
 
 if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name) {
+    function getProfilePhotoUrl($photo, $name)
+    {
         if (empty($photo) || $photo === 'default.jpg') {
             return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
         }
@@ -78,7 +79,7 @@ if (!function_exists('getProfilePhotoUrl')) {
 ?>
 
 <div class="mentorships-page">
-    
+
     <div class="mentorships-header">
         <h1 class="page-title"><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></h1>
         <p class="page-subtitle">Manage your <?= $role === 'trainer' ? 'trainees' : 'mentors' ?>, pending requests and history in one place.</p>
@@ -94,7 +95,10 @@ if (!function_exists('getProfilePhotoUrl')) {
             <?php if (empty($accepted)): ?>
                 <div class="empty-state" style="border: none; box-shadow: none;">
                     <div class="empty-state-icon" style="margin-bottom: 1rem;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
                     </div>
                     <p>No <?= $role === 'trainer' ? 'trainees' : 'mentors' ?> yet.</p>
                 </div>
@@ -120,20 +124,32 @@ if (!function_exists('getProfilePhotoUrl')) {
                         <div class="mentorship-actions">
                             <span class="badge badge-success"><?= $role === 'trainer' ? 'Trainee' : 'Mentor' ?></span>
                             <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
                                 View Profile
                             </a>
                             <div class="mentorship-more" data-mentorship-menu>
                                 <button type="button" class="mentorship-more-toggle" aria-label="More mentorship actions" aria-expanded="false" aria-haspopup="true">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="5" r="1.5"></circle>
+                                        <circle cx="12" cy="12" r="1.5"></circle>
+                                        <circle cx="12" cy="19" r="1.5"></circle>
+                                    </svg>
                                 </button>
                                 <div class="mentorship-more-menu" hidden>
                                     <form action="actions/mentorship_process.php" method="POST" class="js-confirm-unlink-mentorship" data-connection-name="<?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?>" data-connection-role="<?= $role === 'trainer' ? 'trainee' : 'mentor' ?>">
                                         <input type="hidden" name="action" value="unlink_mentorship">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                         <button type="submit" class="mentorship-unlink-action">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M8 6V4h8v2"></path>
+                                                <path d="M19 6l-1 14H6L5 6"></path>
+                                                <path d="M10 11v5M14 11v5"></path>
+                                            </svg>
                                             <span><strong>Unlink <?= $role === 'trainer' ? 'Trainee' : 'Mentor' ?></strong><small>Remove this connection from your <?= $role === 'trainer' ? 'trainees' : 'mentorships' ?>.</small></span>
                                         </button>
                                     </form>
@@ -180,7 +196,10 @@ if (!function_exists('getProfilePhotoUrl')) {
                             <?php if ($role === 'trainee'): ?>
                                 <span class="badge badge-warning">Pending</span>
                                 <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
                                     View Profile
                                 </a>
                             <?php else: ?>
@@ -190,7 +209,9 @@ if (!function_exists('getProfilePhotoUrl')) {
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                     <input type="hidden" name="return_to" value="mentorships.php">
                                     <button type="submit" class="btn btn-accept btn-sm" data-loading-text="Accepting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> 
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 6L9 17l-5-5"></path>
+                                        </svg>
                                         Accept
                                     </button>
                                 </form>
@@ -200,12 +221,18 @@ if (!function_exists('getProfilePhotoUrl')) {
                                     <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
                                     <input type="hidden" name="return_to" value="mentorships.php">
                                     <button type="submit" class="btn btn-reject btn-sm" data-loading-text="Rejecting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> 
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
                                         Reject
                                     </button>
                                 </form>
                                 <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline" style="margin-left: 0.5rem;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
                                     View Profile
                                 </a>
                             <?php endif; ?>
@@ -247,7 +274,10 @@ if (!function_exists('getProfilePhotoUrl')) {
                             <span class="badge badge-danger">Rejected</span>
                             <span class="date-text"><?= date('M j, Y', strtotime($req['created_at'])) ?></span>
                             <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
                                 View Profile
                             </a>
                         </div>

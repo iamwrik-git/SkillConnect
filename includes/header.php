@@ -120,6 +120,7 @@ $notificationTimeLabel = static function ($createdAt): string {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,9 +129,10 @@ $notificationTimeLabel = static function ($createdAt): string {
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
 </head>
+
 <body>
     <div class="app-layout">
-        
+
         <!-- TOP NAVIGATION -->
         <header class="top-nav">
             <button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
@@ -144,8 +146,7 @@ $notificationTimeLabel = static function ($createdAt): string {
                         class="logo-image"
                         width="190"
                         height="59"
-                        fetchpriority="high"
-                    >
+                        fetchpriority="high">
                 </a>
             </div>
 
@@ -154,7 +155,7 @@ $notificationTimeLabel = static function ($createdAt): string {
                 <form action="search.php" method="GET" class="search-form">
                     <input type="text" name="q" placeholder="Search mentors, skills..." class="search-input" aria-label="Global search" list="globalSearchOptions" autocomplete="off">
                     <datalist id="globalSearchOptions">
-                        <?php foreach($search_suggestions as $suggestion): ?>
+                        <?php foreach ($search_suggestions as $suggestion): ?>
                             <option value="<?= htmlspecialchars($suggestion, ENT_QUOTES, 'UTF-8') ?>"></option>
                         <?php endforeach; ?>
                     </datalist>
@@ -209,31 +210,41 @@ $notificationTimeLabel = static function ($createdAt): string {
                             <?php else: ?>
                                 <?php foreach ($nav_notifications as $notification): ?>
                                     <?php
-                                        $notificationType = (string) ($notification['notification_type'] ?? 'mentorship_request');
-                                        $notificationIcon = $notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request');
-                                        $notificationIsUnread = (int) ($notification['is_read'] ?? 0) === 0;
+                                    $notificationType = (string) ($notification['notification_type'] ?? 'mentorship_request');
+                                    $notificationIcon = $notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request');
+                                    $notificationIsUnread = (int) ($notification['is_read'] ?? 0) === 0;
                                     ?>
                                     <form method="post" action="notifications_action.php" class="notification-item-form">
-                                    <input type="hidden" name="action" value="open">
-                                    <input type="hidden" name="notification_id" value="<?= (int) $notification['notification_id'] ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($notification_csrf, ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
-                                    <button type="submit" class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>">
-                                        <span class="notification-item-icon <?= htmlspecialchars($notificationIcon, ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true">
-                                            <?php if ($notificationIcon === 'accepted'): ?>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
-                                            <?php elseif ($notificationIcon === 'rejected'): ?>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m9 9 6 6m0-6-6 6"></path></svg>
-                                            <?php else: ?>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6m-3-3h6"></path></svg>
-                                            <?php endif; ?>
-                                        </span>
-                                        <span class="notification-item-content">
-                                            <span class="notification-item-message"><?= htmlspecialchars((string) $notification['message'], ENT_QUOTES, 'UTF-8') ?></span>
-                                            <span class="notification-item-time"><?= htmlspecialchars($notificationTimeLabel($notification['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-                                        </span>
-                                        <?php if ($notificationIsUnread): ?><span class="notification-item-unread-dot" aria-label="Unread"></span><?php endif; ?>
-                                    </button>
+                                        <input type="hidden" name="action" value="open">
+                                        <input type="hidden" name="notification_id" value="<?= (int) $notification['notification_id'] ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($notification_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                                        <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
+                                        <button type="submit" class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>">
+                                            <span class="notification-item-icon <?= htmlspecialchars($notificationIcon, ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true">
+                                                <?php if ($notificationIcon === 'accepted'): ?>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="9"></circle>
+                                                        <path d="m8 12 2.5 2.5L16 9"></path>
+                                                    </svg>
+                                                <?php elseif ($notificationIcon === 'rejected'): ?>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="9"></circle>
+                                                        <path d="m9 9 6 6m0-6-6 6"></path>
+                                                    </svg>
+                                                <?php else: ?>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                        <circle cx="10" cy="7" r="4"></circle>
+                                                        <path d="M20 8v6m-3-3h6"></path>
+                                                    </svg>
+                                                <?php endif; ?>
+                                            </span>
+                                            <span class="notification-item-content">
+                                                <span class="notification-item-message"><?= htmlspecialchars((string) $notification['message'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                <span class="notification-item-time"><?= htmlspecialchars($notificationTimeLabel($notification['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                                            </span>
+                                            <?php if ($notificationIsUnread): ?><span class="notification-item-unread-dot" aria-label="Unread"></span><?php endif; ?>
+                                        </button>
                                     </form>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -252,7 +263,12 @@ $notificationTimeLabel = static function ($createdAt): string {
                     </div>
                     <dialog class="notification-confirm-dialog" id="notification-clear-confirm" aria-labelledby="notification-clear-title">
                         <div class="notification-confirm-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6m4-6v6"></path><path d="m6 7 1 13h10l1-13"></path><path d="M9 7V4h6v3"></path></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 7h16"></path>
+                                <path d="M10 11v6m4-6v6"></path>
+                                <path d="m6 7 1 13h10l1-13"></path>
+                                <path d="M9 7V4h6v3"></path>
+                            </svg>
                         </div>
                         <h2 id="notification-clear-title">Clear notifications?</h2>
                         <div class="notification-confirm-actions">
@@ -265,25 +281,25 @@ $notificationTimeLabel = static function ($createdAt): string {
                 <!-- Profile dropdown -->
                 <div class="nav-item has-dropdown profile-menu" data-dropdown="profile">
                     <?php
-                        $nav_photo = $_SESSION['profile_photo'] ?? '';
-                        $nav_name = $_SESSION['name'] ?? 'User';
-                        $nav_role = $_SESSION['role'] ?? 'trainee';
-                        $show_initials = empty($nav_photo) || $nav_photo === 'default.jpg';
-                        $name_parts = array_values(array_filter(preg_split('/\\s+/', trim($nav_name))));
-                        $initials = 'U';
-                        if (count($name_parts) >= 2) {
-                            $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1) . mb_substr(end($name_parts), 0, 1));
-                        } elseif (count($name_parts) === 1 && $name_parts[0] !== '') {
-                            $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1));
-                        }
+                    $nav_photo = $_SESSION['profile_photo'] ?? '';
+                    $nav_name = $_SESSION['name'] ?? 'User';
+                    $nav_role = $_SESSION['role'] ?? 'trainee';
+                    $show_initials = empty($nav_photo) || $nav_photo === 'default.jpg';
+                    $name_parts = array_values(array_filter(preg_split('/\\s+/', trim($nav_name))));
+                    $initials = 'U';
+                    if (count($name_parts) >= 2) {
+                        $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1) . mb_substr(end($name_parts), 0, 1));
+                    } elseif (count($name_parts) === 1 && $name_parts[0] !== '') {
+                        $initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1));
+                    }
 
-                        $nav_avatar_url = '';
-                        if (!$show_initials) {
-                            $safe_photo = basename((string) $nav_photo);
-                            $photo_path = __DIR__ . '/../assets/images/profile/' . $safe_photo;
-                            $photo_version = is_file($photo_path) ? filemtime($photo_path) : time();
-                            $nav_avatar_url = 'assets/images/profile/' . rawurlencode($safe_photo) . '?v=' . $photo_version;
-                        }
+                    $nav_avatar_url = '';
+                    if (!$show_initials) {
+                        $safe_photo = basename((string) $nav_photo);
+                        $photo_path = __DIR__ . '/../assets/images/profile/' . $safe_photo;
+                        $photo_version = is_file($photo_path) ? filemtime($photo_path) : time();
+                        $nav_avatar_url = 'assets/images/profile/' . rawurlencode($safe_photo) . '?v=' . $photo_version;
+                    }
                     ?>
                     <button
                         type="button"
@@ -291,8 +307,7 @@ $notificationTimeLabel = static function ($createdAt): string {
                         aria-expanded="false"
                         aria-controls="profile-dropdown"
                         aria-haspopup="true"
-                        id="profile-menu-trigger"
-                    >
+                        id="profile-menu-trigger">
                         <?php if ($show_initials): ?>
                             <span class="avatar-placeholder initials-avatar" aria-hidden="true"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></span>
                         <?php else: ?>
@@ -332,11 +347,18 @@ $notificationTimeLabel = static function ($createdAt): string {
 
                         <div class="profile-popup-actions">
                             <a href="profile.php" class="profile-menu-link is-featured" role="menuitem">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
                                 <span>View Profile</span>
                             </a>
                             <a href="logout.php?csrf_token=<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>" class="profile-menu-link profile-menu-logout" role="menuitem" data-confirm-logout>
-                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
                                 <span>Log out</span>
                             </a>
                         </div>
@@ -344,98 +366,139 @@ $notificationTimeLabel = static function ($createdAt): string {
                 </div>
 
                 <script>
-                (() => {
-                    const trigger = document.getElementById('network-menu-trigger');
-                    const menu = document.getElementById('network-dropdown');
-                    const wrapper = trigger && trigger.closest('.network-menu');
-                    if (!trigger || !menu || !wrapper || wrapper.dataset.networkReady === 'true') return;
-                    wrapper.dataset.networkReady = 'true';
-                    const setOpen = (open) => {
-                        wrapper.classList.toggle('show', open);
-                        trigger.setAttribute('aria-expanded', String(open));
-                        menu.setAttribute('aria-hidden', String(!open));
-                    };
-                    trigger.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
-                        if (willOpen) {
-                            const notifications = document.querySelector('.notification-menu');
-                            if (notifications) {
-                                notifications.classList.remove('show');
-                                const notificationTrigger = document.getElementById('notifications-menu-trigger');
-                                const notificationMenu = document.getElementById('notifications-dropdown');
-                                if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
-                                if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
-                            }
-                            const profile = document.querySelector('.profile-menu');
-                            if (profile) {
-                                profile.classList.remove('show');
-                                const profileTrigger = document.getElementById('profile-menu-trigger');
-                                const profileMenu = document.getElementById('profile-dropdown');
-                                if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
-                                if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
-                            }
-                        }
-                        setOpen(willOpen);
-                    });
-                    document.addEventListener('click', (event) => {
-                        if (!wrapper.contains(event.target)) setOpen(false);
-                    });
-                    document.addEventListener('keydown', (event) => {
-                        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
-                            setOpen(false);
-                            trigger.focus();
-                        }
-                    });
-                })();
-                </script>
-                <script>
-                (() => {
-                    const clearForm = document.getElementById('notification-clear-form');
-                    const clearTrigger = document.getElementById('notification-clear-trigger');
-                    const dialog = document.getElementById('notification-clear-confirm');
-                    const cancelButton = document.getElementById('notification-clear-cancel');
-                    const acceptButton = document.getElementById('notification-clear-accept');
-                    if (clearForm && clearTrigger && dialog && cancelButton && acceptButton && !clearForm.dataset.confirmReady) {
-                        clearForm.dataset.confirmReady = 'true';
-                        clearForm.addEventListener('submit', (event) => {
+                    (() => {
+                        const trigger = document.getElementById('network-menu-trigger');
+                        const menu = document.getElementById('network-dropdown');
+                        const wrapper = trigger && trigger.closest('.network-menu');
+                        if (!trigger || !menu || !wrapper || wrapper.dataset.networkReady === 'true') return;
+                        wrapper.dataset.networkReady = 'true';
+                        const setOpen = (open) => {
+                            wrapper.classList.toggle('show', open);
+                            trigger.setAttribute('aria-expanded', String(open));
+                            menu.setAttribute('aria-hidden', String(!open));
+                        };
+                        trigger.addEventListener('click', (event) => {
                             event.preventDefault();
-                            if (typeof dialog.showModal === 'function') dialog.showModal();
-                            else if (window.confirm('Clear notifications? Mentorship requests will not be affected.')) clearForm.submit();
+                            event.stopPropagation();
+                            const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                            if (willOpen) {
+                                const notifications = document.querySelector('.notification-menu');
+                                if (notifications) {
+                                    notifications.classList.remove('show');
+                                    const notificationTrigger = document.getElementById('notifications-menu-trigger');
+                                    const notificationMenu = document.getElementById('notifications-dropdown');
+                                    if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
+                                    if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
+                                }
+                                const profile = document.querySelector('.profile-menu');
+                                if (profile) {
+                                    profile.classList.remove('show');
+                                    const profileTrigger = document.getElementById('profile-menu-trigger');
+                                    const profileMenu = document.getElementById('profile-dropdown');
+                                    if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
+                                    if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
+                                }
+                            }
+                            setOpen(willOpen);
                         });
-                        cancelButton.addEventListener('click', () => dialog.close());
-                        acceptButton.addEventListener('click', () => {
-                            dialog.close();
-                            clearForm.submit();
+                        document.addEventListener('click', (event) => {
+                            if (!wrapper.contains(event.target)) setOpen(false);
                         });
-                        dialog.addEventListener('click', (event) => {
-                            if (event.target === dialog) dialog.close();
+                        document.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+                                setOpen(false);
+                                trigger.focus();
+                            }
                         });
-                    }
-                })();
+                    })();
                 </script>
                 <script>
-                (() => {
-                    const trigger = document.getElementById('notifications-menu-trigger');
-                    const menu = document.getElementById('notifications-dropdown');
-                    const wrapper = trigger && trigger.closest('.notification-menu');
-                    if (!trigger || !menu || !wrapper || wrapper.dataset.notificationsReady === 'true') return;
-                    wrapper.dataset.notificationsReady = 'true';
+                    (() => {
+                        const clearForm = document.getElementById('notification-clear-form');
+                        const clearTrigger = document.getElementById('notification-clear-trigger');
+                        const dialog = document.getElementById('notification-clear-confirm');
+                        const cancelButton = document.getElementById('notification-clear-cancel');
+                        const acceptButton = document.getElementById('notification-clear-accept');
+                        if (clearForm && clearTrigger && dialog && cancelButton && acceptButton && !clearForm.dataset.confirmReady) {
+                            clearForm.dataset.confirmReady = 'true';
+                            clearForm.addEventListener('submit', (event) => {
+                                event.preventDefault();
+                                if (typeof dialog.showModal === 'function') dialog.showModal();
+                                else if (window.confirm('Clear notifications? Mentorship requests will not be affected.')) clearForm.submit();
+                            });
+                            cancelButton.addEventListener('click', () => dialog.close());
+                            acceptButton.addEventListener('click', () => {
+                                dialog.close();
+                                clearForm.submit();
+                            });
+                            dialog.addEventListener('click', (event) => {
+                                if (event.target === dialog) dialog.close();
+                            });
+                        }
+                    })();
+                </script>
+                <script>
+                    (() => {
+                        const trigger = document.getElementById('notifications-menu-trigger');
+                        const menu = document.getElementById('notifications-dropdown');
+                        const wrapper = trigger && trigger.closest('.notification-menu');
+                        if (!trigger || !menu || !wrapper || wrapper.dataset.notificationsReady === 'true') return;
+                        wrapper.dataset.notificationsReady = 'true';
 
-                    const setOpen = (open) => {
-                        wrapper.classList.toggle('show', open);
-                        trigger.setAttribute('aria-expanded', String(open));
-                        menu.setAttribute('aria-hidden', String(!open));
-                    };
+                        const setOpen = (open) => {
+                            wrapper.classList.toggle('show', open);
+                            trigger.setAttribute('aria-expanded', String(open));
+                            menu.setAttribute('aria-hidden', String(!open));
+                        };
 
-                    // Notifications are click-controlled on desktop and mobile.
-                    // This prevents the notification panel from activating the adjacent profile hover menu.
-                    trigger.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
-                        if (willOpen) {
+                        // Notifications are click-controlled on desktop and mobile.
+                        // This prevents the notification panel from activating the adjacent profile hover menu.
+                        trigger.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                            if (willOpen) {
+                                const network = document.querySelector('.network-menu');
+                                if (network) {
+                                    network.classList.remove('show');
+                                    const networkTrigger = document.getElementById('network-menu-trigger');
+                                    const networkMenu = document.getElementById('network-dropdown');
+                                    if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
+                                    if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
+                                }
+                                const profile = document.querySelector('.profile-menu');
+                                if (profile) {
+                                    profile.classList.remove('show');
+                                    const profileTrigger = document.getElementById('profile-menu-trigger');
+                                    const profileMenu = document.getElementById('profile-dropdown');
+                                    if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
+                                    if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
+                                }
+                            }
+                            setOpen(willOpen);
+                        });
+                        document.addEventListener('click', (event) => {
+                            if (!wrapper.contains(event.target)) setOpen(false);
+                        });
+                        document.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+                                setOpen(false);
+                                trigger.focus();
+                            }
+                        });
+                    })();
+                </script>
+                <script>
+                    (() => {
+                        const trigger = document.getElementById('profile-menu-trigger');
+                        const menu = document.getElementById('profile-dropdown');
+                        const wrapper = trigger && trigger.closest('.profile-menu');
+                        if (!trigger || !menu || !wrapper || wrapper.dataset.profileMenuReady === 'true') return;
+                        wrapper.dataset.profileMenuReady = 'true';
+
+                        const hoverMode = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+                        const closeOtherMenus = () => {
                             const network = document.querySelector('.network-menu');
                             if (network) {
                                 network.classList.remove('show');
@@ -444,129 +507,100 @@ $notificationTimeLabel = static function ($createdAt): string {
                                 if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
                                 if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
                             }
-                            const profile = document.querySelector('.profile-menu');
-                            if (profile) {
-                                profile.classList.remove('show');
-                                const profileTrigger = document.getElementById('profile-menu-trigger');
-                                const profileMenu = document.getElementById('profile-dropdown');
-                                if (profileTrigger) profileTrigger.setAttribute('aria-expanded', 'false');
-                                if (profileMenu) profileMenu.setAttribute('aria-hidden', 'true');
+                            const notifications = document.querySelector('.notification-menu');
+                            if (notifications) {
+                                notifications.classList.remove('show');
+                                const notificationTrigger = document.getElementById('notifications-menu-trigger');
+                                const notificationMenu = document.getElementById('notifications-dropdown');
+                                if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
+                                if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
                             }
-                        }
-                        setOpen(willOpen);
-                    });
-                    document.addEventListener('click', (event) => {
-                        if (!wrapper.contains(event.target)) setOpen(false);
-                    });
-                    document.addEventListener('keydown', (event) => {
-                        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
-                            setOpen(false);
-                            trigger.focus();
-                        }
-                    });
-                })();
-                </script>
-                <script>
-                (() => {
-                    const trigger = document.getElementById('profile-menu-trigger');
-                    const menu = document.getElementById('profile-dropdown');
-                    const wrapper = trigger && trigger.closest('.profile-menu');
-                    if (!trigger || !menu || !wrapper || wrapper.dataset.profileMenuReady === 'true') return;
-                    wrapper.dataset.profileMenuReady = 'true';
+                        };
 
-                    const hoverMode = window.matchMedia('(hover: hover) and (pointer: fine)');
+                        const setOpen = (open) => {
+                            if (open) closeOtherMenus();
+                            wrapper.classList.toggle('show', open);
+                            trigger.setAttribute('aria-expanded', String(open));
+                            menu.setAttribute('aria-hidden', String(!open));
+                        };
 
-                    const closeOtherMenus = () => {
-                        const network = document.querySelector('.network-menu');
-                        if (network) {
-                            network.classList.remove('show');
-                            const networkTrigger = document.getElementById('network-menu-trigger');
-                            const networkMenu = document.getElementById('network-dropdown');
-                            if (networkTrigger) networkTrigger.setAttribute('aria-expanded', 'false');
-                            if (networkMenu) networkMenu.setAttribute('aria-hidden', 'true');
-                        }
-                        const notifications = document.querySelector('.notification-menu');
-                        if (notifications) {
-                            notifications.classList.remove('show');
-                            const notificationTrigger = document.getElementById('notifications-menu-trigger');
-                            const notificationMenu = document.getElementById('notifications-dropdown');
-                            if (notificationTrigger) notificationTrigger.setAttribute('aria-expanded', 'false');
-                            if (notificationMenu) notificationMenu.setAttribute('aria-hidden', 'true');
-                        }
-                    };
-
-                    const setOpen = (open) => {
-                        if (open) closeOtherMenus();
-                        wrapper.classList.toggle('show', open);
-                        trigger.setAttribute('aria-expanded', String(open));
-                        menu.setAttribute('aria-hidden', String(!open));
-                    };
-
-                    // Keep the profile dropdown hover-friendly on desktop, with click support
-                    // for touch devices. The notification panel is click-only and stays separated.
-                    trigger.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setOpen(trigger.getAttribute('aria-expanded') !== 'true');
-                    });
-                    wrapper.addEventListener('mouseenter', () => {
-                        if (hoverMode.matches) closeOtherMenus();
-                    });
-                    wrapper.addEventListener('focusout', (event) => {
-                        if (!wrapper.contains(event.relatedTarget)) setOpen(false);
-                    });
-                    document.addEventListener('click', (event) => {
-                        if (!wrapper.contains(event.target)) setOpen(false);
-                    });
-                    document.addEventListener('keydown', (event) => {
-                        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
-                            setOpen(false);
-                            trigger.focus();
-                        }
-                    });
-                    menu.addEventListener('click', (event) => {
-                        if (event.target.closest('a')) setOpen(false);
-                    });
-                    if (hoverMode.addEventListener) hoverMode.addEventListener('change', () => setOpen(false));
-                })();
+                        // Keep the profile dropdown hover-friendly on desktop, with click support
+                        // for touch devices. The notification panel is click-only and stays separated.
+                        trigger.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+                        });
+                        wrapper.addEventListener('mouseenter', () => {
+                            if (hoverMode.matches) closeOtherMenus();
+                        });
+                        wrapper.addEventListener('focusout', (event) => {
+                            if (!wrapper.contains(event.relatedTarget)) setOpen(false);
+                        });
+                        document.addEventListener('click', (event) => {
+                            if (!wrapper.contains(event.target)) setOpen(false);
+                        });
+                        document.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+                                setOpen(false);
+                                trigger.focus();
+                            }
+                        });
+                        menu.addEventListener('click', (event) => {
+                            if (event.target.closest('a')) setOpen(false);
+                        });
+                        if (hoverMode.addEventListener) hoverMode.addEventListener('change', () => setOpen(false));
+                    })();
                 </script>
             </div>
         </header>
 
         <div class="app-body">
-            
+
             <!-- SIDEBAR -->
             <aside class="sidebar" id="app-sidebar">
                 <div class="sidebar-scrollable">
-                    
+
                     <nav class="sidebar-section">
                         <h3 class="sidebar-heading">MAIN</h3>
                         <ul class="sidebar-list">
                             <li>
                                 <a href="dashboard.php" class="sidebar-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    </svg>
                                     <span>Dashboard</span>
                                 </a>
                             </li>
-                            
+
                             <?php if ($user_role === 'trainee'): ?>
                                 <li>
                                     <a href="search.php" class="sidebar-link <?= $current_page === 'search.php' ? 'active' : '' ?>">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
                                         <span>Find Trainers</span>
                                     </a>
                                 </li>
                             <?php endif; ?>
-                            
+
                             <li>
                                 <a href="profile.php" class="sidebar-link <?= $current_page === 'profile.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
                                     <span>Profile</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="edit_profile.php" class="sidebar-link <?= $current_page === 'edit_profile.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
                                     <span>Edit Profile</span>
                                 </a>
                             </li>
@@ -578,26 +612,37 @@ $notificationTimeLabel = static function ($createdAt): string {
                         <ul class="sidebar-list">
                             <li>
                                 <a href="my_skills.php" class="sidebar-link <?= $current_page === 'my_skills.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                        <polyline points="2 17 12 22 22 17"></polyline>
+                                        <polyline points="2 12 12 17 22 12"></polyline>
+                                    </svg>
                                     <span>My Skills</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="mentorships.php" class="sidebar-link <?= $current_page === 'mentorships.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
                                     <span><?= $user_role === 'trainer' ? 'My Trainees' : 'My Mentorships' ?></span>
                                 </a>
                             </li>
-                            
+
                             <?php if ($user_role === 'trainee'): ?>
-                            <li>
-                                <a href="saved_trainers.php" class="sidebar-link <?= $current_page === 'saved_trainers.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                                    <span>Saved Trainers</span>
-                                </a>
-                            </li>
+                                <li>
+                                    <a href="saved_trainers.php" class="sidebar-link <?= $current_page === 'saved_trainers.php' ? 'active' : '' ?>">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                        <span>Saved Trainers</span>
+                                    </a>
+                                </li>
                             <?php endif; ?>
-                            
+
                         </ul>
                     </nav>
 
@@ -606,13 +651,25 @@ $notificationTimeLabel = static function ($createdAt): string {
                         <ul class="sidebar-list">
                             <li>
                                 <a href="stay_tuned.php" class="sidebar-link <?= $current_page === 'stay_tuned.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
                                     <span>Communities</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="stay_tuned.php" class="sidebar-link <?= $current_page === 'stay_tuned.php' ? 'active' : '' ?>">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                        <path d="M4 22h16"></path>
+                                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
+                                    </svg>
                                     <span>Leaderboard</span>
                                 </a>
                             </li>
@@ -623,7 +680,11 @@ $notificationTimeLabel = static function ($createdAt): string {
 
                 <div class="sidebar-footer">
                     <a href="logout.php?csrf_token=<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>" class="logout-link" data-confirm-logout>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
                         <span>Logout</span>
                     </a>
                 </div>
@@ -636,7 +697,11 @@ $notificationTimeLabel = static function ($createdAt): string {
             <div class="confirm-modal-backdrop logout-confirm-backdrop" id="logout-confirm-modal" aria-hidden="true">
                 <section class="confirm-modal-content logout-confirm-content" role="dialog" aria-modal="true" aria-labelledby="logout-confirm-title" aria-describedby="logout-confirm-message" tabindex="-1">
                     <div class="confirm-modal-icon confirm-danger logout-confirm-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 17l5-5-5-5"></path>
+                            <path d="M15 12H3"></path>
+                            <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path>
+                        </svg>
                     </div>
                     <h2 class="confirm-modal-title" id="logout-confirm-title">Log out of SkillConnect?</h2>
                     <p class="confirm-modal-message" id="logout-confirm-message">Are you sure you want to log out? You will need to sign in again to access your account.</p>
@@ -650,69 +715,73 @@ $notificationTimeLabel = static function ($createdAt): string {
                 </section>
             </div>
             <script>
-            (() => {
-                const modal = document.getElementById('logout-confirm-modal');
-                const dialog = modal && modal.querySelector('.logout-confirm-content');
-                const cancelButton = document.getElementById('logout-cancel-btn');
-                const confirmButton = document.getElementById('logout-confirm-btn');
-                if (!modal || !dialog || !cancelButton || !confirmButton || modal.dataset.ready === 'true') return;
-                modal.dataset.ready = 'true';
+                (() => {
+                    const modal = document.getElementById('logout-confirm-modal');
+                    const dialog = modal && modal.querySelector('.logout-confirm-content');
+                    const cancelButton = document.getElementById('logout-cancel-btn');
+                    const confirmButton = document.getElementById('logout-confirm-btn');
+                    if (!modal || !dialog || !cancelButton || !confirmButton || modal.dataset.ready === 'true') return;
+                    modal.dataset.ready = 'true';
 
-                let logoutUrl = 'logout.php';
-                let lastFocusedElement = null;
+                    let logoutUrl = 'logout.php';
+                    let lastFocusedElement = null;
 
-                const openModal = (url, source) => {
-                    logoutUrl = url || 'logout.php';
-                    lastFocusedElement = source;
-                    modal.classList.add('show');
-                    modal.setAttribute('aria-hidden', 'false');
-                    document.body.classList.add('logout-confirm-open');
-                    window.setTimeout(() => cancelButton.focus(), 30);
-                };
+                    const openModal = (url, source) => {
+                        logoutUrl = url || 'logout.php';
+                        lastFocusedElement = source;
+                        modal.classList.add('show');
+                        modal.setAttribute('aria-hidden', 'false');
+                        document.body.classList.add('logout-confirm-open');
+                        window.setTimeout(() => cancelButton.focus(), 30);
+                    };
 
-                const closeModal = () => {
-                    modal.classList.remove('show');
-                    modal.setAttribute('aria-hidden', 'true');
-                    document.body.classList.remove('logout-confirm-open');
-                    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
-                };
+                    const closeModal = () => {
+                        modal.classList.remove('show');
+                        modal.setAttribute('aria-hidden', 'true');
+                        document.body.classList.remove('logout-confirm-open');
+                        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+                    };
 
-                document.addEventListener('click', (event) => {
-                    const logoutLink = event.target.closest('[data-confirm-logout]');
-                    if (!logoutLink) return;
-                    event.preventDefault();
-                    openModal(logoutLink.href, logoutLink);
-                });
-
-                cancelButton.addEventListener('click', closeModal);
-                confirmButton.addEventListener('click', (event) => {
-                    const form = document.getElementById('logout-action-form');
-                    if (form) {
+                    document.addEventListener('click', (event) => {
+                        const logoutLink = event.target.closest('[data-confirm-logout]');
+                        if (!logoutLink) return;
                         event.preventDefault();
-                        form.submit();
-                    } else {
-                        window.location.href = logoutUrl;
-                    }
-                });
-                modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
-                document.addEventListener('keydown', (event) => {
-                    if (!modal.classList.contains('show')) return;
-                    if (event.key === 'Escape') {
-                        event.preventDefault();
-                        closeModal();
-                    }
-                    if (event.key === 'Tab') {
-                        const focusable = [cancelButton, confirmButton];
-                        const first = focusable[0];
-                        const last = focusable[focusable.length - 1];
-                        if (event.shiftKey && document.activeElement === first) {
-                            event.preventDefault(); last.focus();
-                        } else if (!event.shiftKey && document.activeElement === last) {
-                            event.preventDefault(); first.focus();
+                        openModal(logoutLink.href, logoutLink);
+                    });
+
+                    cancelButton.addEventListener('click', closeModal);
+                    confirmButton.addEventListener('click', (event) => {
+                        const form = document.getElementById('logout-action-form');
+                        if (form) {
+                            event.preventDefault();
+                            form.submit();
+                        } else {
+                            window.location.href = logoutUrl;
                         }
-                    }
-                });
-            })();
+                    });
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) closeModal();
+                    });
+                    document.addEventListener('keydown', (event) => {
+                        if (!modal.classList.contains('show')) return;
+                        if (event.key === 'Escape') {
+                            event.preventDefault();
+                            closeModal();
+                        }
+                        if (event.key === 'Tab') {
+                            const focusable = [cancelButton, confirmButton];
+                            const first = focusable[0];
+                            const last = focusable[focusable.length - 1];
+                            if (event.shiftKey && document.activeElement === first) {
+                                event.preventDefault();
+                                last.focus();
+                            } else if (!event.shiftKey && document.activeElement === last) {
+                                event.preventDefault();
+                                first.focus();
+                            }
+                        }
+                    });
+                })();
             </script>
 
             <!-- MAIN CONTENT AREA -->

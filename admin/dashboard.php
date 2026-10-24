@@ -53,17 +53,25 @@ ob_start();
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-icon bg-blue-light text-blue">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
         </div>
         <div class="stat-info">
             <p class="stat-label">Total Users</p>
             <h3 class="stat-value"><?= number_format($totalUsers) ?></h3>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon bg-green-light text-green">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+            </svg>
         </div>
         <div class="stat-info">
             <p class="stat-label">Trainees</p>
@@ -73,7 +81,9 @@ ob_start();
 
     <div class="stat-card">
         <div class="stat-icon bg-purple-light text-purple">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
         </div>
         <div class="stat-info">
             <p class="stat-label">Trainers</p>
@@ -83,7 +93,10 @@ ob_start();
 
     <div class="stat-card">
         <div class="stat-icon bg-orange-light text-orange">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path>
+                <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path>
+            </svg>
         </div>
         <div class="stat-info">
             <p class="stat-label">Mentorship Requests</p>
@@ -112,7 +125,7 @@ ob_start();
                     </div>
                 </div>
             </div>
-            
+
             <div class="chart-legend">
                 <div class="legend-item">
                     <span class="legend-color bg-blue"></span>
@@ -138,21 +151,32 @@ ob_start();
         <h3 class="card-title">Quick Actions</h3>
         <div class="quick-actions-grid">
             <a href="manage_users.php" class="qa-card">
-                <div class="qa-icon bg-blue-light"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <div class="qa-icon bg-blue-light"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg></div>
                 <div class="qa-text">
                     <h4>Manage Users</h4>
                     <p>View, search and manage all users</p>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </a>
-            
+
             <a href="manage_skills.php" class="qa-card">
-                <div class="qa-icon bg-purple-light"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
+                <div class="qa-icon bg-purple-light"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg></div>
                 <div class="qa-text">
                     <h4>Manage Skills</h4>
                     <p>Add, edit or remove platform skills</p>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </a>
         </div>
     </div>
@@ -176,29 +200,30 @@ ob_start();
             </thead>
             <tbody>
                 <?php if (empty($recentUsers)): ?>
-                <tr>
-                    <td colspan="5" class="text-center">No users found.</td>
-                </tr>
-                <?php else: ?>
-                    <?php $i = 1; foreach ($recentUsers as $user): ?>
                     <tr>
-                        <td><?= $i++ ?></td>
-                        <td>
-                            <div class="user-cell">
-                                <span class="avatar-sm bg-blue text-white">
-                                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
-                                </span>
-                                <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
-                            </div>
-                        </td>
-                        <td><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td>
-                            <span class="badge badge-<?= $user['role'] === 'trainer' ? 'purple' : 'green' ?>">
-                                <?= ucfirst($user['role']) ?>
-                            </span>
-                        </td>
-                        <td><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
+                        <td colspan="5" class="text-center">No users found.</td>
                     </tr>
+                <?php else: ?>
+                    <?php $i = 1;
+                    foreach ($recentUsers as $user): ?>
+                        <tr>
+                            <td><?= $i++ ?></td>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="avatar-sm bg-blue text-white">
+                                        <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                                    </span>
+                                    <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            </td>
+                            <td><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <span class="badge badge-<?= $user['role'] === 'trainer' ? 'purple' : 'green' ?>">
+                                    <?= ucfirst($user['role']) ?>
+                                </span>
+                            </td>
+                            <td><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 //Correctly check session status before starting it
 require_once __DIR__ . '/../includes/session.php';
@@ -19,8 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
-    exit; }
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
+}
 
 // Get the user action 
 $action = $_POST['action'] ?? '';
@@ -32,7 +34,7 @@ $skill_id = filter_input(INPUT_POST, 'skill_id', FILTER_VALIDATE_INT);
 // Skill add logic
 if ($action === 'add_skill') {
     // For no skill_id or invalid skill
-    if (!$skill_id || $skill_id <= 0) { 
+    if (!$skill_id || $skill_id <= 0) {
         $_SESSION['error'] = "Invalid Skill selected.";
         header("Location: ../my_skills.php");
         exit();
@@ -71,17 +73,15 @@ if ($action === 'add_skill') {
         // Final step: Insert the new skill
         $insertstmt = $pdo->prepare("INSERT INTO user_skills (user_id, skill_id) VALUES (?,?)");
         $insertstmt->execute([$user_id, $skill_id]);
-        $_SESSION['success'] = "Skill added successfully."; 
-
+        $_SESSION['success'] = "Skill added successfully.";
     } catch (PDOException $pe) {
         // Catch all db errors while adding skill
         error_log("Database Error(Add Skill): " . $pe->getMessage());
         $_SESSION['error'] = "An unexpected error occurred while adding the skill.";
-    } 
+    }
     header("Location: ../my_skills.php");
     exit();
-}
-elseif ($action === 'remove_skill') {
+} elseif ($action === 'remove_skill') {
     // If invalid skill selected
     if (!$skill_id || $skill_id <= 0) {
         $_SESSION['error'] = "Invalid skill selected.";
@@ -96,7 +96,7 @@ elseif ($action === 'remove_skill') {
 
         // If deleted successfully else removing skill is not valid.
         if ($deletestmt->rowCount() > 0) {
-            $_SESSION['success'] = "Skill removed successfully."; 
+            $_SESSION['success'] = "Skill removed successfully.";
         } else {
             $_SESSION['error'] = "Skill not found in your profile.";
         }
@@ -106,8 +106,7 @@ elseif ($action === 'remove_skill') {
     }
     header("Location: ../my_skills.php");
     exit();
-} 
-else {
+} else {
     // All unrecognized fallbacks
     header("Location: ../my_skills.php");
     exit();

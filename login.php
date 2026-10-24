@@ -29,6 +29,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,6 +37,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body class="auth-page">
 
     <!-- CSS State Checkbox: Pre-checked if redirect came from a sign-up error -->
@@ -49,13 +51,13 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
     </header>
 
     <div class="login-workspace">
-        
+
         <!-- =======================================================
              PANEL 1: AUTHENTICATION FORMS
              ======================================================= -->
         <div class="login-form-panel">
             <div class="form-view-container">
-                
+
                 <!-- VIEW A: SIGN IN -->
                 <div class="form-view login-view">
                     <div class="form-header">
@@ -65,7 +67,11 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                     <?php if (!$isSignup && $error): ?>
                         <div class="inline-error-banner">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
                             <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                     <?php endif; ?>
@@ -84,7 +90,10 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                             <div class="password-wrapper">
                                 <input type="password" id="login-password" name="password" class="form-input" required autocomplete="current-password" placeholder="••••••••">
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -94,7 +103,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                         </div>
 
                         <button type="submit" class="submit-btn" data-loading-text="Signing In...">Sign In &rarr;</button>
-                        
+
                         <div class="auth-divider">
                             <span>or</span>
                         </div>
@@ -112,7 +121,11 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                     <?php if ($isSignup && $error): ?>
                         <div class="inline-error-banner">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
                             <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                     <?php endif; ?>
@@ -160,7 +173,10 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                                 <div class="password-wrapper">
                                     <input type="password" id="reg-password" name="password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -169,7 +185,10 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                                 <div class="password-wrapper">
                                     <input type="password" id="reg-confirm-password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -191,7 +210,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
              PANEL 2: VISUAL OVERLAY (Slides Right <-> Left)
              ======================================================= -->
         <div class="login-illustration-panel">
-            
+
             <!-- Static Asset: object-fit: cover guarantees no white space -->
             <img src="assets/images/skillconnect-auth-login.jpg" alt="SkillConnect learner exploring programming, data science, and machine learning at a laptop" class="auth-illustration-img">
             <div class="auth-illustration-overlay"></div>
@@ -225,98 +244,101 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
             object-fit: contain;
             margin: 0 auto;
         }
+
         .auth-form .form-validation-error {
             color: #b91c1c;
             font-size: 0.8rem;
             margin-top: 6px;
             line-height: 1.35;
         }
+
         .auth-form input[aria-invalid="true"] {
             border-color: #ef4444;
         }
     </style>
     <script src="assets/js/main.js"></script>
     <script>
-    (() => {
-        const form = document.getElementById('register-form');
-        if (!form) return;
+        (() => {
+            const form = document.getElementById('register-form');
+            if (!form) return;
 
-        const password = document.getElementById('reg-password');
-        const confirmPassword = document.getElementById('reg-confirm-password');
-        const submitButton = form.querySelector('button[type="submit"]');
+            const password = document.getElementById('reg-password');
+            const confirmPassword = document.getElementById('reg-confirm-password');
+            const submitButton = form.querySelector('button[type="submit"]');
 
-        function clearError(input) {
-            input.removeAttribute('aria-invalid');
-            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
-            wrapper?.querySelector('.form-validation-error')?.remove();
-        }
-
-        function showError(input, message) {
-            clearError(input);
-            input.setAttribute('aria-invalid', 'true');
-            const error = document.createElement('p');
-            error.className = 'form-validation-error';
-            error.setAttribute('role', 'alert');
-            error.textContent = message;
-            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
-            wrapper?.appendChild(error);
-            input.focus();
-        }
-
-        function validateRegistration(event) {
-            clearError(password);
-            clearError(confirmPassword);
-
-            let invalidInput = null;
-            let message = '';
-
-            if (!password.value) {
-                invalidInput = password;
-                message = 'Please enter a password.';
-            } else if (password.value.length < 8 || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
-                invalidInput = password;
-                message = 'Password must be at least 8 characters and include a number and special character.';
-            } else if (!confirmPassword.value) {
-                invalidInput = confirmPassword;
-                message = 'Please confirm your password.';
-            } else if (password.value !== confirmPassword.value) {
-                invalidInput = confirmPassword;
-                message = 'Passwords do not match.';
+            function clearError(input) {
+                input.removeAttribute('aria-invalid');
+                const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+                wrapper?.querySelector('.form-validation-error')?.remove();
             }
 
-            if (invalidInput) {
-                if (event) {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                }
-                // Restore the button if another script has already changed its label.
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.classList.remove('is-loading', 'loading');
-                    submitButton.removeAttribute('aria-busy');
-                    submitButton.innerHTML = 'Create Account &rarr;';
-                }
-                showError(invalidInput, message);
-                return false;
+            function showError(input, message) {
+                clearError(input);
+                input.setAttribute('aria-invalid', 'true');
+                const error = document.createElement('p');
+                error.className = 'form-validation-error';
+                error.setAttribute('role', 'alert');
+                error.textContent = message;
+                const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+                wrapper?.appendChild(error);
+                input.focus();
             }
-            return true;
-        }
 
-        password.addEventListener('input', () => clearError(password));
-        confirmPassword.addEventListener('input', () => clearError(confirmPassword));
+            function validateRegistration(event) {
+                clearError(password);
+                clearError(confirmPassword);
 
-        // Capture-phase click validation runs before generic loading-button handlers.
-        if (submitButton) {
-            submitButton.addEventListener('click', (event) => {
-                if (!validateRegistration(event)) return;
+                let invalidInput = null;
+                let message = '';
+
+                if (!password.value) {
+                    invalidInput = password;
+                    message = 'Please enter a password.';
+                } else if (password.value.length < 8 || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
+                    invalidInput = password;
+                    message = 'Password must be at least 8 characters and include a number and special character.';
+                } else if (!confirmPassword.value) {
+                    invalidInput = confirmPassword;
+                    message = 'Please confirm your password.';
+                } else if (password.value !== confirmPassword.value) {
+                    invalidInput = confirmPassword;
+                    message = 'Passwords do not match.';
+                }
+
+                if (invalidInput) {
+                    if (event) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                    }
+                    // Restore the button if another script has already changed its label.
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('is-loading', 'loading');
+                        submitButton.removeAttribute('aria-busy');
+                        submitButton.innerHTML = 'Create Account &rarr;';
+                    }
+                    showError(invalidInput, message);
+                    return false;
+                }
+                return true;
+            }
+
+            password.addEventListener('input', () => clearError(password));
+            confirmPassword.addEventListener('input', () => clearError(confirmPassword));
+
+            // Capture-phase click validation runs before generic loading-button handlers.
+            if (submitButton) {
+                submitButton.addEventListener('click', (event) => {
+                    if (!validateRegistration(event)) return;
+                }, true);
+            }
+
+            // Also cover keyboard submission and programmatic form submission.
+            form.addEventListener('submit', (event) => {
+                validateRegistration(event);
             }, true);
-        }
-
-        // Also cover keyboard submission and programmatic form submission.
-        form.addEventListener('submit', (event) => {
-            validateRegistration(event);
-        }, true);
-    })();
+        })();
     </script>
 </body>
+
 </html>

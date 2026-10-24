@@ -22,8 +22,10 @@ function requireLogin()
 
     // Newly registered users must finish onboarding before opening other pages/actions.
     // Existing sessions without this flag are left alone; migrated accounts default to complete.
-    if (array_key_exists('onboarding_completed', $_SESSION)
-        && (int) $_SESSION['onboarding_completed'] === 0) {
+    if (
+        array_key_exists('onboarding_completed', $_SESSION)
+        && (int) $_SESSION['onboarding_completed'] === 0
+    ) {
         $currentScript = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
         if (!in_array($currentScript, ['dashboard.php', 'onboarding_process.php'], true)) {
             $scriptDirectory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));

@@ -1,4 +1,5 @@
 <?php
+
 /** Central session configuration and request-security helpers. */
 
 // Never expose PHP warnings or uncaught exception details to visitors.

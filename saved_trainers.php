@@ -24,7 +24,8 @@ if ($current_user_role !== 'trainee') {
 
 // Helper function for photos
 if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name) {
+    function getProfilePhotoUrl($photo, $name)
+    {
         if (empty($photo) || $photo === 'default.jpg') {
             return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
         }
@@ -110,7 +111,9 @@ if (file_exists('includes/header.php')) {
         </div>
         <?php if (!empty($trainers)): ?>
             <div class="header-callout" style="padding: 0.5rem 1rem; margin: 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb; margin-right:8px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb; margin-right:8px;">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
                 <strong style="color:#2563eb; font-size:0.9rem;"><?= count($trainers) ?> trainers saved</strong>
             </div>
         <?php endif; ?>
@@ -131,7 +134,10 @@ if (file_exists('includes/header.php')) {
                 <p style="color: #64748b; margin-bottom: 1.5rem;">Bookmark trainers you're interested in<br>to find them here later.</p>
                 <a href="search.php" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
                     Find Trainers
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -154,7 +160,9 @@ if (file_exists('includes/header.php')) {
 
                         <!-- Static Red Bookmark strictly for visual consistency with reference -->
                         <div style="position: absolute; top: 0; right: 0; color: #ef4444; padding: 4px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
                         </div>
                     </div>
 
@@ -188,14 +196,17 @@ if (file_exists('includes/header.php')) {
                         <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn btn-outline-primary" style="flex: 1;">
                             View Profile
                         </a>
-                        
+
                         <form action="actions/saved_trainer_process.php" method="POST" class="mentorship-request-form js-confirm-remove-saved" data-trainer-name="<?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?>" style="flex: 1; margin: 0; display: flex;">
                             <input type="hidden" name="action" value="remove">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
                             <input type="hidden" name="return_to" value="saved_trainers.php">
                             <button type="submit" class="btn btn-danger-light" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" data-loading-text="Removing...">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
                                 Remove
                             </button>
                         </form>

@@ -9,8 +9,14 @@ $userId = (int) getCurrentUserId();
 $action = is_string($_POST['action'] ?? null) ? $_POST['action'] : '';
 
 $allowedReturnPages = [
-    'dashboard.php', 'mentorships.php', 'profile.php', 'search.php',
-    'my_skills.php', 'saved_trainers.php', 'edit_profile.php', 'stay_tuned.php'
+    'dashboard.php',
+    'mentorships.php',
+    'profile.php',
+    'search.php',
+    'my_skills.php',
+    'saved_trainers.php',
+    'edit_profile.php',
+    'stay_tuned.php'
 ];
 $returnRaw = $_POST['return_to'] ?? 'dashboard.php';
 $returnTo = is_string($returnRaw) ? basename($returnRaw) : 'dashboard.php';

@@ -32,7 +32,6 @@ try {
     ");
     $skillStmt->execute([$viewId]);
     $userSkills = $skillStmt->fetchAll(PDO::FETCH_COLUMN);
-
 } catch (PDOException $e) {
     error_log("View User Error: " . $e->getMessage());
     $_SESSION['admin_error'] = "We could not load that user right now. Please try again later.";
@@ -40,7 +39,7 @@ try {
     exit();
 }
 
-$avatarUrl = empty($user['profile_photo']) || $user['profile_photo'] === 'default.jpg' 
+$avatarUrl = empty($user['profile_photo']) || $user['profile_photo'] === 'default.jpg'
     ? "https://ui-avatars.com/api/?name=" . urlencode($user['name']) . "&background=eff6ff&color=2563eb&size=120&bold=true"
     : "../assets/images/profile/" . htmlspecialchars($user['profile_photo'], ENT_QUOTES, 'UTF-8');
 
@@ -49,7 +48,10 @@ ob_start();
 <div class="page-header">
     <div>
         <a href="manage_users.php" class="back-link mb-2 inline-flex">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
             Back to Manage Users
         </a>
         <h1>User Overview: <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?></h1>
@@ -64,12 +66,12 @@ ob_start();
             <span class="badge badge-<?= $user['role'] === 'trainer' ? 'purple' : 'green' ?> mt-1">
                 <?= ucfirst($user['role']) ?>
             </span>
-            <?php if($user['is_admin']): ?>
+            <?php if ($user['is_admin']): ?>
                 <span class="badge badge-blue ml-2">Administrator</span>
             <?php endif; ?>
         </div>
     </div>
-    
+
     <div class="view-user-grid">
         <div class="view-user-section">
             <h3>Account Details</h3>
@@ -80,7 +82,7 @@ ob_start();
                 <li><strong>Experience:</strong> <?= !empty($user['exp_level']) ? ucfirst(htmlspecialchars($user['exp_level'])) : 'Not specified' ?></li>
             </ul>
         </div>
-        
+
         <div class="view-user-section">
             <h3>Bio</h3>
             <div class="bio-box">

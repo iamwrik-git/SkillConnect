@@ -76,7 +76,7 @@ if (!$user_not_found && !$is_own_profile && $current_user_role === 'trainee' && 
         ");
         $statusStmt->execute([$current_user_id, $target_user_id]);
         $active_request = $statusStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($active_request) {
             $mentorship_status = $active_request['status'];
         }
@@ -87,7 +87,8 @@ if (!$user_not_found && !$is_own_profile && $current_user_role === 'trainee' && 
 
 // Helper function to resolve profile photo or generate UI-Avatar Initials
 if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name) {
+    function getProfilePhotoUrl($photo, $name)
+    {
         if (empty($photo) || $photo === 'default.jpg') {
             return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
         }
@@ -107,7 +108,10 @@ if (file_exists('includes/header.php')) {
     <!-- Flash Messages (A1 Integration) -->
     <?php if (isset($_SESSION['success'])): ?>
         <div class="profile-alert alert-success js-toast-target">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
             <?= htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['success']); ?>
@@ -115,13 +119,17 @@ if (file_exists('includes/header.php')) {
 
     <?php if (isset($_SESSION['error'])): ?>
         <div class="profile-alert alert-danger js-toast-target">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
             <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
-    
+
     <!-- Page Header -->
     <header class="profile-header-top">
         <div>
@@ -132,18 +140,24 @@ if (file_exists('includes/header.php')) {
         </div>
         <?php if (!empty($_SESSION['is_admin'])): ?>
             <?php
-                // Rebuild return query string excluding user_id to preserve filters
-                $returnParams = $_GET;
-                unset($returnParams['user_id']);
-                $returnQs = !empty($returnParams) ? '?' . http_build_query($returnParams) : '';
+            // Rebuild return query string excluding user_id to preserve filters
+            $returnParams = $_GET;
+            unset($returnParams['user_id']);
+            $returnQs = !empty($returnParams) ? '?' . http_build_query($returnParams) : '';
             ?>
             <a href="admin/manage_users.php<?= htmlspecialchars($returnQs, ENT_QUOTES, 'UTF-8') ?>" class="back-link">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
                 Back to Manage Users
             </a>
         <?php else: ?>
             <a href="dashboard.php" class="back-link">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
                 Back to Dashboard
             </a>
         <?php endif; ?>
@@ -162,28 +176,38 @@ if (file_exists('includes/header.php')) {
                 <!-- Uses UI-Avatars if no photo exists! -->
                 <img src="<?= getProfilePhotoUrl($profile_user['profile_photo'] ?? '', $profile_user['name']) ?>" alt="Profile Photo" class="profile-display-photo">
             </div>
-            
+
             <div class="profile-details">
                 <h2 class="profile-name">
                     <?= htmlspecialchars($profile_user['name'], ENT_QUOTES, 'UTF-8') ?>
                 </h2>
-                
+
                 <div class="profile-role-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                     <?= htmlspecialchars(ucfirst($profile_user['role']), ENT_QUOTES, 'UTF-8') ?>
                 </div>
 
                 <div class="profile-meta-grid">
                     <div class="meta-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                        <strong>Experience:</strong> 
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="meta-icon">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <strong>Experience:</strong>
                         <span><?= !empty($profile_user['exp_level']) ? htmlspecialchars(ucfirst($profile_user['exp_level']), ENT_QUOTES, 'UTF-8') : 'Not specified' ?></span>
                     </div>
-                    
+
                     <?php if ($is_own_profile && !empty($profile_user['email'])): ?>
                         <div class="meta-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <strong>Email:</strong> 
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="meta-icon">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <strong>Email:</strong>
                             <span><?= htmlspecialchars($profile_user['email'], ENT_QUOTES, 'UTF-8') ?></span>
                             <span class="meta-note">(Only visible to you)</span>
                         </div>
@@ -195,29 +219,43 @@ if (file_exists('includes/header.php')) {
             <div class="profile-action-area">
                 <?php if ($is_own_profile): ?>
                     <a href="edit_profile.php" class="profile-btn profile-btn-primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
                         Edit Profile
                     </a>
                 <?php elseif ($current_user_role === 'trainee' && $profile_user['role'] === 'trainer'): ?>
-                    
+
                     <?php if ($mentorship_status === 'pending'): ?>
                         <button disabled class="profile-btn btn-status-pending">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
                             Mentorship Request Pending
                         </button>
                     <?php elseif ($mentorship_status === 'accepted'): ?>
                         <button disabled class="profile-btn btn-status-accepted">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
                             Already Connected
                         </button>
                     <?php else: ?>
                         <!-- STRICTLY PRESERVED POST ACTION WITH A3 LOADING STATE -->
                         <form method="POST" action="actions/mentorship_process.php" class="profile-action-form">
                             <input type="hidden" name="action" value="send_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="trainer_id" value="<?= (int)$target_user_id ?>">
                             <button type="submit" class="profile-btn profile-btn-primary" data-loading-text="Sending...">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="8.5" cy="7" r="4"></circle>
+                                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                                </svg>
                                 Request Mentorship
                             </button>
                         </form>
@@ -229,10 +267,16 @@ if (file_exists('includes/header.php')) {
 
         <!-- Content Grid (About & Skills) -->
         <div class="profile-content-grid">
-            
+
             <section class="profile-card">
                 <h2 class="profile-section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <line x1="21.17" y1="8" x2="12" y2="8"></line>
+                        <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+                        <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+                    </svg>
                     About
                 </h2>
                 <div class="profile-bio-text">
@@ -249,7 +293,11 @@ if (file_exists('includes/header.php')) {
 
             <section class="profile-card">
                 <h2 class="profile-section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
                     <?= $profile_user['role'] === 'trainee' ? 'Skills I Want to Learn' : 'Skills I Teach' ?>
                 </h2>
 
@@ -258,10 +306,13 @@ if (file_exists('includes/header.php')) {
                         <!-- A6 Better Empty State (Fixed Visitor Logic) -->
                         <div class="empty-state" style="border: none; box-shadow: none; padding: 1.5rem 0 0 0; background: transparent;">
                             <div class="empty-state-icon" style="width: 48px; height: 48px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
                             </div>
                             <h3 style="font-size: 1rem;">No skills added yet</h3>
-                            
+
                             <?php if ($is_own_profile): ?>
                                 <p style="margin-bottom: 1rem;"><?= $profile_user['role'] === 'trainee' ? 'Add the skills you want to learn.' : 'Add the skills you teach to help trainees discover your profile.' ?></p>
                                 <a href="edit_profile.php" class="btn btn-secondary empty-state-action">Edit Profile</a>
@@ -287,7 +338,7 @@ if (file_exists('includes/header.php')) {
 
 </div>
 
-<?php 
+<?php
 // 8. Output Footer
 if (file_exists('includes/footer.php')) {
     require_once 'includes/footer.php';

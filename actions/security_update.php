@@ -37,7 +37,7 @@ try {
     }
 
     // Dynamically identify the correct password column name (commonly 'password' or 'password_hash')
-    $pass_col = 'password'; 
+    $pass_col = 'password';
     if (array_key_exists('password_hash', $user)) {
         $pass_col = 'password_hash';
     } elseif (array_key_exists('pass', $user)) {
@@ -76,7 +76,7 @@ try {
         }
 
         $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
-        
+
         $updateStmt = $pdo->prepare("UPDATE users SET {$pass_col} = ? WHERE user_id = ?");
         $updateStmt->execute([$new_hash, $user_id]);
 
@@ -163,7 +163,6 @@ try {
             exit();
         }
     }
-
 } catch (PDOException $e) {
     error_log("Security Update Error: " . $e->getMessage());
     $_SESSION['error'] = "We could not update your account settings. Please try again later.";
@@ -173,4 +172,3 @@ try {
 
 header("Location: ../edit_profile.php");
 exit();
-?>

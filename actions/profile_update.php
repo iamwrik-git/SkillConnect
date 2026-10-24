@@ -1,4 +1,4 @@
-<?php 
+<?php
 //profile_update.php 
 
 //Very common code
@@ -19,8 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !is_string($_POST['action'] ?? null
     exit();
 }
 
-if (!csrfValid($_POST['csrf_token'] ?? null)) { skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
-    exit; }
+if (!csrfValid($_POST['csrf_token'] ?? null)) {
+    skillConnectErrorResponse(403, 'Your request could not be verified. Refresh the page and try again.');
+    exit;
+}
 
 $nameInput = $_POST['name'] ?? '';
 $bioInput = $_POST['bio'] ?? '';
@@ -30,12 +32,12 @@ $bio = is_string($bioInput) ? trim($bioInput) : '';
 $exp_level = is_string($expInput) ? $expInput : null; //set the exp_level if its updated, keep null if not
 
 //catch '' string from html form input & set it to null
-if($exp_level === ''){
+if ($exp_level === '') {
     $exp_level = null;
 }
 
 //if name is empty or its lenth is more than 100 char fallback to edit_profile
-if(empty($name) || strlen($name) > 100){
+if (empty($name) || strlen($name) > 100) {
     $_SESSION['error'] = 'Name is required and must not exceed 100 characters';
     header("Location: ../edit_profile.php");
     exit();
@@ -44,7 +46,7 @@ if(empty($name) || strlen($name) > 100){
 
 $allowed_exp_levels = ['Beginner', 'Intermediate', 'Expert']; //set a valid choice of exp_level
 //check if the user forget to set exp_level or $exp_level is not allowed_exp_level[Done by in_array stmt]
-if($exp_level !== null && !in_array($exp_level, $allowed_exp_levels, true)){
+if ($exp_level !== null && !in_array($exp_level, $allowed_exp_levels, true)) {
     $_SESSION['error'] = "Invalid experience level selected.";
     header("Location: ../edit_profile.php");
     exit();
@@ -65,26 +67,26 @@ try {
     $current_photo = $user['profile_photo'] ?? 'default.jpg';
 } catch (PDOException $e) {
     //this common block handle any database error & throw massage
-    error_log("Database Error (Fetch User): ".$e->getMessage());
+    error_log("Database Error (Fetch User): " . $e->getMessage());
     $_SESSION['error'] = "We could not update your profile right now. Please try again later.";
     header("Location: ../edit_profile.php");
     exit();
 }
 
 $new_photo_filename = null; //a new photo file name variable created, set null for later use
- //__DIR__ find absolute file path where this script, Enable the code to run even if the sever changed
-$upload_dir = __DIR__. '/../assets/images/profile/';
+//__DIR__ find absolute file path where this script, Enable the code to run even if the sever changed
+$upload_dir = __DIR__ . '/../assets/images/profile/';
 
 //##IMPORTANT
-if(!is_dir($upload_dir)){ //if upload directory missing
-// create a new directory. "0755" - security permission means only owner can read & write 
-// for rest of server read only 
+if (!is_dir($upload_dir)) { //if upload directory missing
+    // create a new directory. "0755" - security permission means only owner can read & write 
+    // for rest of server read only 
     mkdir($upload_dir, 0755, true);
 }
 
 //stmt Ensure that global files array has an item named prifle photo and
 //if user doesn't add any photo "!== UPLOAD_ERR_NO_FILE" become true. So father code will not run
-if(isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLOAD_ERR_NO_FILE){
+if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLOAD_ERR_NO_FILE) {
     $file = $_FILES['profile_photo'];
 
     //during a file upload PHP populate with a internal int code, 0 means success, anything else error
@@ -105,7 +107,7 @@ if(isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLO
     //getimagesize() verify that the uploaded pic is a legitmate image
     $image_info = getimagesize($file['tmp_name']);
     //if getimagesize() failed return false
-    if ($image_info === false) { 
+    if ($image_info === false) {
         $_SESSION['error'] = "The uploaded file is not a valid image.";
         header("Location: ../edit_profile.php");
         exit();
@@ -129,8 +131,8 @@ if(isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLO
     }
 
     $extension = 'jpg';
-    if($image_info['mime'] === 'image/png') $extension = 'png';
-    if($image_info['mime'] === 'image/webp') $extension = 'webp';
+    if ($image_info['mime'] === 'image/png') $extension = 'png';
+    if ($image_info['mime'] === 'image/webp') $extension = 'webp';
 
     //Genarate a new file name-
     //attach the user_id and a randomised text by uniquid(..., true) then .fileExtension
@@ -165,8 +167,8 @@ try {
     $_SESSION['role'] = $user['role'] ?? ($_SESSION['role'] ?? 'trainee');
     $_SESSION['success'] = "Profile updated successfully.";
 } catch (PDOException $e) {
-    error_log("Database error (Update Profile): ".$e->getMessage());
-    
+    error_log("Database error (Update Profile): " . $e->getMessage());
+
     //upload file clean up for failed uploads
     if ($new_photo_filename) {
         $failed_upload_path = $upload_dir . $new_photo_filename;

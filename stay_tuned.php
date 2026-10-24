@@ -10,6 +10,7 @@ requireLogin();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,21 +19,22 @@ requireLogin();
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
 
     <div class="stay-tuned-wrapper">
         <div class="stay-tuned-card">
-            
+
             <!-- SkillConnect Logo -->
             <a href="dashboard.php" class="stay-tuned-logo">
                 <img src="assets/images/skillconnect-logo.svg"
-                     alt="SkillConnect"
-                     class="stay-tuned-logo-image">
+                    alt="SkillConnect"
+                    class="stay-tuned-logo-image">
             </a>
-            
+
             <h1 class="stay-tuned-title">Stay Tuned</h1>
             <p class="stay-tuned-message">This feature will be available in a future version of SkillConnect.</p>
-            
+
             <!-- Safe return link so the user is not trapped -->
             <a href="dashboard.php" class="stay-tuned-back">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -46,4 +48,5 @@ requireLogin();
     </div>
 
 </body>
+
 </html>

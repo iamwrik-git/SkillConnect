@@ -51,7 +51,7 @@ try {
 
 // 4. Handle Search Requests and Sorting Validation
 $search_skill_id = filter_input(INPUT_GET, 'skill_id', FILTER_VALIDATE_INT);
-$search_query = trim($_GET['q'] ?? ''); 
+$search_query = trim($_GET['q'] ?? '');
 $sort = $_GET['sort'] ?? 'name_asc';
 
 $search_performed = false;
@@ -116,11 +116,11 @@ if ($search_skill_id && $search_skill_id > 0) {
         error_log("Trainer Search Error (Dropdown): " . $e->getMessage());
         $search_error = "An unexpected error occurred while searching for trainers.";
     }
-} 
+}
 // SCENARIO B: User used the Global Search Bar
 elseif (!empty($search_query)) {
     $search_performed = true;
-    $selected_skill_name = '"' . $search_query . '"'; 
+    $selected_skill_name = '"' . $search_query . '"';
 
     try {
         $like_term = '%' . $search_query . '%';
@@ -278,7 +278,7 @@ if (file_exists('includes/header.php')) {
                     <h3>Search Results for <?= htmlspecialchars($selected_skill_name, ENT_QUOTES, 'UTF-8') ?></h3>
                     <span class="badge results-badge"><?= count($trainers) ?> trainers found</span>
                 </div>
-                
+
                 <div class="results-sort">
                     <form action="search.php" method="GET" class="sort-form">
                         <?php if (!empty($search_query)): ?>
@@ -287,7 +287,7 @@ if (file_exists('includes/header.php')) {
                         <?php if (!empty($search_skill_id)): ?>
                             <input type="hidden" name="skill_id" value="<?= htmlspecialchars($search_skill_id, ENT_QUOTES, 'UTF-8') ?>">
                         <?php endif; ?>
-                        
+
                         <span class="sort-label">Sort by:</span>
                         <select name="sort" class="form-input sort-select" onchange="this.form.submit()">
                             <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Name (A - Z)</option>
@@ -339,23 +339,27 @@ if (file_exists('includes/header.php')) {
                                         <?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') . ' experience' : 'Experience not specified' ?>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Bookmark Form -->
                                 <?php if ($current_user_role === 'trainee'): ?>
                                     <form action="actions/saved_trainer_process.php" method="POST" class="bookmark-form" style="position: absolute; top: -4px; right: -4px; margin: 0;">
                                         <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
-                                        
+
                                         <?php if (in_array($trainer['user_id'], $saved_trainers)): ?>
                                             <input type="hidden" name="action" value="remove">
                                             <button type="submit" class="bookmark-btn saved" aria-label="Remove saved trainer" title="Remove saved trainer">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                                </svg>
                                             </button>
                                         <?php else: ?>
                                             <input type="hidden" name="action" value="save">
                                             <button type="submit" class="bookmark-btn unsaved" aria-label="Save trainer" title="Save trainer">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                                </svg>
                                             </button>
                                         <?php endif; ?>
                                     </form>
@@ -392,13 +396,16 @@ if (file_exists('includes/header.php')) {
                                 <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn btn-outline-primary">
                                     View Profile
                                 </a>
-                                
+
                                 <form action="actions/mentorship_process.php" method="POST" class="mentorship-request-form">
                                     <input type="hidden" name="action" value="send_request">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
                                     <button type="submit" class="btn btn-primary" data-loading-text="Requesting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                        </svg>
                                         Request Mentorship
                                     </button>
                                 </form>
