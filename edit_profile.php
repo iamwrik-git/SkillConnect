@@ -42,15 +42,6 @@ try {
 $recovery_configured = !empty($user['security_question'])
     && !empty($user['security_answer_hash']);
 
-// Show the setup prompt at most once per PHP session for this authenticated user.
-// Set the flag before rendering so refreshes and revisits cannot show it again.
-$recovery_prompt_session_key = 'recovery_prompt_shown_user_' . (int) $user_id;
-$show_recovery_modal = false;
-
-if (!$recovery_configured && empty($_SESSION[$recovery_prompt_session_key])) {
-    $_SESSION[$recovery_prompt_session_key] = true;
-    $show_recovery_modal = true;
-}
 
 // Helper for UI-Avatars (Fallback for profile photo)
 if (!function_exists('getProfilePhotoUrl')) {
@@ -448,34 +439,6 @@ if (file_exists('includes/header.php')) {
     </div>
 
 </div>
-
-<!-- Modal Popup for Unconfigured Account Recovery -->
-<?php if ($show_recovery_modal): ?>
-<div id="recovery-setup-modal"
-     class="recovery-modal-backdrop"
-     aria-hidden="true"
-     role="presentation">
-    <div class="recovery-modal-content"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="recovery-modal-title"
-         aria-describedby="recovery-modal-description"
-         tabindex="-1">
-        <button type="button" class="recovery-btn-close btn-close-modal" aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="recovery-modal-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </div>
-        <h2 id="recovery-modal-title">Set Up Account Recovery</h2>
-        <p id="recovery-modal-description">Protect your account by setting up a recovery question. This will help you reset your password if you ever forget it.</p>
-        <div class="recovery-modal-actions">
-            <button type="button" id="btn-setup-now" class="btn btn-primary">Set Up Now</button>
-            <button type="button" id="btn-maybe-later" class="btn btn-secondary">Maybe Later</button>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
 
 <!-- Inline Javascript for Tabs and Modal to bypass browser caching -->
 <script>

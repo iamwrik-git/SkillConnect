@@ -65,7 +65,9 @@ if ($action === 'register') {
 
         // Hash and insert
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $insertstmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)");
+        // New registrations must complete onboarding before using the application.
+        // Existing accounts retain onboarding_completed = 1 via the database default.
+        $insertstmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role, onboarding_completed) VALUES (?, ?, ?, ?, 0)");
         $insertstmt->execute([$name, $email, $password_hash, $role]);
 
         $new_user_id = $pdo->lastInsertId();
@@ -76,6 +78,7 @@ if ($action === 'register') {
         $_SESSION['role'] = $role;
         $_SESSION['profile_photo'] = 'default.jpg';
         $_SESSION['is_admin'] = 0;
+        $_SESSION['onboarding_completed'] = 0;
 
         header('Location: ../dashboard.php');
         exit();
@@ -98,7 +101,7 @@ if ($action === 'register') {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, role, is_admin, profile_photo FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, role, is_admin, profile_photo, onboarding_completed FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -110,6 +113,7 @@ if ($action === 'register') {
             $_SESSION['role'] = $user['role'];
             $_SESSION['profile_photo'] = $user['profile_photo'] ?? 'default.jpg';
             $_SESSION['is_admin'] = $user['is_admin'];
+            $_SESSION['onboarding_completed'] = (int) ($user['onboarding_completed'] ?? 1);
 
             if ($user['is_admin'] == 1) {
                 header("Location: ../admin/dashboard.php");

@@ -14,6 +14,54 @@ $role = $_SESSION['role'] ?? '';
 $name = trim((string)($_SESSION['name'] ?? 'User'));
 $first_name = preg_split('/\s+/', $name)[0] ?? 'User';
 
+// First-login onboarding state. The database migration adds onboarding_completed;
+// old accounts default to complete, while registration explicitly sets new accounts to 0.
+$onboarding_user = [];
+$show_onboarding_profile = false;
+$show_onboarding_security = false;
+$onboarding_error = (string) ($_SESSION['onboarding_error'] ?? '');
+unset($_SESSION['onboarding_error']);
+$show_onboarding_success = !empty($_SESSION['onboarding_success']);
+unset($_SESSION['onboarding_success']);
+if (empty($_SESSION['onboarding_csrf']) || !is_string($_SESSION['onboarding_csrf'])) {
+    $_SESSION['onboarding_csrf'] = bin2hex(random_bytes(32));
+}
+$onboarding_csrf = $_SESSION['onboarding_csrf'];
+
+try {
+    $onboardingStmt = $pdo->prepare(
+        'SELECT name, bio, exp_level, security_question, security_answer_hash, onboarding_completed FROM users WHERE user_id = ? LIMIT 1'
+    );
+    $onboardingStmt->execute([(int) $user_id]);
+    $onboarding_user = $onboardingStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    $onboardingComplete = (int) ($onboarding_user['onboarding_completed'] ?? 1) === 1;
+    $_SESSION['onboarding_completed'] = $onboardingComplete ? 1 : 0;
+
+    if (!$onboardingComplete) {
+        $profileIsComplete = trim((string) ($onboarding_user['name'] ?? '')) !== ''
+            && in_array(($onboarding_user['exp_level'] ?? ''), ['Beginner', 'Intermediate', 'Expert'], true)
+            && trim((string) ($onboarding_user['bio'] ?? '')) !== '';
+        $securityIsComplete = !empty($onboarding_user['security_question'])
+            && !empty($onboarding_user['security_answer_hash']);
+
+        if ($profileIsComplete && $securityIsComplete) {
+            // Recover gracefully if the security values were saved but the final flag was not.
+            $finishStmt = $pdo->prepare('UPDATE users SET onboarding_completed = 1 WHERE user_id = ?');
+            $finishStmt->execute([(int) $user_id]);
+            $_SESSION['onboarding_completed'] = 1;
+            $show_onboarding_success = true;
+        } elseif (!$profileIsComplete) {
+            $show_onboarding_profile = true;
+        } else {
+            $show_onboarding_security = true;
+        }
+    }
+} catch (PDOException $e) {
+    error_log('Onboarding state lookup failed: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Unable to load account setup. Please check the SkillConnect database migration and try again.');
+}
+
 // 4. Fetch Database Information
 $skills = [];
 $pending_requests = [];
@@ -110,6 +158,89 @@ function getProfilePhotoUrl($photo, $name)
 ?>
 
 <div class="dashboard-page">
+
+    <?php if ($show_onboarding_success): ?>
+        <div class="sc-onboarding-toast" role="status" aria-live="polite">
+            <span class="sc-onboarding-toast-icon" aria-hidden="true">✓</span>
+            <div><strong>Profile completed!</strong><span>Your account is now set up.</span></div>
+            <button type="button" class="sc-onboarding-toast-close" aria-label="Dismiss notification">×</button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($show_onboarding_profile || $show_onboarding_security): ?>
+        <div class="sc-onboarding-backdrop" id="sc-onboarding-backdrop">
+            <?php if ($show_onboarding_profile): ?>
+                <section class="sc-onboarding-modal sc-onboarding-profile-modal" role="dialog" aria-modal="true" aria-labelledby="sc-onboarding-title" aria-describedby="sc-onboarding-description">
+                    <aside class="sc-onboarding-aside sc-onboarding-aside-profile">
+                        <img class="sc-onboarding-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect">
+                        <span class="sc-onboarding-step">STEP 1 OF 2</span>
+                        <h2>Welcome to SkillConnect!</h2>
+                        <p id="sc-onboarding-description">Let’s set up your profile so you can get the most out of your learning and mentorship experience.</p>
+                        <div class="sc-onboarding-art" aria-hidden="true">
+                            <div class="sc-art-orbit sc-art-orbit-one"></div><div class="sc-art-orbit sc-art-orbit-two"></div>
+                            <div class="sc-art-laptop"><div class="sc-art-screen"><span></span><span></span><span></span><i></i><i></i><i></i></div><div class="sc-art-keyboard"></div></div>
+                            <div class="sc-art-cap"><svg viewBox="0 0 48 48" fill="none"><path d="M4 17 24 7l20 10-20 10L4 17Z" fill="currentColor"/><path d="M12 22v11c7 6 17 6 24 0V22L24 28 12 22Z" fill="currentColor" opacity=".72"/><path d="M43 18v13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+                            <div class="sc-art-sparkle">✦</div>
+                        </div>
+                        <div class="sc-onboarding-aside-note"><span>✓</span> A better profile helps people connect with you.</div>
+                    </aside>
+                    <div class="sc-onboarding-form-panel">
+                        <div class="sc-onboarding-form-heading"><span class="sc-onboarding-step-mobile">STEP 1 OF 2</span><h2 id="sc-onboarding-title">Complete Your Profile</h2><p>Provide a few details to get started.</p></div>
+                        <?php if ($onboarding_error !== ''): ?><div class="sc-onboarding-error" role="alert"><?= htmlspecialchars($onboarding_error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+                        <form action="actions/onboarding_process.php" method="post" class="sc-onboarding-form" novalidate>
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($onboarding_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="action" value="save_profile">
+                            <div class="sc-onboarding-field"><label for="sc-onboarding-name">Full Name <span>*</span></label><input id="sc-onboarding-name" name="full_name" type="text" maxlength="100" autocomplete="name" required value="<?= htmlspecialchars((string) ($onboarding_user['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Enter your full name"></div>
+                            <div class="sc-onboarding-field"><label for="sc-onboarding-level">Expertise Level <span>*</span></label><select id="sc-onboarding-level" name="exp_level" required><option value="">Select expertise level</option><option value="Beginner" <?= (($onboarding_user['exp_level'] ?? '') === 'Beginner') ? 'selected' : '' ?>>Beginner</option><option value="Intermediate" <?= (($onboarding_user['exp_level'] ?? '') === 'Intermediate') ? 'selected' : '' ?>>Intermediate</option><option value="Expert" <?= (($onboarding_user['exp_level'] ?? '') === 'Expert') ? 'selected' : '' ?>>Expert</option></select></div>
+                            <div class="sc-onboarding-field"><label for="sc-onboarding-bio">Bio <span>*</span></label><textarea id="sc-onboarding-bio" name="bio" rows="4" maxlength="300" required placeholder="Tell us about yourself, your skills and interests..."><?= htmlspecialchars((string) ($onboarding_user['bio'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea><div class="sc-onboarding-char-count"><span id="sc-onboarding-bio-count"><?= strlen((string) ($onboarding_user['bio'] ?? '')) ?></span>/300</div></div>
+                            <button type="submit" class="sc-onboarding-submit">Save &amp; Continue <span aria-hidden="true">→</span></button>
+                            <p class="sc-onboarding-required-note"><span>*</span> Required fields</p>
+                        </form>
+                    </div>
+                </section>
+            <?php else: ?>
+                <section class="sc-onboarding-modal sc-onboarding-security-modal" role="dialog" aria-modal="true" aria-labelledby="sc-onboarding-title" aria-describedby="sc-onboarding-description">
+                    <aside class="sc-onboarding-aside sc-onboarding-aside-security">
+                        <img class="sc-onboarding-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect">
+                        <span class="sc-onboarding-step">STEP 2 OF 2</span>
+                        <div class="sc-security-illustration" aria-hidden="true"><div class="sc-security-halo"></div><svg viewBox="0 0 100 112" fill="none"><path d="M50 5 86 19v29c0 25-15 43-36 57C29 91 14 73 14 48V19L50 5Z" fill="url(#scShieldGradient)"/><path d="M50 5 86 19v29c0 25-15 43-36 57V5Z" fill="#2563eb" opacity=".38"/><rect x="35" y="43" width="30" height="25" rx="5" fill="white"/><path d="M41 43v-7a9 9 0 0 1 18 0v7" stroke="white" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="54" r="3" fill="#2563eb"/><path d="M50 57v5" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="scShieldGradient" x1="14" y1="5" x2="86" y2="105" gradientUnits="userSpaceOnUse"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs></svg></div>
+                        <h2>Keep Your Account Safe</h2>
+                        <p id="sc-onboarding-description">Set up your security question to help recover your account if you ever forget your password.</p>
+                        <ul class="sc-security-benefits"><li><span>✓</span> Quick and easy setup</li><li><span>✓</span> Helps keep your account secure</li><li><span>✓</span> Used for password recovery</li></ul>
+                    </aside>
+                    <div class="sc-onboarding-form-panel">
+                        <div class="sc-onboarding-form-heading"><span class="sc-onboarding-step-mobile">STEP 2 OF 2</span><h2 id="sc-onboarding-title">Set Up Security Questions</h2><p>Choose a security question and provide your answer.</p></div>
+                        <?php if ($onboarding_error !== ''): ?><div class="sc-onboarding-error" role="alert"><?= htmlspecialchars($onboarding_error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+                        <form action="actions/onboarding_process.php" method="post" class="sc-onboarding-form">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($onboarding_csrf, ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="action" value="save_security">
+                            <div class="sc-onboarding-field"><label for="sc-security-question">Security Question <span>*</span></label><select id="sc-security-question" name="security_question" required><option value="">Select a security question</option><option value="school">What was the name of your first school?</option><option value="pet">What was the name of your first pet?</option><option value="nickname">What was your childhood nickname?</option><option value="city">In what city were you born?</option></select></div>
+                            <div class="sc-onboarding-field">
+                                <label for="sc-security-answer">Your Answer <span>*</span></label>
+                                <div style="position:relative;width:100%;">
+                                    <input id="sc-security-answer" type="password" name="security_answer" maxlength="255" autocomplete="off" required placeholder="Enter your answer" style="padding-right:48px;">
+                                    <button type="button" class="sc-security-answer-toggle" data-target="sc-security-answer" aria-label="Show security answer" aria-pressed="false" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:7px;background:transparent;color:#64748b;cursor:pointer;">
+                                        <svg class="sc-eye-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="sc-onboarding-field">
+                                <label for="sc-security-confirm">Confirm Answer <span>*</span></label>
+                                <div style="position:relative;width:100%;">
+                                    <input id="sc-security-confirm" type="password" name="confirm_security_answer" maxlength="255" autocomplete="off" required placeholder="Re-enter your answer" style="padding-right:48px;">
+                                    <button type="button" class="sc-security-answer-toggle" data-target="sc-security-confirm" aria-label="Show confirmation answer" aria-pressed="false" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:7px;background:transparent;color:#64748b;cursor:pointer;">
+                                        <svg class="sc-eye-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" class="sc-onboarding-submit">Save &amp; Finish <span aria-hidden="true">→</span></button>
+                            <p class="sc-onboarding-required-note"><span>*</span> Required fields</p>
+                        </form>
+                    </div>
+                </section>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <?php if ($db_error): ?>
         <section class="card error-card">
@@ -434,6 +565,45 @@ function getProfilePhotoUrl($photo, $name)
     <?php endif; ?>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const backdrop = document.getElementById('sc-onboarding-backdrop');
+    if (backdrop) {
+        document.body.classList.add('sc-onboarding-active');
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') event.preventDefault();
+        });
+        backdrop.addEventListener('click', function (event) {
+            if (event.target === backdrop) event.preventDefault();
+        });
+        const firstInput = backdrop.querySelector('input:not([type="hidden"]), select, textarea');
+        if (firstInput) firstInput.focus({preventScroll: true});
+    }
+    document.querySelectorAll('.sc-security-answer-toggle').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const input = document.getElementById(button.dataset.target);
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.setAttribute('aria-pressed', show ? 'true' : 'false');
+            button.setAttribute('aria-label', show ? 'Hide security answer' : (input.id === 'sc-security-confirm' ? 'Show confirmation answer' : 'Show security answer'));
+            button.innerHTML = show
+                ? '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16.6 16.6 0 0 1-3.2 4.1"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"/></svg>'
+                : '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+        });
+    });
+    const bio = document.getElementById('sc-onboarding-bio');
+    const count = document.getElementById('sc-onboarding-bio-count');
+    if (bio && count) bio.addEventListener('input', () => count.textContent = String(bio.value.length));
+    const toast = document.querySelector('.sc-onboarding-toast');
+    if (toast) {
+        const close = toast.querySelector('.sc-onboarding-toast-close');
+        if (close) close.addEventListener('click', () => toast.remove());
+        window.setTimeout(() => toast.remove(), 6500);
+    }
+});
+</script>
 
 <?php
 if (file_exists('includes/footer.php')) {
