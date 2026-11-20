@@ -10,7 +10,7 @@ requireLogin();
 $user_id = getCurrentUserId();
 $role = $_SESSION['role'] ?? 'trainee';
 
-$page_title = $role === 'trainer' ? 'My Trainees' : 'My Mentorships';
+$page_title = $role === 'trainer' ? 'My Mentees' : 'My Mentors';
 
 $accepted = [];
 $pending = [];
@@ -66,30 +66,25 @@ try {
 if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
-
-if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name)
-    {
-        if (empty($photo) || $photo === 'default.jpg') {
-            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&bold=true";
-        }
-        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
-    }
-}
 ?>
 
 <div class="mentorships-page">
 
     <div class="mentorships-header">
         <h1 class="page-title"><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></h1>
-        <p class="page-subtitle">Manage your <?= $role === 'trainer' ? 'trainees' : 'mentors' ?>, pending requests and history in one place.</p>
+        <p class="page-subtitle">Manage your <?= $role === 'trainer' ? 'mentees' : 'mentors' ?>, pending requests and history in one place.</p>
     </div>
 
     <!-- 1. ACCEPTED MENTORSHIPS -->
     <div class="mentorship-list-card">
         <div class="mentorship-list-header">
-            <h3><?= $role === 'trainer' ? 'Accepted Trainees' : 'My Mentors' ?> (<?= count($accepted) ?>)</h3>
-            <p><?= $role === 'trainer' ? 'Trainees who have accepted your mentorship.' : 'Trainers who have accepted your mentorship requests.' ?></p>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <h3><?= $role === 'trainer' ? 'My Mentees' : 'My Mentors' ?> (<?= count($accepted) ?>)</h3>
+                <?php if (!empty($accepted)): ?>
+                    <span class="badge-pill-active"><?= count($accepted) ?> active</span>
+                <?php endif; ?>
+            </div>
+            <p><?= $role === 'trainer' ? 'Mentees you are mentoring.' : 'Mentors who have accepted your mentorship requests.' ?></p>
         </div>
         <div class="mentorship-list-body">
             <?php if (empty($accepted)): ?>
@@ -100,64 +95,36 @@ if (!function_exists('getProfilePhotoUrl')) {
                             <circle cx="9" cy="7" r="4"></circle>
                         </svg>
                     </div>
-                    <p>No <?= $role === 'trainer' ? 'trainees' : 'mentors' ?> yet.</p>
+                    <p>No <?= $role === 'trainer' ? 'mentees' : 'mentors' ?> yet.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($accepted as $req): ?>
-                    <?php $skills_arr = !empty($req['skills']) ? array_unique(explode(',', $req['skills'])) : []; ?>
-                    <div class="mentorship-list-item">
-                        <div class="mentorship-user-info">
-                            <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile">
-                            <div>
-                                <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                                <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
-                            </div>
-                        </div>
-                        <div class="mentorship-skills skill-chips-mini">
-                            <?php foreach (array_slice($skills_arr, 0, 4) as $skill): ?>
-                                <span class="chip-mini"><?= htmlspecialchars(trim($skill), ENT_QUOTES, 'UTF-8') ?></span>
-                            <?php endforeach; ?>
-                            <?php if (count($skills_arr) > 4): ?>
-                                <span class="chip-mini">+<?= count($skills_arr) - 4 ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="mentorship-actions">
-                            <span class="badge badge-success"><?= $role === 'trainer' ? 'Trainee' : 'Mentor' ?></span>
-                            <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                View Profile
-                            </a>
-                            <div class="mentorship-more" data-mentorship-menu>
-                                <button type="button" class="mentorship-more-toggle" aria-label="More mentorship actions" aria-expanded="false" aria-haspopup="true">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <circle cx="12" cy="5" r="1.5"></circle>
-                                        <circle cx="12" cy="12" r="1.5"></circle>
-                                        <circle cx="12" cy="19" r="1.5"></circle>
-                                    </svg>
-                                </button>
-                                <div class="mentorship-more-menu" hidden>
-                                    <form action="actions/mentorship_process.php" method="POST" class="js-confirm-unlink-mentorship" data-connection-name="<?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?>" data-connection-role="<?= $role === 'trainer' ? 'trainee' : 'mentor' ?>">
-                                        <input type="hidden" name="action" value="unlink_mentorship">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                                        <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
-                                        <button type="submit" class="mentorship-unlink-action">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M8 6V4h8v2"></path>
-                                                <path d="M19 6l-1 14H6L5 6"></path>
-                                                <path d="M10 11v5M14 11v5"></path>
-                                            </svg>
-                                            <span><strong>Unlink <?= $role === 'trainer' ? 'Trainee' : 'Mentor' ?></strong><small>Remove this connection from your <?= $role === 'trainer' ? 'trainees' : 'mentorships' ?>.</small></span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                <div class="connection-card-list">
+                    <?php 
+                    $first_conn_skill = '';
+                    foreach ($accepted as $req): 
+                        $skills_arr = !empty($req['skills']) ? array_unique(array_filter(array_map('trim', explode(',', $req['skills'])))) : [];
+                        if (!$first_conn_skill && !empty($skills_arr)) {
+                            $first_conn_skill = reset($skills_arr);
+                        }
+                        $card_user_id = (int)$req['user_id'];
+                        $card_name = $req['name'];
+                        $card_photo = $req['profile_photo'] ?? null;
+                        $card_exp_level = $req['exp_level'] ?? null;
+                        $card_skills = $skills_arr;
+                        $card_primary_skill = !empty($skills_arr) ? reset($skills_arr) : '';
+                        $card_role_label = $role === 'trainer' ? 'Mentee' : 'Mentor';
+                        $card_request_id = (int)($req['request_id'] ?? 0);
+                        $card_show_unlink = true;
+                        $card_compact = false;
+                        $card_view_label = 'View Profile';
+                        require __DIR__ . '/includes/partials/connection_card.php';
+                    endforeach; 
+                    ?>
+                </div>
+                <div class="connection-tip">
+                    <span class="connection-tip-icon">Tip:</span>
+                    <span>Use <strong>Message</strong> to chat and collaborate without leaving this page.</span>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -166,7 +133,7 @@ if (!function_exists('getProfilePhotoUrl')) {
     <div class="mentorship-list-card">
         <div class="mentorship-list-header">
             <h3>Pending Requests (<?= count($pending) ?>)</h3>
-            <p><?= $role === 'trainer' ? 'Trainees who have requested your mentorship.' : 'Your mentorship requests that are waiting for a response.' ?></p>
+            <p><?= $role === 'trainer' ? 'Mentees who have requested your mentorship.' : 'Your mentorship requests that are waiting for a response.' ?></p>
         </div>
         <div class="mentorship-list-body">
             <?php if (empty($pending)): ?>
@@ -174,71 +141,26 @@ if (!function_exists('getProfilePhotoUrl')) {
                     <p>No pending requests.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($pending as $req): ?>
-                    <?php $skills_arr = !empty($req['skills']) ? array_unique(explode(',', $req['skills'])) : []; ?>
-                    <div class="mentorship-list-item">
-                        <div class="mentorship-user-info">
-                            <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile">
-                            <div>
-                                <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                                <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
-                            </div>
-                        </div>
-                        <div class="mentorship-skills skill-chips-mini">
-                            <?php foreach (array_slice($skills_arr, 0, 4) as $skill): ?>
-                                <span class="chip-mini"><?= htmlspecialchars(trim($skill), ENT_QUOTES, 'UTF-8') ?></span>
-                            <?php endforeach; ?>
-                            <?php if (count($skills_arr) > 4): ?>
-                                <span class="chip-mini">+<?= count($skills_arr) - 4 ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="mentorship-actions">
-                            <?php if ($role === 'trainee'): ?>
-                                <span class="badge badge-warning">Pending</span>
-                                <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                    View Profile
-                                </a>
-                            <?php else: ?>
-                                <form action="actions/mentorship_process.php" method="POST" style="margin:0;">
-                                    <input type="hidden" name="action" value="accept_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
-                                    <input type="hidden" name="return_to" value="mentorships.php">
-                                    <button type="submit" class="btn btn-accept btn-sm" data-loading-text="Accepting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 6L9 17l-5-5"></path>
-                                        </svg>
-                                        Accept
-                                    </button>
-                                </form>
-                                <form action="actions/mentorship_process.php" method="POST" class="js-confirm-reject-request" style="margin:0;">
-                                    <input type="hidden" name="action" value="reject_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="request_id" value="<?= (int)$req['request_id'] ?>">
-                                    <input type="hidden" name="return_to" value="mentorships.php">
-                                    <button type="submit" class="btn btn-reject btn-sm" data-loading-text="Rejecting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
-                                        Reject
-                                    </button>
-                                </form>
-                                <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline" style="margin-left: 0.5rem;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                    View Profile
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                <div class="connection-card-list">
+                    <?php foreach ($pending as $req): 
+                        $skills_arr = !empty($req['skills']) ? array_unique(array_filter(array_map('trim', explode(',', $req['skills'])))) : [];
+                        $card_user_id = (int)$req['user_id'];
+                        $card_name = $req['name'];
+                        $card_photo = $req['profile_photo'] ?? null;
+                        $card_exp_level = $req['exp_level'] ?? null;
+                        $card_skills = $skills_arr;
+                        $card_primary_skill = !empty($skills_arr) ? reset($skills_arr) : '';
+                        $card_role_label = $role === 'trainer' ? 'Mentee' : 'Mentor';
+                        $card_status = 'pending';
+                        $card_request_id = (int)($req['request_id'] ?? 0);
+                        $card_is_incoming_request = ($role === 'trainer');
+                        $card_show_unlink = false;
+                        $card_compact = false;
+                        $card_view_label = 'View Profile';
+                        $card_return_to = 'mentorships.php';
+                        require __DIR__ . '/includes/partials/connection_card.php';
+                    endforeach; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -255,34 +177,26 @@ if (!function_exists('getProfilePhotoUrl')) {
                     <p>No request history.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($history as $req): ?>
-                    <?php $skills_arr = !empty($req['skills']) ? array_unique(explode(',', $req['skills'])) : []; ?>
-                    <div class="mentorship-list-item">
-                        <div class="mentorship-user-info">
-                            <img src="<?= getProfilePhotoUrl($req['profile_photo'], $req['name']) ?>" alt="Profile">
-                            <div>
-                                <h4><?= htmlspecialchars($req['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                                <p><?= htmlspecialchars(ucfirst($req['exp_level'] ?? 'Not specified'), ENT_QUOTES, 'UTF-8') ?></p>
-                            </div>
-                        </div>
-                        <div class="mentorship-skills skill-chips-mini">
-                            <?php foreach (array_slice($skills_arr, 0, 4) as $skill): ?>
-                                <span class="chip-mini"><?= htmlspecialchars(trim($skill), ENT_QUOTES, 'UTF-8') ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                        <div class="mentorship-actions">
-                            <span class="badge badge-danger">Rejected</span>
-                            <span class="date-text"><?= date('M j, Y', strtotime($req['created_at'])) ?></span>
-                            <a href="profile.php?user_id=<?= (int)$req['user_id'] ?>" class="btn-view-profile-outline">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                View Profile
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                <div class="connection-card-list">
+                    <?php foreach ($history as $req): 
+                        $skills_arr = !empty($req['skills']) ? array_unique(array_filter(array_map('trim', explode(',', $req['skills'])))) : [];
+                        $card_user_id = (int)$req['user_id'];
+                        $card_name = $req['name'];
+                        $card_photo = $req['profile_photo'] ?? null;
+                        $card_exp_level = $req['exp_level'] ?? null;
+                        $card_skills = $skills_arr;
+                        $card_primary_skill = !empty($skills_arr) ? reset($skills_arr) : '';
+                        $card_role_label = $role === 'trainer' ? 'Mentee' : 'Mentor';
+                        $card_status = 'rejected';
+                        $card_request_id = (int)($req['request_id'] ?? 0);
+                        $card_date = !empty($req['created_at']) ? date('M j, Y', strtotime($req['created_at'])) : '';
+                        $card_show_unlink = false;
+                        $card_compact = false;
+                        $card_view_label = 'View Profile';
+                        $card_return_to = 'mentorships.php';
+                        require __DIR__ . '/includes/partials/connection_card.php';
+                    endforeach; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>

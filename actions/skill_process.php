@@ -15,7 +15,7 @@ $user_id = getCurrentUserId();
 
 // No other method rather than 'POST' is allowed.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: ../my_skills.php");
+    header("Location: ../profile.php?tab=skills");
     exit();
 }
 
@@ -27,16 +27,17 @@ if (!csrfValid($_POST['csrf_token'] ?? null)) {
 // Get the user action 
 $action = $_POST['action'] ?? '';
 $skill_id = filter_input(INPUT_POST, 'skill_id', FILTER_VALIDATE_INT);
-
-// Optional: Add CSRF token verification here if applicable
-// if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) { ... }
+$return_to = $_POST['return_to'] ?? '../profile.php?tab=skills';
+if (!is_string($return_to) || !str_starts_with($return_to, '../')) {
+    $return_to = '../profile.php?tab=skills';
+}
 
 // Skill add logic
 if ($action === 'add_skill') {
     // For no skill_id or invalid skill
     if (!$skill_id || $skill_id <= 0) {
         $_SESSION['error'] = "Invalid Skill selected.";
-        header("Location: ../my_skills.php");
+        header("Location: " . $return_to);
         exit();
     }
 
@@ -46,7 +47,7 @@ if ($action === 'add_skill') {
         $checkstmt->execute([$skill_id]);
         if (!$checkstmt->fetch()) {
             $_SESSION['error'] = "Skill not found.";
-            header("Location: ../my_skills.php");
+            header("Location: " . $return_to);
             exit();
         }
 
@@ -57,7 +58,7 @@ if ($action === 'add_skill') {
 
         if ($current_skill_count >= 3) {
             $_SESSION['error'] = "You can add a maximum of three skills.";
-            header("Location: ../my_skills.php");
+            header("Location: " . $return_to);
             exit();
         }
 
@@ -66,7 +67,7 @@ if ($action === 'add_skill') {
         $duplicatestmt->execute([$user_id, $skill_id]);
         if ($duplicatestmt->fetch()) {
             $_SESSION['error'] = "This skill is already added.";
-            header("Location: ../my_skills.php");
+            header("Location: " . $return_to);
             exit();
         }
 
@@ -79,13 +80,13 @@ if ($action === 'add_skill') {
         error_log("Database Error(Add Skill): " . $pe->getMessage());
         $_SESSION['error'] = "An unexpected error occurred while adding the skill.";
     }
-    header("Location: ../my_skills.php");
+    header("Location: " . $return_to);
     exit();
 } elseif ($action === 'remove_skill') {
     // If invalid skill selected
     if (!$skill_id || $skill_id <= 0) {
         $_SESSION['error'] = "Invalid skill selected.";
-        header("Location: ../my_skills.php");
+        header("Location: " . $return_to);
         exit();
     }
 
@@ -104,10 +105,10 @@ if ($action === 'add_skill') {
         error_log("Database Error(Remove skill): " . $pe->getMessage());
         $_SESSION['error'] = "An unexpected error occurred while removing the skill.";
     }
-    header("Location: ../my_skills.php");
+    header("Location: " . $return_to);
     exit();
 } else {
     // All unrecognized fallbacks
-    header("Location: ../my_skills.php");
+    header("Location: " . $return_to);
     exit();
 }

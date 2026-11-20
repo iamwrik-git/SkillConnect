@@ -7,31 +7,10 @@ require_once __DIR__ . '/includes/session.php';
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
 
-if (file_exists('includes/functions.php')) {
-    require_once 'includes/functions.php';
-}
-
 // 2. Authentication & Authorization
 requireLogin();
 $current_user_id = getCurrentUserId();
-$current_user_role = $_SESSION['role'] ?? '';
-
-// Restrict access: Only trainees can search for trainers
-if ($current_user_role !== 'trainee') {
-    header("Location: dashboard.php");
-    exit();
-}
-
-// Helper function to resolve profile photo or generate UI-Avatar Initials
-if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name)
-    {
-        if (empty($photo) || $photo === 'default.jpg') {
-            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
-        }
-        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
-    }
-}
+$current_user_role = $_SESSION['role'] ?? 'trainee';
 
 // 3. Fetch ONLY the current user's added skills for the search dropdown
 $user_skills = [];
@@ -101,6 +80,8 @@ if ($search_skill_id && $search_skill_id > 0) {
                 FROM users u
                 JOIN user_skills us ON u.user_id = us.user_id
                 WHERE u.role = 'trainer' 
+                  AND (u.is_admin = 0 OR u.is_admin IS NULL)
+                  AND u.email NOT LIKE '%admin%'
                   AND us.skill_id = ?
                   AND u.user_id NOT IN (
                       SELECT trainer_id 
@@ -114,7 +95,7 @@ if ($search_skill_id && $search_skill_id > 0) {
         }
     } catch (PDOException $e) {
         error_log("Trainer Search Error (Dropdown): " . $e->getMessage());
-        $search_error = "An unexpected error occurred while searching for trainers.";
+        $search_error = "An unexpected error occurred while searching for mentors.";
     }
 }
 // SCENARIO B: User used the Global Search Bar
@@ -135,6 +116,8 @@ elseif (!empty($search_query)) {
             JOIN user_skills us ON u.user_id = us.user_id
             JOIN skills s ON us.skill_id = s.skill_id
             WHERE u.role = 'trainer' 
+              AND (u.is_admin = 0 OR u.is_admin IS NULL)
+              AND u.email NOT LIKE '%admin%'
               AND (u.name LIKE ? OR s.skill_name LIKE ?)
             ORDER BY is_connected DESC, $order_by_sql
         ");
@@ -142,7 +125,7 @@ elseif (!empty($search_query)) {
         $fetched_trainers = $trainerStmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Trainer Search Error (Text Query): " . $e->getMessage());
-        $search_error = "An unexpected error occurred while searching for trainers.";
+        $search_error = "An unexpected error occurred while searching for mentors.";
     }
 }
 
@@ -189,7 +172,7 @@ if ($current_user_role === 'trainee') {
 // ------------------------------------------
 
 // 5. Output Header
-$page_title = 'Find Trainers - SkillConnect';
+$page_title = 'Find Mentors - SkillConnect';
 if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
@@ -200,8 +183,8 @@ if (file_exists('includes/header.php')) {
     <!-- Header Section -->
     <header class="search-header-top">
         <div class="header-titles">
-            <h1 class="page-title">Find Trainers</h1>
-            <p class="page-subtitle">Discover skilled trainers and start your learning journey.</p>
+            <h1 class="page-title">Find Mentors</h1>
+            <p class="page-subtitle">Discover skilled mentors and start your learning journey.</p>
         </div>
         <div class="header-callout">
             <div class="callout-icon">
@@ -214,7 +197,7 @@ if (file_exists('includes/header.php')) {
             </div>
             <div class="callout-text">
                 <strong>Learn from real people</strong>
-                <p>Connect with experienced trainers and gain practical knowledge.</p>
+                <p>Connect with experienced mentors and gain practical knowledge.</p>
             </div>
         </div>
     </header>
@@ -229,14 +212,14 @@ if (file_exists('includes/header.php')) {
         </div>
         <div class="search-box-content">
             <h2>Search by Skill</h2>
-            <p>Select a skill you want to learn to find qualified trainers who teach it.</p>
+            <p>Select a skill you want to learn to find qualified mentors who teach it.</p>
 
             <form action="search.php" method="GET" class="search-inline-form" novalidate>
                 <?php if (empty($user_skills)): ?>
                     <select class="form-input" disabled>
                         <option>No skills added to your profile yet</option>
                     </select>
-                    <a href="my_skills.php" class="btn btn-primary">Add Skills First</a>
+                    <a href="profile.php?tab=skills" class="btn btn-primary">Add Skills First</a>
                 <?php else: ?>
                     <select name="skill_id" required class="form-input">
                         <option value="">-- Select a Skill --</option>
@@ -258,6 +241,19 @@ if (file_exists('includes/header.php')) {
         </div>
     </section>
 
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="profile-alert alert-success js-toast-target" style="display:none;" role="status">
+            <?= htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') ?>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="profile-alert alert-danger js-toast-target" style="display:none;" role="alert">
+            <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
     <!-- Search Results Area -->
     <?php if ($search_performed): ?>
 
@@ -276,7 +272,7 @@ if (file_exists('includes/header.php')) {
             <div class="search-results-header">
                 <div class="results-title-group">
                     <h3>Search Results for <?= htmlspecialchars($selected_skill_name, ENT_QUOTES, 'UTF-8') ?></h3>
-                    <span class="badge results-badge"><?= count($trainers) ?> trainers found</span>
+                    <span class="badge results-badge"><?= count($trainers) ?> mentors found</span>
                 </div>
 
                 <div class="results-sort">
@@ -300,7 +296,7 @@ if (file_exists('includes/header.php')) {
             </div>
 
             <?php if (empty($trainers)): ?>
-                <!-- Empty State: No Trainers Found -->
+                <!-- Empty State: No Mentors Found -->
                 <div class="search-empty-state card">
                     <div class="empty-icon-wrapper">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -318,8 +314,8 @@ if (file_exists('includes/header.php')) {
                         </div>
                     </div>
                     <div class="empty-text">
-                        <h3>No trainers found</h3>
-                        <p style="margin-bottom: 1rem;">We couldn't find a trainer for this skill yet.<br>Try another skill.</p>
+                        <h3>No mentors found</h3>
+                        <p style="margin-bottom: 1rem;">We couldn't find a mentor for this skill yet.<br>Try another skill.</p>
                         <button type="button" class="btn btn-primary" onclick="document.querySelector('.search-inline-form select').focus()">Change Skill</button>
                     </div>
                 </div>
@@ -331,10 +327,10 @@ if (file_exists('includes/header.php')) {
 
                             <!-- Trainer Header -->
                             <div class="trainer-card-header" style="position: relative; padding-right: 2.5rem;">
-                                <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Trainer Photo" class="trainer-avatar">
+                                <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Mentor Photo" class="trainer-avatar">
                                 <div class="trainer-info">
                                     <h4 class="trainer-name"><?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                                    <span class="trainer-role-text">Trainer</span>
+                                    <span class="trainer-role-text">Mentor</span>
                                     <div class="trainer-exp">
                                         <?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') . ' experience' : 'Experience not specified' ?>
                                     </div>
@@ -349,14 +345,14 @@ if (file_exists('includes/header.php')) {
 
                                         <?php if (in_array($trainer['user_id'], $saved_trainers)): ?>
                                             <input type="hidden" name="action" value="remove">
-                                            <button type="submit" class="bookmark-btn saved" aria-label="Remove saved trainer" title="Remove saved trainer">
+                                            <button type="submit" class="bookmark-btn saved" aria-label="Remove saved mentor" title="Remove saved mentor">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                                                 </svg>
                                             </button>
                                         <?php else: ?>
                                             <input type="hidden" name="action" value="save">
-                                            <button type="submit" class="bookmark-btn unsaved" aria-label="Save trainer" title="Save trainer">
+                                            <button type="submit" class="bookmark-btn unsaved" aria-label="Save mentor" title="Save mentor">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                                                 </svg>
@@ -393,22 +389,24 @@ if (file_exists('includes/header.php')) {
 
                             <!-- Action Buttons -->
                             <div class="trainer-card-footer">
-                                <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn btn-outline-primary">
+                                <a href="profile.php?user_id=<?= (int)$trainer['user_id'] ?>" class="btn btn-outline-primary" <?= $current_user_role !== 'trainee' ? 'style="width:100%; text-align:center;"' : '' ?>>
                                     View Profile
                                 </a>
 
-                                <form action="actions/mentorship_process.php" method="POST" class="mentorship-request-form">
-                                    <input type="hidden" name="action" value="send_request">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
-                                    <button type="submit" class="btn btn-primary" data-loading-text="Requesting...">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                        </svg>
-                                        Request Mentorship
-                                    </button>
-                                </form>
+                                <?php if ($current_user_role === 'trainee'): ?>
+                                    <form action="actions/mentorship_process.php" method="POST" class="mentorship-request-form">
+                                        <input type="hidden" name="action" value="send_request">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                        <input type="hidden" name="trainer_id" value="<?= (int)$trainer['user_id'] ?>">
+                                        <button type="submit" class="btn btn-primary" data-loading-text="Requesting...">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                            </svg>
+                                            Request Mentorship
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
 
                         </div>
@@ -419,7 +417,7 @@ if (file_exists('includes/header.php')) {
         <?php endif; ?>
 
     <?php else: ?>
-        <!-- Initial State: Find the right trainer -->
+        <!-- Initial State: Find the right mentor -->
         <div class="search-empty-state card">
             <div class="empty-icon-wrapper initial-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -433,8 +431,8 @@ if (file_exists('includes/header.php')) {
                 </div>
             </div>
             <div class="empty-text">
-                <h3>Find the right trainer for you</h3>
-                <p>Select a skill from the dropdown above to discover qualified trainers<br>and start your learning journey.</p>
+                <h3>Find the right mentor for you</h3>
+                <p>Select a skill from the dropdown above to discover qualified mentors<br>and start your learning journey.</p>
             </div>
         </div>
     <?php endif; ?>

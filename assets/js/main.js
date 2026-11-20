@@ -36,21 +36,135 @@ document.addEventListener('DOMContentLoaded', () => {
     // A1: TOAST NOTIFICATIONS
     // =========================================================
 
-    const flashMessages = document.querySelectorAll('.js-toast-target');
-
-    if (flashMessages.length > 0) {
+    function getOrCreateToastContainer() {
         let toastContainer = document.querySelector('.toast-container');
-
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.className = 'toast-container';
             toastContainer.setAttribute('aria-live', 'polite');
             document.body.appendChild(toastContainer);
         }
+        return toastContainer;
+    }
 
+    function dismissToast(toastElement) {
+        if (!toastElement || toastElement.classList.contains('toast-closing')) {
+            return;
+        }
+
+        toastElement.classList.add('toast-closing');
+
+        let removed = false;
+        const removeElement = () => {
+            if (!removed && toastElement.parentNode) {
+                removed = true;
+                toastElement.remove();
+            }
+        };
+
+        toastElement.addEventListener('animationend', removeElement, { once: true });
+        // Fallback in case animationend does not fire (e.g. reduced-motion)
+        setTimeout(removeElement, 350);
+    }
+
+    function escapeToastHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    window.showToast = function(messageText, type = 'info') {
+        if (!messageText || typeof messageText !== 'string' || messageText.trim() === '') {
+            return null;
+        }
+
+        const validTypes = ['success', 'error', 'warning', 'info'];
+        if (!validTypes.includes(type)) {
+            type = 'info';
+        }
+
+        const toastContainer = getOrCreateToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.setAttribute('role', 'alert');
+
+        let iconSvg = '';
+        if (type === 'success') {
+            iconSvg = `
+                <svg width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>`;
+        } else if (type === 'error') {
+            iconSvg = `
+                <svg width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>`;
+        } else if (type === 'warning') {
+            iconSvg = `
+                <svg width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>`;
+        } else {
+            iconSvg = `
+                <svg width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>`;
+        }
+
+        toast.innerHTML = `
+            <div class="toast-icon">${iconSvg}</div>
+            <div class="toast-content">
+                <div class="toast-message">${escapeToastHtml(messageText)}</div>
+            </div>
+            <button
+                type="button"
+                class="toast-close"
+                aria-label="Close Notification">
+                <svg width="16" height="16" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => dismissToast(toast));
+        }
+
+        const duration = type === 'error' ? 6000 : 4000;
+        setTimeout(() => {
+            if (document.body.contains(toast)) {
+                dismissToast(toast);
+            }
+        }, duration);
+
+        return toast;
+    };
+
+    const flashMessages = document.querySelectorAll('.js-toast-target');
+    if (flashMessages.length > 0) {
         flashMessages.forEach(msgElement => {
             let type = 'info';
-
             if (msgElement.classList.contains('alert-success')) {
                 type = 'success';
             } else if (msgElement.classList.contains('alert-danger')) {
@@ -60,99 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const messageText = msgElement.textContent.trim();
-
             msgElement.style.display = 'none';
 
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.setAttribute('role', 'alert');
-
-            let iconSvg = '';
-
-            if (type === 'success') {
-                iconSvg = `
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>`;
-            } else if (type === 'error') {
-                iconSvg = `
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>`;
-            } else if (type === 'warning') {
-                iconSvg = `
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>`;
-            } else {
-                iconSvg = `
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>`;
+            if (messageText) {
+                window.showToast(messageText, type);
             }
-
-            toast.innerHTML = `
-                <div class="toast-icon">${iconSvg}</div>
-
-                <div class="toast-content">
-                    <div class="toast-message">${messageText}</div>
-                </div>
-
-                <button
-                    type="button"
-                    class="toast-close"
-                    aria-label="Close Notification">
-                    <svg width="16" height="16" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            `;
-
-            toastContainer.appendChild(toast);
-
-            toast.querySelector('.toast-close')
-                .addEventListener('click', () => {
-                    dismissToast(toast);
-                });
-
-            const duration = type === 'error' ? 6000 : 4000;
-
-            setTimeout(() => {
-                if (document.body.contains(toast)) {
-                    dismissToast(toast);
-                }
-            }, duration);
         });
-
-        function dismissToast(toastElement) {
-            if (toastElement.classList.contains('toast-closing')) {
-                return;
-            }
-
-            toastElement.classList.add('toast-closing');
-
-            toastElement.addEventListener('animationend', () => {
-                toastElement.remove();
-            }, { once: true });
-        }
     }
 
 
@@ -388,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('submit', e => {
 
         // -----------------------------------------------------
-        // Remove saved trainer confirmation
+        // Remove saved mentor confirmation
         // -----------------------------------------------------
 
         const removeSavedForm =
@@ -399,12 +426,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const trainerName =
                 removeSavedForm.getAttribute('data-trainer-name') ||
-                'this trainer';
+                'this mentor';
 
             showConfirmationModal({
-                title: 'Remove Saved Trainer?',
+                title: 'Remove Saved Mentor?',
                 message:
-                    `Are you sure you want to remove ${trainerName} from your saved trainers?`,
+                    `Are you sure you want to remove ${trainerName} from your saved mentors?`,
                 confirmText: 'Remove',
                 confirmClass: 'confirm-danger'
             }, () => {
@@ -501,10 +528,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 unlinkMentorshipForm.getAttribute('data-connection-name') || 'this user';
             const connectionRole =
                 unlinkMentorshipForm.getAttribute('data-connection-role') || 'connection';
+            const isMentee = (connectionRole === 'mentee' || connectionRole === 'trainee');
 
             showConfirmationModal({
-                title: `Unlink ${connectionRole === 'trainee' ? 'Trainee' : 'Mentor'}?`,
-                message: `Are you sure you want to remove ${connectionName} from your ${connectionRole === 'trainee' ? 'accepted trainees' : 'mentorships'}? This will end the accepted mentorship connection.`,
+                title: `Unlink ${isMentee ? 'Mentee' : 'Mentor'}?`,
+                message: `Are you sure you want to remove ${connectionName} from your ${isMentee ? 'accepted mentees' : 'mentors'}? This will end the accepted mentorship connection.`,
                 confirmText: 'Unlink',
                 confirmClass: 'confirm-danger'
             }, () => {
@@ -537,22 +565,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // A7: EDIT PROFILE TABS & ACCOUNT RECOVERY MODAL
     // =========================================================
 
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabNavBtns = document.querySelectorAll('.edit-profile-tabs .tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    if (tabBtns.length > 0) {
+    if (tabNavBtns.length > 0) {
         // Tab switching logic
         function switchTab(targetId) {
-            tabBtns.forEach(btn => btn.classList.remove('active'));
+            tabNavBtns.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+                btn.setAttribute('tabindex', '-1');
+            });
             tabContents.forEach(content => {
                 content.classList.remove('active');
             });
 
-            const activeBtn = document.querySelector(`.tab-btn[data-target="${targetId}"]`);
+            const activeBtn = document.querySelector(`.edit-profile-tabs .tab-btn[data-target="${targetId}"]`);
             const activeContent = document.getElementById(targetId);
 
             if (activeBtn && activeContent) {
                 activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-selected', 'true');
+                activeBtn.setAttribute('tabindex', '0');
                 activeContent.classList.add('active');
                 
                 // Update URL hash transparently without page jumping
@@ -560,16 +594,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Click listeners for tabs
-        tabBtns.forEach(btn => {
+        // Click listeners for navigation tabs
+        tabNavBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 switchTab(btn.getAttribute('data-target'));
             });
         });
 
-        // Deep-link routing based on hash string (e.g. redirected from actions)
+        // In-page quick tab switch buttons (e.g., Manage Skills overview button)
+        document.querySelectorAll('[data-tab-switch]').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab(trigger.getAttribute('data-tab-switch'));
+            });
+        });
+
+        // Deep-link routing based on hash string or query params
         if (window.location.hash === '#security') {
             switchTab('tab-security');
+        } else if (window.location.hash === '#skills' || window.location.search.includes('tab=skills')) {
+            switchTab('tab-skills');
+        } else if (window.location.hash === '#profile') {
+            switchTab('tab-profile');
         }
     }
 

@@ -151,7 +151,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                                 <label for="role-trainee" class="selector-card">
                                     <span class="card-icon">🎓</span>
                                     <span class="card-text-group">
-                                        <span class="card-title">Trainee</span>
+                                        <span class="card-title">Mentee</span>
                                         <span class="card-desc">Looking to learn</span>
                                     </span>
                                 </label>
@@ -160,7 +160,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                                 <label for="role-trainer" class="selector-card">
                                     <span class="card-icon">💼</span>
                                     <span class="card-text-group">
-                                        <span class="card-title">Trainer</span>
+                                        <span class="card-title">Mentor</span>
                                         <span class="card-desc">Looking to teach</span>
                                     </span>
                                 </label>
@@ -223,12 +223,12 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
             <!-- Dynamic Text based on Login/Signup state anchored at the bottom -->
             <div class="panel-typography text-login-state">
                 <h3>Learn from Experts. Build Real Skills.</h3>
-                <p>Connect with skilled trainers, gain hands-on knowledge and grow with a supportive community.</p>
+                <p>Connect with skilled mentors, gain hands-on knowledge and grow with a supportive community.</p>
             </div>
 
             <div class="panel-typography text-signup-state">
                 <h3>Turn Your Skills Into Real Opportunities.</h3>
-                <p>Join a growing community of learners and expert trainers, and take the next step in your journey.</p>
+                <p>Join a growing community of learners and expert mentors, and take the next step in your journey.</p>
             </div>
 
         </div>

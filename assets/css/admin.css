@@ -545,9 +545,9 @@ html { -webkit-text-size-adjust: 100%; }
     text-align: center;
 }
 .sc-confirm-modal::backdrop {
-    background: rgba(15, 23, 42, .62);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
+    background: rgba(15, 23, 42, 0.45);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 .sc-confirm-close {
     position: absolute;

@@ -1,8 +1,8 @@
 <?php
 // admin/manage_users.php
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireAdmin();
-require_once '../includes/db_connect.php';
+require_once __DIR__ . '/../includes/db_connect.php';
 
 // Handle Deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
@@ -17,8 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $_SESSION['admin_error'] = "You cannot delete your own administrator account.";
     } else {
         try {
-            // Note: Cascade deletion rules on the DB should handle user_skills and mentorships.
-            // If they are not natively cascading in the schema, doing it explicitly:
+            // Find user photo to clean up file after deletion
+            $photoStmt = $pdo->prepare("SELECT profile_photo FROM users WHERE user_id = ?");
+            $photoStmt->execute([$deleteId]);
+            $userPhoto = $photoStmt->fetchColumn();
+
+            // Note: Cascade deletion rules on the DB handle user_skills and mentorships.
+            // Explicit cleanup ensures consistency regardless of database driver configuration:
             $pdo->beginTransaction();
             // Clean up notifications sent to this user or referencing their mentorship requests
             $pdo->prepare("DELETE FROM notifications WHERE recipient_user_id = ?")->execute([$deleteId]);
@@ -31,6 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt = $pdo->prepare("DELETE FROM users WHERE user_id = ?");
             $stmt->execute([$deleteId]);
             $pdo->commit();
+
+            // Clean up physical photo file if not default
+            if ($userPhoto && $userPhoto !== 'default.jpg') {
+                $photoPath = __DIR__ . '/../assets/images/profile/' . basename($userPhoto);
+                if (is_file($photoPath)) {
+                    @unlink($photoPath);
+                }
+            }
 
             $_SESSION['admin_success'] = "User successfully deleted.";
         } catch (PDOException $e) {
@@ -139,7 +152,7 @@ ob_start();
                 <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
             </svg></div>
         <div class="stat-info">
-            <p class="stat-label">Trainees</p>
+            <p class="stat-label">Mentees</p>
             <h3 class="stat-value"><?= number_format($traineesCount) ?></h3>
         </div>
     </div>
@@ -148,7 +161,7 @@ ob_start();
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg></div>
         <div class="stat-info">
-            <p class="stat-label">Trainers</p>
+            <p class="stat-label">Mentors</p>
             <h3 class="stat-value"><?= number_format($trainersCount) ?></h3>
         </div>
     </div>
@@ -167,8 +180,8 @@ ob_start();
 
             <select name="role" class="filter-select">
                 <option value="">All Roles</option>
-                <option value="trainee" <?= $roleFilter === 'trainee' ? 'selected' : '' ?>>Trainee</option>
-                <option value="trainer" <?= $roleFilter === 'trainer' ? 'selected' : '' ?>>Trainer</option>
+                <option value="trainee" <?= $roleFilter === 'trainee' ? 'selected' : '' ?>>Mentee</option>
+                <option value="trainer" <?= $roleFilter === 'trainer' ? 'selected' : '' ?>>Mentor</option>
             </select>
 
             <button type="submit" class="btn btn-primary">Search</button>
@@ -216,7 +229,7 @@ ob_start();
                             <td><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
                                 <span class="badge badge-<?= $user['role'] === 'trainer' ? 'purple' : 'green' ?>">
-                                    <?= ucfirst($user['role']) ?>
+                                    <?= $user['role'] === 'trainer' ? 'Mentor' : 'Mentee' ?>
                                 </span>
                             </td>
                             <td><?= !empty($user['exp_level']) ? ucfirst(htmlspecialchars($user['exp_level'])) : '-' ?></td>

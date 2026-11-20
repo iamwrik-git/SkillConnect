@@ -16,7 +16,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover skilled trainers, learn new technologies, and grow through meaningful mentorship with SkillConnect.">
+    <meta name="description" content="Discover skilled mentors, learn new technologies, and grow through meaningful mentorship with SkillConnect.">
     <title>SkillConnect | Learn. Connect. Grow.</title>
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -27,7 +27,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
     <header class="lp-header">
         <div class="lp-container lp-nav">
             <a class="lp-brand" href="index.php" aria-label="SkillConnect home">
-                <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:51px;width:auto;max-width:100%;object-fit:contain;">
+                <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:56px;width:auto;max-width:100%;object-fit:contain;">
             </a>
 
             <nav class="lp-nav-links" aria-label="Main navigation">
@@ -60,17 +60,17 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
             <div class="lp-container lp-hero-grid">
                 <div class="lp-hero-copy">
                     <div class="lp-eyebrow"><span>Learn</span><b>•</b><span>Connect</span><b>•</b><span>Grow</span></div>
-                    <h1>Find the Right Trainers. Build a <span>Better You.</span></h1>
+                    <h1>Find the Right Mentors. Build a <span>Better You.</span></h1>
                     <p class="lp-hero-description">
-                        SkillConnect helps you discover skilled trainers, learn new technologies and grow through mentorship.
-                        A simple, focused platform for learners and trainers.
+                        SkillConnect helps you discover skilled mentors, learn new technologies and grow through mentorship.
+                        A simple, focused platform for mentees and mentors.
                     </p>
                     <div class="lp-hero-actions">
                         <a class="lp-button lp-button-primary" href="login.php?mode=signup">Get Started <span aria-hidden="true">→</span></a>
                         <a class="lp-button lp-button-outline" href="login.php">Sign In</a>
                     </div>
                     <div class="lp-benefits">
-                        <div class="lp-benefit"><span class="lp-benefit-icon" aria-hidden="true">♧</span><span>Learn from<br>experienced trainers</span></div>
+                        <div class="lp-benefit"><span class="lp-benefit-icon" aria-hidden="true">♧</span><span>Learn from<br>experienced mentors</span></div>
                         <div class="lp-benefit"><span class="lp-benefit-icon" aria-hidden="true">▤</span><span>Improve your skills<br>with mentorship</span></div>
                         <div class="lp-benefit"><span class="lp-benefit-icon" aria-hidden="true">▥</span><span>Grow in your<br>learning journey</span></div>
                     </div>
@@ -78,7 +78,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
 
                 <div class="lp-hero-visual">
                     <div class="lp-visual-glow"></div>
-                    <img src="assets/images/skillconnect-hero.jpeg" alt="A learner coding on a laptop with trainer profiles and technology skills around them" class="lp-hero-image">
+                    <img src="assets/images/skillconnect-hero.jpeg" alt="A learner coding on a laptop with mentor profiles and technology skills around them" class="lp-hero-image">
                     <div class="lp-floating-tag lp-tag-java">Java</div>
                     <div class="lp-floating-tag lp-tag-dsa">Data Structures</div>
                     <div class="lp-floating-tag lp-tag-web">Web Development</div>
@@ -100,8 +100,8 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
                                 <circle cx="10.8" cy="10.8" r="6.6" />
                                 <path d="m16 16 4.2 4.2" />
                             </svg></div>
-                        <h3>Find Skilled Trainers</h3>
-                        <p>Discover trainers based on the skills and technologies you want to learn.</p>
+                        <h3>Find Skilled Mentors</h3>
+                        <p>Discover mentors based on the skills and technologies you want to learn.</p>
                     </article>
                     <article class="lp-feature-card">
                         <div class="lp-feature-icon lp-icon-green" aria-hidden="true"><svg viewBox="0 0 24 24">
@@ -140,7 +140,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
                 <div class="lp-steps lp-steps-image">
                     <img
                         src="assets/images/skillconnect-how-it-works.jpeg"
-                        alt="How SkillConnect works: create your account, find the right trainer, and request mentorship."
+                        alt="How SkillConnect works: create your account, find the right mentor, and request mentorship."
                         class="lp-how-image"
                         loading="lazy">
                 </div>
@@ -171,7 +171,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
             <div class="lp-footer-main">
                 <div class="lp-footer-brand">
                     <a class="lp-brand" href="index.php">
-                        <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:51px;width:auto;max-width:100%;object-fit:contain;">
+                        <img class="lp-brand-logo" src="assets/images/skillconnect-logo.svg" alt="SkillConnect" style="display:block;height:56px;width:auto;max-width:100%;object-fit:contain;">
                     </a>
                     <p>A platform to learn, connect and grow together.</p>
                 </div>

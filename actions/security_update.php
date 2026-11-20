@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/session.php';
 
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
+require_once '../includes/recovery_helpers.php';
 
 requireLogin();
 $user_id = getCurrentUserId();
@@ -115,7 +116,7 @@ try {
         $existing_question = (string) ($user['security_question'] ?? '');
         $has_existing = !empty($user['security_answer_hash']);
 
-        $allowedQuestions = ['school', 'pet', 'nickname', 'city'];
+        $allowedQuestions = array_keys(getSecurityQuestions());
         if (!is_string($question) || !in_array($question, $allowedQuestions, true)) {
             $_SESSION['error'] = "Please select a valid security question.";
             header("Location: ../edit_profile.php#security");

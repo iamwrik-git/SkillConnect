@@ -62,7 +62,7 @@ if ($action === 'send_request') {
     $trainer_id = filter_input(INPUT_POST, 'trainer_id', FILTER_VALIDATE_INT);
 
     if (!$trainer_id || $trainer_id <= 0) {
-        $_SESSION['error'] = "Invalid trainer ID.";
+        $_SESSION['error'] = "Invalid mentor ID.";
         header("Location: ../dashboard.php");
         exit();
     }
@@ -95,13 +95,13 @@ if ($action === 'send_request') {
         }
 
         if (!$is_trainee) {
-            $_SESSION['error'] = "Only trainees can send mentorship requests.";
+            $_SESSION['error'] = "Only mentees can send mentorship requests.";
             header("Location: " . $redirect_url);
             exit();
         }
 
         if (!$is_trainer) {
-            $_SESSION['error'] = "The requested user is not a valid trainer.";
+            $_SESSION['error'] = "The requested user is not a valid mentor.";
             header("Location: " . $redirect_url);
             exit();
         }
@@ -117,7 +117,7 @@ if ($action === 'send_request') {
         $stmt->execute([$current_user_id, $trainer_id]);
 
         if ($stmt->fetch()) {
-            $_SESSION['error'] = "You already have an active or pending mentorship request with this trainer.";
+            $_SESSION['error'] = "You already have an active or pending mentorship request with this mentor.";
             header("Location: " . $redirect_url);
             exit();
         }
@@ -197,7 +197,7 @@ if ($action === 'send_request') {
         if ($delete->rowCount() === 1) {
             $pdo->commit();
             $_SESSION['success'] = $current_user['role'] === 'trainer'
-                ? "Trainee unlinked successfully."
+                ? "Mentee unlinked successfully."
                 : "Mentor unlinked successfully.";
         } else {
             $pdo->rollBack();
@@ -234,13 +234,13 @@ if ($action === 'send_request') {
     $success_message = ($action === 'accept_request') ? "Mentorship request accepted." : "Mentorship request rejected.";
 
     try {
-        // Validate that the authenticated user is actually a trainer
+        // Validate that the authenticated user is actually a mentor
         $stmt = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
         $stmt->execute([$current_user_id]);
         $current_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$current_user || $current_user['role'] !== 'trainer') {
-            $_SESSION['error'] = "Only trainers can accept or reject requests.";
+            $_SESSION['error'] = "Only mentors can accept or reject requests.";
             header("Location: ../" . $return_to);
             exit();
         }
@@ -270,9 +270,9 @@ if ($action === 'send_request') {
             exit();
         }
 
-        // Verify the trainee is still a valid trainee
+        // Verify the mentee is still a valid mentee
         if ($request['trainee_role'] !== 'trainee') {
-            $_SESSION['error'] = "The sender of this request is no longer a valid trainee.";
+            $_SESSION['error'] = "The sender of this request is no longer a valid mentee.";
             header("Location: ../" . $return_to);
             exit();
         }

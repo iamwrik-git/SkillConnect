@@ -1,8 +1,8 @@
 <?php
 // admin/view_user.php
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireAdmin();
-require_once '../includes/db_connect.php';
+require_once __DIR__ . '/../includes/db_connect.php';
 
 $viewId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -39,9 +39,7 @@ try {
     exit();
 }
 
-$avatarUrl = empty($user['profile_photo']) || $user['profile_photo'] === 'default.jpg'
-    ? "https://ui-avatars.com/api/?name=" . urlencode($user['name']) . "&background=eff6ff&color=2563eb&size=120&bold=true"
-    : "../assets/images/profile/" . htmlspecialchars($user['profile_photo'], ENT_QUOTES, 'UTF-8');
+$avatarUrl = getProfilePhotoUrl($user['profile_photo'] ?? '', $user['name'] ?? 'User', 120);
 
 ob_start();
 ?>
@@ -64,7 +62,7 @@ ob_start();
         <div class="view-user-title">
             <h2><?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?></h2>
             <span class="badge badge-<?= $user['role'] === 'trainer' ? 'purple' : 'green' ?> mt-1">
-                <?= ucfirst($user['role']) ?>
+                <?= $user['role'] === 'trainer' ? 'Mentor' : 'Mentee' ?>
             </span>
             <?php if ($user['is_admin']): ?>
                 <span class="badge badge-blue ml-2">Administrator</span>

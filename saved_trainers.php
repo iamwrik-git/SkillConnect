@@ -6,31 +6,14 @@ require_once __DIR__ . '/includes/session.php';
 require_once 'includes/db_connect.php';
 require_once 'includes/auth.php';
 
-if (file_exists('includes/functions.php')) {
-    require_once 'includes/functions.php';
-}
-
 // Authentication & Identity
 requireLogin();
 $current_user_id = getCurrentUserId();
-$current_user_role = $_SESSION['role'] ?? '';
+$current_user_role = $_SESSION['role'] ?? 'trainee';
 
-// Restrict access
-if ($current_user_role !== 'trainee') {
-    $_SESSION['error'] = "Only trainees can access saved trainers.";
-    header("Location: dashboard.php");
-    exit();
-}
-
-// Helper function for photos
-if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name)
-    {
-        if (empty($photo) || $photo === 'default.jpg') {
-            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
-        }
-        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
-    }
+if ($current_user_role === 'trainer') {
+    header('Location: dashboard.php');
+    exit;
 }
 
 $trainers = [];
@@ -80,7 +63,7 @@ try {
     $db_error = true;
 }
 
-$page_title = 'Saved Trainers - SkillConnect';
+$page_title = 'Saved Mentors - SkillConnect';
 if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
@@ -106,15 +89,15 @@ if (file_exists('includes/header.php')) {
     <!-- Header Section -->
     <header class="search-header-top" style="align-items: center;">
         <div class="header-titles">
-            <h1 class="page-title">Saved Trainers</h1>
-            <p class="page-subtitle">Your bookmarked trainers, all in one place.</p>
+            <h1 class="page-title">Saved Mentors</h1>
+            <p class="page-subtitle">Your bookmarked mentors, all in one place.</p>
         </div>
         <?php if (!empty($trainers)): ?>
             <div class="header-callout" style="padding: 0.5rem 1rem; margin: 0;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb; margin-right:8px;">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <strong style="color:#2563eb; font-size:0.9rem;"><?= count($trainers) ?> trainers saved</strong>
+                <strong style="color:#2563eb; font-size:0.9rem;"><?= count($trainers) ?> mentors saved</strong>
             </div>
         <?php endif; ?>
     </header>
@@ -130,10 +113,10 @@ if (file_exists('includes/header.php')) {
                 </div>
             </div>
             <div class="empty-text">
-                <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">No saved trainers yet</h3>
-                <p style="color: #64748b; margin-bottom: 1.5rem;">Bookmark trainers you're interested in<br>to find them here later.</p>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">No saved mentors yet</h3>
+                <p style="color: #64748b; margin-bottom: 1.5rem;">Bookmark mentors you're interested in<br>to find them here later.</p>
                 <a href="search.php" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
-                    Find Trainers
+                    Find Mentors
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -149,10 +132,10 @@ if (file_exists('includes/header.php')) {
 
                     <!-- Trainer Header with Red Bookmark -->
                     <div class="trainer-card-header" style="position: relative; padding-right: 2.5rem;">
-                        <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Trainer Photo" class="trainer-avatar">
+                        <img src="<?= getProfilePhotoUrl($trainer['profile_photo'] ?? '', $trainer['name']) ?>" alt="Mentor Photo" class="trainer-avatar">
                         <div class="trainer-info">
                             <h4 class="trainer-name"><?= htmlspecialchars($trainer['name'], ENT_QUOTES, 'UTF-8') ?></h4>
-                            <span class="trainer-role-text">Trainer</span>
+                            <span class="trainer-role-text">Mentor</span>
                             <div class="trainer-exp">
                                 <?= !empty($trainer['exp_level']) ? htmlspecialchars(ucfirst($trainer['exp_level']), ENT_QUOTES, 'UTF-8') . ' experience' : 'Experience not specified' ?>
                             </div>

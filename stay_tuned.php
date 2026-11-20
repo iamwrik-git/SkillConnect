@@ -7,6 +7,15 @@ require_once 'includes/auth.php';
 
 // Enforce authentication so only logged-in users access this view
 requireLogin();
+
+$feature = $_GET['feature'] ?? '';
+$featureTitle = 'Stay Tuned';
+$featureMessage = 'This feature will be available in a future version of SkillConnect.';
+
+if ($feature === 'messages') {
+    $featureTitle = 'Messages Inbox';
+    $featureMessage = 'A dedicated messages inbox is coming soon! You can already send direct messages to your connected mentors and mentees using the Message button on their profile cards.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +23,7 @@ requireLogin();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stay Tuned - SkillConnect</title>
+    <title><?= htmlspecialchars($featureTitle, ENT_QUOTES, 'UTF-8') ?> - SkillConnect</title>
     <!-- Hook into global styles -->
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -32,8 +41,8 @@ requireLogin();
                     class="stay-tuned-logo-image">
             </a>
 
-            <h1 class="stay-tuned-title">Stay Tuned</h1>
-            <p class="stay-tuned-message">This feature will be available in a future version of SkillConnect.</p>
+            <h1 class="stay-tuned-title"><?= htmlspecialchars($featureTitle, ENT_QUOTES, 'UTF-8') ?></h1>
+            <p class="stay-tuned-message"><?= htmlspecialchars($featureMessage, ENT_QUOTES, 'UTF-8') ?></p>
 
             <!-- Safe return link so the user is not trapped -->
             <a href="dashboard.php" class="stay-tuned-back">

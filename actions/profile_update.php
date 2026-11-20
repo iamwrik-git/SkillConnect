@@ -44,16 +44,8 @@ if (empty($name) || strlen($name) > 100) {
 }
 
 
-$allowed_exp_levels = ['Beginner', 'Intermediate', 'Expert']; //set a valid choice of exp_level
-//check if the user forget to set exp_level or $exp_level is not allowed_exp_level[Done by in_array stmt]
-if ($exp_level !== null && !in_array($exp_level, $allowed_exp_levels, true)) {
-    $_SESSION['error'] = "Invalid experience level selected.";
-    header("Location: ../edit_profile.php");
-    exit();
-}
-
 try {
-    //retrive the current profile_photo by PDO statement
+    //retrive the current user and profile_photo by PDO statement
     $stmt = $pdo->prepare("SELECT name, role, profile_photo FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -65,12 +57,25 @@ try {
     }
     // check if the user had any current photo if not default pic
     $current_photo = $user['profile_photo'] ?? 'default.jpg';
+    $user_role = $user['role'] ?? ($_SESSION['role'] ?? 'trainee');
 } catch (PDOException $e) {
     //this common block handle any database error & throw massage
     error_log("Database Error (Fetch User): " . $e->getMessage());
     $_SESSION['error'] = "We could not update your profile right now. Please try again later.";
     header("Location: ../edit_profile.php");
     exit();
+}
+
+// Experience level: completely disabled and null for trainees; validated for trainers
+if ($user_role === 'trainee') {
+    $exp_level = null;
+} else {
+    $allowed_exp_levels = ['Beginner', 'Intermediate', 'Expert'];
+    if ($exp_level !== null && !in_array($exp_level, $allowed_exp_levels, true)) {
+        $_SESSION['error'] = "Invalid experience level selected.";
+        header("Location: ../edit_profile.php");
+        exit();
+    }
 }
 
 $new_photo_filename = null; //a new photo file name variable created, set null for later use
@@ -179,5 +184,5 @@ try {
     $_SESSION['error'] = "An unexpected error occurred while updating the profile.";
 }
 
-header("Location: ../edit_profile.php");
+header("Location: ../profile.php");
 exit();

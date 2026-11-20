@@ -84,7 +84,8 @@ if ($action === 'register') {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         // New registrations must complete onboarding before using the application.
         // Existing accounts retain onboarding_completed = 1 via the database default.
-        $insertstmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role, onboarding_completed) VALUES (?, ?, ?, ?, 0)");
+        // Trainees have exp_level explicitly initialized to NULL.
+        $insertstmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role, exp_level, onboarding_completed) VALUES (?, ?, ?, ?, NULL, 0)");
         $insertstmt->execute([$name, $email, $password_hash, $role]);
 
         $new_user_id = $pdo->lastInsertId();
@@ -96,6 +97,7 @@ if ($action === 'register') {
         $_SESSION['profile_photo'] = 'default.jpg';
         $_SESSION['is_admin'] = 0;
         $_SESSION['onboarding_completed'] = 0;
+        $_SESSION['dashboard_hero_mode'] = 'signup';
 
         header('Location: ../dashboard.php');
         exit();
@@ -135,6 +137,7 @@ if ($action === 'register') {
             $_SESSION['profile_photo'] = $user['profile_photo'] ?? 'default.jpg';
             $_SESSION['is_admin'] = $user['is_admin'];
             $_SESSION['onboarding_completed'] = (int) ($user['onboarding_completed'] ?? 1);
+            $_SESSION['dashboard_hero_mode'] = 'welcome_back';
 
             if ($user['is_admin'] == 1) {
                 header("Location: ../admin/dashboard.php");

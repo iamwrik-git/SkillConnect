@@ -160,3 +160,6 @@ if (!function_exists('normalizeSecurityAnswer')) {
         return function_exists('mb_strtolower') ? mb_strtolower($answer, 'UTF-8') : strtolower($answer);
     }
 }
+
+require_once __DIR__ . '/helpers.php';
+

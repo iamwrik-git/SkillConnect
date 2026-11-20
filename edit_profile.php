@@ -7,12 +7,9 @@ require_once __DIR__ . '/includes/session.php';
 // Generate a session-bound CSRF token for all profile/security forms.
 $csrf_token = csrfToken();
 
-require_once 'includes/db_connect.php';
-require_once 'includes/auth.php';
-
-if (file_exists('includes/functions.php')) {
-    require_once 'includes/functions.php';
-}
+require_once __DIR__ . '/includes/db_connect.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/recovery_helpers.php';
 
 // 2. Authentication & Identity
 requireLogin();
@@ -20,7 +17,6 @@ $user_id = getCurrentUserId();
 
 // 3. Fetch current user profile data (Added security fields)
 try {
-    // We use a broader select here in case your password column is named differently
     $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -37,20 +33,7 @@ try {
 }
 
 // 3b. Determine Account Recovery Status
-$recovery_configured = !empty($user['security_question'])
-    && !empty($user['security_answer_hash']);
-
-
-// Helper for UI-Avatars (Fallback for profile photo)
-if (!function_exists('getProfilePhotoUrl')) {
-    function getProfilePhotoUrl($photo, $name)
-    {
-        if (empty($photo) || $photo === 'default.jpg') {
-            return "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=eff6ff&color=2563eb&size=120&bold=true";
-        }
-        return 'assets/images/profile/' . htmlspecialchars($photo, ENT_QUOTES, 'UTF-8');
-    }
-}
+$recovery_configured = isRecoveryConfigured($user);
 
 // 4. Fetch user's current skills
 $user_skills = [];
@@ -75,18 +58,18 @@ $points = 0;
 $hasPhoto = (!empty($user['profile_photo']) && $user['profile_photo'] !== 'default.jpg');
 $hasName  = !empty(trim($user['name'] ?? ''));
 $hasEmail = !empty(trim($user['email'] ?? ''));
-$hasExp   = !empty($user['exp_level']);
+$hasExp   = !empty($user['exp_level']) && ($user['role'] === 'trainer');
 $hasBio   = !empty(trim($user['bio'] ?? ''));
 $skillPts = min(3, $current_skill_count);
 
 if ($hasPhoto) $points += 1;
 if ($hasName)  $points += 1;
 if ($hasEmail) $points += 1;
-if ($hasExp) $points += 1;
-if ($hasBio) $points += 1;
+if ($hasExp)   $points += 1;
+if ($hasBio)   $points += 1;
 $points += $skillPts;
 
-$maxPoints = 8;
+$maxPoints = ($user['role'] === 'trainer') ? 8 : 7;
 $completionPercentage = round(($points / $maxPoints) * 100);
 
 $circleRadius = 45;
@@ -108,6 +91,13 @@ if (file_exists('includes/header.php')) {
             <h1 class="page-title">Edit Profile</h1>
             <p class="page-subtitle">Manage your profile information and account settings.</p>
         </div>
+        <a href="profile.php" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to Profile
+        </a>
     </header>
 
     <!-- Profile settings navigation -->
@@ -190,9 +180,10 @@ if (file_exists('includes/header.php')) {
 
                     <div class="form-group">
                         <label class="form-label" for="role">Account Role (Read-Only)</label>
-                        <input type="text" id="role" value="<?= htmlspecialchars(ucfirst($user['role']), ENT_QUOTES, 'UTF-8') ?>" readonly class="form-input readonly">
+                        <input type="text" id="role" value="<?= htmlspecialchars(($user['role'] === 'trainer' ? 'Mentor' : 'Mentee'), ENT_QUOTES, 'UTF-8') ?>" readonly class="form-input readonly">
                     </div>
 
+                    <?php if ($user['role'] === 'trainer'): ?>
                     <div class="form-group">
                         <label class="form-label" for="exp_level">Experience Level</label>
                         <select id="exp_level" name="exp_level" class="form-input">
@@ -202,6 +193,7 @@ if (file_exists('includes/header.php')) {
                             <option value="Expert" <?= ($user['exp_level'] ?? '') === 'Expert' ? 'selected' : '' ?>>Expert</option>
                         </select>
                     </div>
+                    <?php endif; ?>
 
                     <div class="form-group">
                         <label class="form-label" for="bio">Bio</label>
@@ -256,10 +248,12 @@ if (file_exists('includes/header.php')) {
                                 ['label' => 'Profile Photo', 'done' => $hasPhoto, 'status' => $hasPhoto ? 'Completed' : 'Pending'],
                                 ['label' => 'Full Name', 'done' => $hasName, 'status' => $hasName ? 'Completed' : 'Pending'],
                                 ['label' => 'Email Address', 'done' => $hasEmail, 'status' => $hasEmail ? 'Completed' : 'Pending'],
-                                ['label' => 'Experience Level', 'done' => $hasExp, 'status' => $hasExp ? 'Completed' : 'Pending'],
-                                ['label' => 'Bio', 'done' => $hasBio, 'status' => $hasBio ? 'Completed' : 'Pending'],
-                                ['label' => 'Add 3 Skills', 'done' => ($skillPts === 3), 'status' => $skillPts . '/3 added']
                             ];
+                            if ($user['role'] === 'trainer') {
+                                $checklistItems[] = ['label' => 'Experience Level', 'done' => $hasExp, 'status' => $hasExp ? 'Completed' : 'Pending'];
+                            }
+                            $checklistItems[] = ['label' => 'Bio', 'done' => $hasBio, 'status' => $hasBio ? 'Completed' : 'Pending'];
+                            $checklistItems[] = ['label' => 'Add 3 Skills', 'done' => ($skillPts === 3), 'status' => $skillPts . '/3 added'];
 
                             foreach ($checklistItems as $item):
                                 $isDone = $item['done'];
@@ -300,7 +294,7 @@ if (file_exists('includes/header.php')) {
                                 Add, remove or update the skills you want to <?= $user['role'] === 'trainer' ? 'teach' : 'learn' ?>.<br>
                                 You can manage up to 3 skills in your profile.
                             </p>
-                            <a href="my_skills.php" class="btn btn-primary" style="margin-top: 1.25rem;">
+                            <a href="profile.php?tab=skills" class="btn btn-primary" style="margin-top: 1.25rem;">
                                 Go to My Skills &rarr;
                             </a>
                         </div>
@@ -427,10 +421,11 @@ if (file_exists('includes/header.php')) {
                         <label class="form-label" for="security_question">Security Question</label>
                         <select id="security_question" name="security_question" class="form-input" required>
                             <option value="">Select a security question...</option>
-                            <option value="school" <?= (($user['security_question'] ?? '') === 'school') ? 'selected' : '' ?>>What was the name of your first school?</option>
-                            <option value="pet" <?= (($user['security_question'] ?? '') === 'pet') ? 'selected' : '' ?>>What was the name of your first pet?</option>
-                            <option value="nickname" <?= (($user['security_question'] ?? '') === 'nickname') ? 'selected' : '' ?>>What was your childhood nickname?</option>
-                            <option value="city" <?= (($user['security_question'] ?? '') === 'city') ? 'selected' : '' ?>>In what city were you born?</option>
+                            <?php foreach (getSecurityQuestions() as $qKey => $qLabel): ?>
+                                <option value="<?= htmlspecialchars($qKey, ENT_QUOTES, 'UTF-8') ?>" <?= (($user['security_question'] ?? '') === $qKey) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($qLabel, ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
@@ -489,49 +484,6 @@ if (file_exists('includes/header.php')) {
     </div>
 
 </div>
-
-<!-- Inline Javascript for Tabs and Modal to bypass browser caching -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. TAB SWITCHING LOGIC
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        if (tabBtns.length > 0) {
-            function switchTab(targetId) {
-                tabBtns.forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.setAttribute('aria-selected', 'false');
-                    btn.setAttribute('tabindex', '-1');
-                });
-                tabContents.forEach(content => content.classList.remove('active'));
-
-                const activeBtn = document.querySelector(`.tab-btn[data-target="${targetId}"]`);
-                const activeContent = document.getElementById(targetId);
-
-                if (activeBtn && activeContent) {
-                    activeBtn.classList.add('active');
-                    activeBtn.setAttribute('aria-selected', 'true');
-                    activeBtn.setAttribute('tabindex', '0');
-                    activeContent.classList.add('active');
-
-                    history.replaceState(null, null, `#${targetId.replace('tab-', '')}`);
-                }
-            }
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    switchTab(btn.getAttribute('data-target'));
-                });
-            });
-
-            // Deep-link routing 
-            if (window.location.hash === '#security') {
-                switchTab('tab-security');
-            }
-        }
-    });
-</script>
 
 <?php
 // 7. Output Footer

@@ -15,6 +15,8 @@
 </div>
 <!-- END APP LAYOUT -->
 
+<?php require_once __DIR__ . '/partials/message_modal.php'; ?>
+
 <!-- Scripts -->
 <script src="assets/js/main.js"></script>
 </body>

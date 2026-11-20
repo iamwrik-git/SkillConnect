@@ -19,9 +19,16 @@ $allowedReturnPages = [
     'stay_tuned.php'
 ];
 $returnRaw = $_POST['return_to'] ?? 'dashboard.php';
-$returnTo = is_string($returnRaw) ? basename($returnRaw) : 'dashboard.php';
-if (!in_array($returnTo, $allowedReturnPages, true)) {
-    $returnTo = 'dashboard.php';
+$returnTo = 'dashboard.php';
+if (is_string($returnRaw)) {
+    $parsed = parse_url($returnRaw);
+    $page = basename((string) ($parsed['path'] ?? ''));
+    if (empty($parsed['scheme']) && empty($parsed['host']) && in_array($page, $allowedReturnPages, true)) {
+        $returnTo = $page;
+        if (!empty($parsed['query'])) {
+            $returnTo .= '?' . $parsed['query'];
+        }
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

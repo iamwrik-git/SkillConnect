@@ -3,8 +3,8 @@
 
 require_once __DIR__ . '/../includes/session.php';
 
-require_once '../includes/db_connect.php';
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/db_connect.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // Enforce authentication
 requireLogin();
@@ -17,22 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Enforce role restrictions: Only trainees can save trainers
+// Enforce role restrictions: Only mentees can save mentors
 if ($role !== 'trainee') {
-    $_SESSION['error'] = "Only trainees can save trainers.";
+    $_SESSION['error'] = "Only mentees can save mentors.";
     header("Location: ../dashboard.php");
     exit();
 }
 
 // Sanitize and validate inputs
 $action = is_string($_POST['action'] ?? null) ? trim($_POST['action']) : '';
-$trainer_id = filter_input(INPUT_POST, 'trainer_id', FILTER_VALIDATE_INT);
+$trainer_id = filter_input(INPUT_POST, 'trainer_id', FILTER_VALIDATE_INT) ?: filter_var($_POST['trainer_id'] ?? null, FILTER_VALIDATE_INT);
 $returnRaw = $_POST['return_to'] ?? '../search.php';
 $return_to = '../search.php';
 if (is_string($returnRaw)) {
     $parsed = parse_url($returnRaw);
     $page = basename((string) ($parsed['path'] ?? ''));
-    $allowedPages = ['search.php', 'saved_trainers.php'];
+    $allowedPages = ['search.php', 'saved_trainers.php', 'dashboard.php'];
     if (empty($parsed['scheme']) && empty($parsed['host']) && empty($parsed['user']) && empty($parsed['pass']) && in_array($page, $allowedPages, true)) {
         $return_to = '../' . $page;
         if ($page === 'search.php' && isset($parsed['query'])) {
@@ -66,7 +66,7 @@ if (!csrfValid($_POST['csrf_token'] ?? null)) {
 }
 
 if (!$trainer_id || $trainer_id <= 0) {
-    $_SESSION['error'] = "Invalid trainer ID.";
+    $_SESSION['error'] = "Invalid mentor ID.";
     header("Location: " . $return_to);
     exit();
 }
@@ -79,13 +79,13 @@ if ($current_user_id === $trainer_id) {
 }
 
 try {
-    // Validate that the target account exists and is actually a trainer
-    $stmt = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
+    // Validate that the target account exists and is actually a mentor (and not an admin)
+    $stmt = $pdo->prepare("SELECT role, is_admin FROM users WHERE user_id = ?");
     $stmt->execute([$trainer_id]);
     $target = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$target || $target['role'] !== 'trainer') {
-        $_SESSION['error'] = "The target account is not a valid trainer.";
+    if (!$target || $target['role'] !== 'trainer' || !empty($target['is_admin'])) {
+        $_SESSION['error'] = "The target account is not a valid mentor.";
         header("Location: " . $return_to);
         exit();
     }
@@ -96,7 +96,7 @@ try {
         $stmt->execute([$current_user_id, $trainer_id]);
 
         if ($stmt->rowCount() > 0) {
-            $_SESSION['success'] = "Trainer bookmarked successfully.";
+            $_SESSION['success'] = "Mentor bookmarked successfully.";
         }
         // If rowCount is 0, it means the trainer is already saved; silently ignore to avoid annoying the user
 
@@ -105,7 +105,7 @@ try {
         $stmt->execute([$current_user_id, $trainer_id]);
 
         if ($stmt->rowCount() > 0) {
-            $_SESSION['success'] = "Trainer removed from saved list.";
+            $_SESSION['success'] = "Mentor removed from saved list.";
         }
     } else {
         $_SESSION['error'] = "Invalid action specified.";
