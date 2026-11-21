@@ -188,10 +188,10 @@ ob_start();
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th width="10%">#</th>
-                        <th width="40%">Skill Name</th>
-                        <th width="20%">Skill ID</th>
-                        <th width="30%" class="text-right">Actions</th>
+                        <th style="width: 60px;">#</th>
+                        <th>Skill Name</th>
+                        <th style="width: 140px;">Skill ID</th>
+                        <th style="width: 180px;" class="th-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -222,8 +222,8 @@ ob_start();
                                     <span id="skill-text-<?= $skill['skill_id'] ?>"><?= htmlspecialchars($skill['skill_name'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </td>
                                 <td><span class="badge badge-green-light text-green">ID: <?= $skill['skill_id'] ?></span></td>
-                                <td class="text-right">
-                                    <div class="action-buttons justify-end" id="actions-<?= $skill['skill_id'] ?>">
+                                <td class="td-actions">
+                                    <div class="action-buttons" id="actions-<?= $skill['skill_id'] ?>">
                                         <button type="button" class="btn-action btn-view" onclick="toggleEdit(<?= $skill['skill_id'] ?>)">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -270,24 +270,6 @@ ob_start();
         <?php endif; ?>
     </div>
 </div>
-
-<script>
-    function toggleEdit(id) {
-        const form = document.getElementById('edit-form-' + id);
-        const text = document.getElementById('skill-text-' + id);
-        const actions = document.getElementById('actions-' + id);
-
-        if (form.style.display === 'none') {
-            form.style.display = 'flex';
-            text.style.display = 'none';
-            actions.style.display = 'none';
-        } else {
-            form.style.display = 'none';
-            text.style.display = 'inline';
-            actions.style.display = 'flex';
-        }
-    }
-</script>
 
 <?php
 $content = ob_get_clean();

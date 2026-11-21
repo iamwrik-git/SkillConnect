@@ -2,16 +2,22 @@
 // login.php
 require_once 'includes/auth.php';
 
-// Redirect logged-in trainees and trainers to their dashboard,
-// but allow authenticated administrators to access the login/registration forms.
-if (isLoggedIn() && empty($_SESSION['is_admin'])) {
-    header("Location: dashboard.php");
+// Set no-cache headers to prevent browser back-button from restoring a stale, locked form state
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Redirect logged-in users directly to their appropriate dashboard
+if (isLoggedIn()) {
+    $target = !empty($_SESSION['is_admin']) ? "admin/dashboard.php" : "dashboard.php";
+    header("Location: $target");
     exit();
 }
 
-// 1. Determine Auth Mode State
-$mode = $_GET['mode'] ?? 'login';
-$isSignup = ($mode === 'signup');
+// 1. Determine Auth Mode State & Fallbacks
+$clearedNotice = isset($_GET['cleared']) ? 'Previous account setup was cancelled. You can create your account fresh below.' : null;
+$mode = $_GET['mode'] ?? ($clearedNotice ? 'signup' : 'login');
+$isSignup = ($mode === 'signup' || $clearedNotice !== null);
 
 // 2. Safely capture Errors and Form Data
 $error = $_SESSION['error'] ?? null;
@@ -82,12 +88,26 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                         <div class="form-group">
                             <label for="login-email">Email Address</label>
-                            <input type="email" id="login-email" name="email" class="form-input" value="<?= htmlspecialchars($loginEmail, ENT_QUOTES, 'UTF-8') ?>" required autocomplete="email" placeholder="name@example.com">
+                            <div class="auth-input-wrapper">
+                                <span class="auth-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="1.5"></rect>
+                                        <path d="m3 7 9 7 9-7"></path>
+                                    </svg>
+                                </span>
+                                <input type="email" id="login-email" name="email" class="form-input" value="<?= htmlspecialchars($loginEmail, ENT_QUOTES, 'UTF-8') ?>" required autocomplete="email" placeholder="name@example.com">
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label for="login-password">Password</label>
-                            <div class="password-wrapper">
+                            <div class="auth-input-wrapper password-wrapper">
+                                <span class="auth-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                                        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                    </svg>
+                                </span>
                                 <input type="password" id="login-password" name="password" class="form-input" required autocomplete="current-password" placeholder="••••••••">
                                 <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -119,6 +139,16 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                         <p>Join SkillConnect and start your learning journey today.</p>
                     </div>
 
+                    <?php if (!empty($clearedNotice)): ?>
+                        <div class="auth-cleared-banner" role="status">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span><?= htmlspecialchars($clearedNotice, ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if ($isSignup && $error): ?>
                         <div class="inline-error-banner">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -136,12 +166,28 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
                         <div class="form-group">
                             <label for="reg-name">Full Name</label>
-                            <input type="text" id="reg-name" name="name" class="form-input" value="<?= htmlspecialchars($signupName, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="name" placeholder="Enter your name">
+                            <div class="auth-input-wrapper">
+                                <span class="auth-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="8" r="4"></circle>
+                                        <path d="M4 21v-2a8 8 0 0 1 16 0v2z"></path>
+                                    </svg>
+                                </span>
+                                <input type="text" id="reg-name" name="name" class="form-input" value="<?= htmlspecialchars($signupName, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="name" placeholder="Enter your name">
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label for="reg-email">Email Address</label>
-                            <input type="email" id="reg-email" name="email" class="form-input" value="<?= htmlspecialchars($signupEmail, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="email" placeholder="name@example.com">
+                            <div class="auth-input-wrapper">
+                                <span class="auth-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="1.5"></rect>
+                                        <path d="m3 7 9 7 9-7"></path>
+                                    </svg>
+                                </span>
+                                <input type="email" id="reg-email" name="email" class="form-input" value="<?= htmlspecialchars($signupEmail, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100" autocomplete="email" placeholder="name@example.com">
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -170,7 +216,13 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                         <div class="form-group form-group-split">
                             <div class="half-width">
                                 <label for="reg-password">Password</label>
-                                <div class="password-wrapper">
+                                <div class="auth-input-wrapper password-wrapper">
+                                    <span class="auth-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                        </svg>
+                                    </span>
                                     <input type="password" id="reg-password" name="password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -182,7 +234,13 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
                             </div>
                             <div class="half-width">
                                 <label for="reg-confirm-password">Confirm Password</label>
-                                <div class="password-wrapper">
+                                <div class="auth-input-wrapper password-wrapper">
+                                    <span class="auth-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                        </svg>
+                                    </span>
                                     <input type="password" id="reg-confirm-password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="••••••••">
                                     <button type="button" class="password-toggle-btn js-password-toggle" aria-label="Show password">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -235,110 +293,7 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
 
     </div>
 
-    <style>
-        .auth-brand-logo {
-            display: block;
-            width: min(220px, 70%);
-            max-height: 56px;
-            height: auto;
-            object-fit: contain;
-            margin: 0 auto;
-        }
-
-        .auth-form .form-validation-error {
-            color: #b91c1c;
-            font-size: 0.8rem;
-            margin-top: 6px;
-            line-height: 1.35;
-        }
-
-        .auth-form input[aria-invalid="true"] {
-            border-color: #ef4444;
-        }
-    </style>
-    <script src="assets/js/main.js"></script>
-    <script>
-        (() => {
-            const form = document.getElementById('register-form');
-            if (!form) return;
-
-            const password = document.getElementById('reg-password');
-            const confirmPassword = document.getElementById('reg-confirm-password');
-            const submitButton = form.querySelector('button[type="submit"]');
-
-            function clearError(input) {
-                input.removeAttribute('aria-invalid');
-                const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
-                wrapper?.querySelector('.form-validation-error')?.remove();
-            }
-
-            function showError(input, message) {
-                clearError(input);
-                input.setAttribute('aria-invalid', 'true');
-                const error = document.createElement('p');
-                error.className = 'form-validation-error';
-                error.setAttribute('role', 'alert');
-                error.textContent = message;
-                const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
-                wrapper?.appendChild(error);
-                input.focus();
-            }
-
-            function validateRegistration(event) {
-                clearError(password);
-                clearError(confirmPassword);
-
-                let invalidInput = null;
-                let message = '';
-
-                if (!password.value) {
-                    invalidInput = password;
-                    message = 'Please enter a password.';
-                } else if (password.value.length < 8 || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
-                    invalidInput = password;
-                    message = 'Password must be at least 8 characters and include a number and special character.';
-                } else if (!confirmPassword.value) {
-                    invalidInput = confirmPassword;
-                    message = 'Please confirm your password.';
-                } else if (password.value !== confirmPassword.value) {
-                    invalidInput = confirmPassword;
-                    message = 'Passwords do not match.';
-                }
-
-                if (invalidInput) {
-                    if (event) {
-                        event.preventDefault();
-                        event.stopImmediatePropagation();
-                    }
-                    // Restore the button if another script has already changed its label.
-                    if (submitButton) {
-                        submitButton.disabled = false;
-                        submitButton.classList.remove('is-loading', 'loading');
-                        submitButton.removeAttribute('aria-busy');
-                        submitButton.innerHTML = 'Create Account &rarr;';
-                    }
-                    showError(invalidInput, message);
-                    return false;
-                }
-                return true;
-            }
-
-            password.addEventListener('input', () => clearError(password));
-            confirmPassword.addEventListener('input', () => clearError(confirmPassword));
-
-            // Capture-phase click validation runs before generic loading-button handlers.
-            if (submitButton) {
-                submitButton.addEventListener('click', (event) => {
-                    if (!validateRegistration(event)) return;
-                }, true);
-            }
-
-            // Also cover keyboard submission and programmatic form submission.
-            form.addEventListener('submit', (event) => {
-                validateRegistration(event);
-            }, true);
-        })();
-    </script>
+    <script src="assets/js/main.js" defer></script>
 </body>
 
 </html>

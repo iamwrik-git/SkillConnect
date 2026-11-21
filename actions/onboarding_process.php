@@ -7,15 +7,43 @@ require_once __DIR__ . '/../includes/recovery_helpers.php';
 requireLogin();
 
 $userId = (int) getCurrentUserId();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+$actionInput = $_POST['action'] ?? ($_GET['action'] ?? '');
+$submittedToken = $_POST['csrf_token'] ?? ($_GET['csrf'] ?? null);
+$sessionToken = $_SESSION['onboarding_csrf'] ?? null;
+
+if (!is_string($submittedToken) || !is_string($sessionToken) || $submittedToken === '' || !hash_equals($sessionToken, $submittedToken)) {
+    $_SESSION['onboarding_error'] = 'Your session expired. Please try again.';
     header('Location: ../dashboard.php');
     exit;
 }
 
-$submittedToken = $_POST['csrf_token'] ?? null;
-$sessionToken = $_SESSION['onboarding_csrf'] ?? null;
-if (!is_string($submittedToken) || !is_string($sessionToken) || $submittedToken === '' || !hash_equals($sessionToken, $submittedToken)) {
-    $_SESSION['onboarding_error'] = 'Your session expired. Please try again.';
+// Fallback: User cancelled onboarding to start registration over from scratch
+if ($actionInput === 'cancel_onboarding') {
+    try {
+        $check = $pdo->prepare('SELECT user_id, onboarding_completed FROM users WHERE user_id = ? LIMIT 1');
+        $check->execute([$userId]);
+        $row = $check->fetch(PDO::FETCH_ASSOC);
+        if ($row && (int)($row['onboarding_completed'] ?? 1) === 0) {
+            $pdo->prepare('DELETE FROM users WHERE user_id = ? AND onboarding_completed = 0')->execute([$userId]);
+        }
+    } catch (PDOException $e) {
+        error_log('Cancel onboarding cleanup error: ' . $e->getMessage());
+    }
+
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    session_destroy();
+    header('Location: ../login.php?mode=signup&cleared=1');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../dashboard.php');
     exit;
 }

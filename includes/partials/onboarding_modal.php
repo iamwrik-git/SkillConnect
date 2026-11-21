@@ -81,39 +81,16 @@ require_once __DIR__ . '/../recovery_helpers.php';
                 </div>
                 <button type="submit" class="sc-onboarding-submit">Save &amp; Finish <span aria-hidden="true">→</span></button>
                 <p class="sc-onboarding-required-note"><span>*</span> Required fields</p>
+
+                <!-- Fallback: Cancel onboarding and restart registration -->
+                <div class="sc-onboarding-cancel-wrapper">
+                    <a href="actions/onboarding_process.php?action=cancel_onboarding&csrf=<?= urlencode($onboarding_csrf) ?>"
+                       class="sc-onboarding-cancel-link"
+                       onclick="return confirm('Cancel this account setup and start creating your account again?');">
+                        &larr; Cancel &amp; Create Account Again
+                    </a>
+                </div>
             </form>
         </div>
     </section>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const backdrop = document.getElementById('sc-onboarding-backdrop');
-        if (backdrop) {
-            document.body.classList.add('sc-onboarding-active');
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') event.preventDefault();
-            });
-            backdrop.addEventListener('click', function(event) {
-                if (event.target === backdrop) event.preventDefault();
-            });
-            const firstInput = backdrop.querySelector('input:not([type="hidden"]), select, textarea');
-            if (firstInput) {
-                firstInput.focus({ preventScroll: true });
-            }
-        }
-        document.querySelectorAll('.sc-security-answer-toggle').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const input = document.getElementById(button.dataset.target);
-                if (!input) return;
-                const show = input.type === 'password';
-                input.type = show ? 'text' : 'password';
-                button.setAttribute('aria-pressed', show ? 'true' : 'false');
-                button.setAttribute('aria-label', show ? 'Hide security answer' : (input.id === 'sc-security-confirm' ? 'Show confirmation answer' : 'Show security answer'));
-                button.innerHTML = show ?
-                    '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16.6 16.6 0 0 1-3.2 4.1"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"/></svg>' :
-                    '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
-            });
-        });
-    });
-</script>

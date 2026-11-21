@@ -754,19 +754,6 @@ require_once __DIR__ . '/includes/header.php';
 
 </div>
 
-<?php if ($show_onboarding_success): ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toast = document.querySelector('.sc-onboarding-toast');
-        if (toast) {
-            const close = toast.querySelector('.sc-onboarding-toast-close');
-            if (close) close.addEventListener('click', () => toast.remove());
-            window.setTimeout(() => toast.remove(), 6500);
-        }
-    });
-</script>
-<?php endif; ?>
-
 <?php
 if (file_exists('includes/footer.php')) {
     require_once 'includes/footer.php';

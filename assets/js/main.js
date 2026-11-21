@@ -299,6 +299,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // A3: BUTTON LOADING STATES
     // =========================================================
 
+    function resetButtonState(btn) {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.classList.remove('is-loading', 'loading');
+        btn.removeAttribute('aria-busy');
+        if (btn.dataset.originalHtml) {
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+    }
+
     function setButtonLoadingState(btn) {
         if (!btn || btn.disabled) {
             return;
@@ -310,8 +320,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!btn.dataset.originalHtml) {
+            btn.dataset.originalHtml = btn.innerHTML;
+        }
+
         btn.disabled = true;
         btn.classList.add('is-loading');
+        btn.setAttribute('aria-busy', 'true');
 
         btn.innerHTML = `
             <svg
@@ -329,7 +344,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ${loadingText}
         `;
+
+        // Safety fallback: auto-restore button after 8 seconds if no navigation occurred
+        setTimeout(() => {
+            resetButtonState(btn);
+        }, 8000);
     }
+
+    // Restore buttons on browser "Back" navigation or cache restore
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('button.is-loading, button[aria-busy="true"]').forEach(btn => {
+            resetButtonState(btn);
+        });
+    });
 
 
     // =========================================================
@@ -748,5 +775,335 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // =========================================================
+    // A9: AUTH REGISTRATION & PASSWORD VALIDATION
+    // =========================================================
+    (() => {
+        const form = document.getElementById('register-form');
+        if (!form) return;
+
+        const password = document.getElementById('reg-password');
+        const confirmPassword = document.getElementById('reg-confirm-password');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        function clearError(input) {
+            if (!input) return;
+            input.removeAttribute('aria-invalid');
+            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+            wrapper?.querySelector('.form-validation-error')?.remove();
+        }
+
+        function showError(input, message) {
+            clearError(input);
+            input.setAttribute('aria-invalid', 'true');
+            const error = document.createElement('p');
+            error.className = 'form-validation-error';
+            error.setAttribute('role', 'alert');
+            error.textContent = message;
+            const wrapper = input.closest('.half-width') || input.parentElement?.parentElement;
+            wrapper?.appendChild(error);
+            input.focus();
+        }
+
+        function validateRegistration(event) {
+            clearError(password);
+            clearError(confirmPassword);
+
+            let invalidInput = null;
+            let message = '';
+
+            if (!password.value) {
+                invalidInput = password;
+                message = 'Please enter a password.';
+            } else if (password.value.length < 8 || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
+                invalidInput = password;
+                message = 'Password must be at least 8 characters and include a number and special character.';
+            } else if (!confirmPassword.value) {
+                invalidInput = confirmPassword;
+                message = 'Please confirm your password.';
+            } else if (password.value !== confirmPassword.value) {
+                invalidInput = confirmPassword;
+                message = 'Passwords do not match.';
+            }
+
+            if (invalidInput) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('is-loading', 'loading');
+                    submitButton.removeAttribute('aria-busy');
+                    submitButton.innerHTML = 'Create Account &rarr;';
+                }
+                showError(invalidInput, message);
+                return false;
+            }
+            return true;
+        }
+
+        if (password) password.addEventListener('input', () => clearError(password));
+        if (confirmPassword) confirmPassword.addEventListener('input', () => clearError(confirmPassword));
+
+        if (submitButton) {
+            submitButton.addEventListener('click', (event) => {
+                if (!validateRegistration(event)) return;
+            }, true);
+        }
+
+        form.addEventListener('submit', (event) => {
+            validateRegistration(event);
+        }, true);
+    })();
+
+    // =========================================================
+    // A10: PROFILE INCOMPLETE MODAL (Consolidated)
+    // =========================================================
+    (() => {
+        const modal = document.getElementById('profileIncompleteModal');
+        if (!modal) return;
+
+        function openModal() {
+            modal.classList.add('is-active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-active');
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSkillsTab = urlParams.get('tab') === 'skills' || window.location.hash === '#skills';
+
+        if (!isSkillsTab) {
+            setTimeout(openModal, 150);
+        }
+
+        const closeBtn = document.getElementById('closeProfileIncompleteBtn');
+        const dismissBtn = document.getElementById('dismissProfileIncompleteBtn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (dismissBtn) dismissBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+                closeModal();
+            }
+        });
+
+        const goToSkillsBtn = document.getElementById('btnGoToSkillsModal');
+        if (goToSkillsBtn) {
+            goToSkillsBtn.addEventListener('click', function() {
+                closeModal();
+                const tabSkillsBtn = document.getElementById('tab-skills-button');
+                if (tabSkillsBtn) {
+                    tabSkillsBtn.click();
+                }
+                setTimeout(function() {
+                    const searchInput = document.getElementById('skillSearchInput');
+                    if (searchInput) searchInput.focus();
+                }, 120);
+            });
+        }
+    })();
+
+    // =========================================================
+    // A11: SKILL SEARCH COMBOBOX (Consolidated)
+    // =========================================================
+    (() => {
+        const combobox = document.getElementById('skillCombobox');
+        if (!combobox) return;
+
+        const input = document.getElementById('skillSearchInput');
+        const hiddenId = document.getElementById('skillIdInput');
+        const dropdown = document.getElementById('skillDropdownList');
+        const toggle = document.getElementById('skillComboboxToggle');
+        const items = dropdown.querySelectorAll('.skill-option-item');
+        const emptyMsg = document.getElementById('skillEmptyMessage');
+        const form = combobox.closest('form');
+
+        function openDropdown() {
+            dropdown.removeAttribute('hidden');
+            combobox.classList.add('is-open');
+            input.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeDropdown() {
+            dropdown.setAttribute('hidden', '');
+            combobox.classList.remove('is-open');
+            input.setAttribute('aria-expanded', 'false');
+        }
+
+        function filterSkills(query) {
+            const q = (query || '').trim().toLowerCase();
+            let visibleCount = 0;
+            items.forEach(item => {
+                const name = (item.dataset.name || '').toLowerCase();
+                if (!q || name.includes(q)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            if (emptyMsg) {
+                emptyMsg.style.display = (visibleCount === 0) ? 'block' : 'none';
+            }
+        }
+
+        input.addEventListener('focus', function() {
+            openDropdown();
+            filterSkills(this.value);
+        });
+
+        input.addEventListener('click', function() {
+            openDropdown();
+        });
+
+        if (toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (dropdown.hasAttribute('hidden')) {
+                    openDropdown();
+                    input.focus();
+                    filterSkills(input.value);
+                } else {
+                    closeDropdown();
+                }
+            });
+        }
+
+        input.addEventListener('input', function() {
+            openDropdown();
+            filterSkills(this.value);
+            const selectedItem = dropdown.querySelector('.skill-option-item.is-selected');
+            if (selectedItem && selectedItem.dataset.name !== this.value) {
+                selectedItem.classList.remove('is-selected');
+                hiddenId.value = '';
+            }
+            input.classList.remove('is-invalid');
+        });
+
+        items.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                hiddenId.value = this.dataset.id;
+                input.value = this.dataset.name;
+
+                items.forEach(i => i.classList.remove('is-selected'));
+                this.classList.add('is-selected');
+
+                input.classList.remove('is-invalid');
+                closeDropdown();
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!combobox.contains(e.target)) {
+                closeDropdown();
+                const selectedItem = dropdown.querySelector('.skill-option-item.is-selected');
+                if (selectedItem) {
+                    input.value = selectedItem.dataset.name;
+                } else if (!hiddenId.value) {
+                    input.value = '';
+                    filterSkills('');
+                }
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDropdown();
+            } else if (e.key === 'Enter') {
+                if (!dropdown.hasAttribute('hidden')) {
+                    const firstVisible = Array.from(items).find(i => i.style.display !== 'none');
+                    if (firstVisible) {
+                        e.preventDefault();
+                        firstVisible.click();
+                    }
+                }
+            }
+        });
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!hiddenId.value || parseInt(hiddenId.value, 10) <= 0) {
+                    e.preventDefault();
+                    input.classList.add('is-invalid');
+                    input.focus();
+                    openDropdown();
+                    filterSkills('');
+                }
+            });
+        }
+    })();
+
+    // =========================================================
+    // A12: ONBOARDING MODAL & TOAST HANDLERS (Consolidated)
+    // =========================================================
+    (() => {
+        const backdrop = document.getElementById('sc-onboarding-backdrop');
+        if (backdrop) {
+            document.body.classList.add('sc-onboarding-active');
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') event.preventDefault();
+            });
+            backdrop.addEventListener('click', function(event) {
+                if (event.target === backdrop) event.preventDefault();
+            });
+            const firstInput = backdrop.querySelector('input:not([type="hidden"]), select, textarea');
+            if (firstInput) {
+                firstInput.focus({ preventScroll: true });
+            }
+        }
+
+        document.querySelectorAll('.sc-security-answer-toggle').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const input = document.getElementById(button.dataset.target);
+                if (!input) return;
+                const show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                button.setAttribute('aria-pressed', show ? 'true' : 'false');
+                button.setAttribute('aria-label', show ? 'Hide security answer' : (input.id === 'sc-security-confirm' ? 'Show confirmation answer' : 'Show security answer'));
+                button.innerHTML = show ?
+                    '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16.6 16.6 0 0 1-3.2 4.1"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"/></svg>' :
+                    '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+            });
+        });
+
+        // Auto-dismiss onboarding success toast
+        const toast = document.querySelector('.sc-onboarding-toast');
+        if (toast) {
+            const close = toast.querySelector('.sc-onboarding-toast-close');
+            if (close) close.addEventListener('click', () => toast.remove());
+            window.setTimeout(() => toast.remove(), 6500);
+        }
+    })();
+
+    // =========================================================
+    // A13: LANDING PAGE SMOOTH SCROLL & NAVIGATION
+    // =========================================================
+    (() => {
+        document.querySelectorAll('.landing-page a[href^="#"]').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                const targetId = this.getAttribute('href');
+                if (!targetId || targetId === '#') return;
+                const target = document.querySelector(targetId);
+                if (!target) return;
+                event.preventDefault();
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                if (history.replaceState) history.replaceState(null, '', targetId);
+                const mobileMenu = document.querySelector('.lp-mobile-menu');
+                if (mobileMenu) mobileMenu.removeAttribute('open');
+            });
+        });
+    })();
 
 });

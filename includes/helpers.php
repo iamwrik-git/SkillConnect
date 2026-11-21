@@ -3,6 +3,8 @@
  * Shared utility functions for SkillConnect.
  */
 
+require_once __DIR__ . '/recovery_helpers.php';
+
 if (!function_exists('getProfilePhotoUrl')) {
     /**
      * Resolves the profile photo URL or generates a fallback avatar.

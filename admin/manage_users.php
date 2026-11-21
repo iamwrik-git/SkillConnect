@@ -65,8 +65,8 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 10;
 $offset = ($page - 1) * $limit;
 
-// Build Query
-$where = [];
+// Build Query - administrators are excluded from user management and counters
+$where = ["(is_admin = 0 OR is_admin IS NULL)"];
 $params = [];
 
 if ($search !== '') {
@@ -83,12 +83,13 @@ if ($roleFilter === 'trainee' || $roleFilter === 'trainer') {
 $whereClause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 try {
-    // Retrieve all user counters in one aggregate query.
+    // Retrieve all user counters in one aggregate query (excluding admin).
     $userStats = $pdo->query("
         SELECT COUNT(*) AS total_users,
                COALESCE(SUM(CASE WHEN role = 'trainee' THEN 1 ELSE 0 END), 0) AS trainees,
                COALESCE(SUM(CASE WHEN role = 'trainer' THEN 1 ELSE 0 END), 0) AS trainers
         FROM users
+        WHERE (is_admin = 0 OR is_admin IS NULL)
     ")->fetch(PDO::FETCH_ASSOC);
     $totalUsersCount = (int) ($userStats['total_users'] ?? 0);
     $traineesCount = (int) ($userStats['trainees'] ?? 0);
@@ -198,13 +199,13 @@ ob_start();
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th style="width: 50px;">#</th>
                     <th>User</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Experience Level</th>
-                    <th>Joined On</th>
-                    <th>Actions</th>
+                    <th style="width: 110px;">Role</th>
+                    <th style="width: 150px;">Experience Level</th>
+                    <th style="width: 130px;">Joined On</th>
+                    <th style="width: 120px;" class="th-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -215,15 +216,14 @@ ob_start();
                 <?php else: ?>
                     <?php $i = $offset + 1;
                     foreach ($users as $user): ?>
-                        <tr>
+                        <tr class="clickable-row" data-href="view_user.php?id=<?= $user['user_id'] ?>" tabindex="0" role="link" title="Click anywhere to view <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>'s profile">
                             <td><?= $i++ ?></td>
                             <td>
                                 <div class="user-cell">
                                     <span class="avatar-sm bg-blue text-white">
                                         <?= strtoupper(substr($user['name'], 0, 1)) ?>
                                     </span>
-                                    <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
-                                    <?php if ($user['is_admin']) echo ' <span title="Administrator" style="color:var(--primary); font-size:12px; margin-left:4px;">★</span>'; ?>
+                                    <span class="user-name-text"><?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </td>
                             <td><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -234,28 +234,19 @@ ob_start();
                             </td>
                             <td><?= !empty($user['exp_level']) ? ucfirst(htmlspecialchars($user['exp_level'])) : '-' ?></td>
                             <td><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="view_user.php?id=<?= $user['user_id'] ?>" class="btn-action btn-view">
+                            <td class="td-actions">
+                                <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete User" data-confirm-action="Delete User" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="This will permanently remove this user and their associated mentorships and skills. This action cannot be undone.">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="action" value="delete_user">
+                                    <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
+                                    <button type="submit" class="btn-action btn-delete" <?= $user['user_id'] == $_SESSION['user_id'] ? 'disabled title="Cannot delete yourself"' : '' ?>>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                            <circle cx="12" cy="12" r="3"></circle>
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                         </svg>
-                                        View
-                                    </a>
-                                    <form method="POST" class="inline-form js-confirm-delete" data-confirm-title="Delete User" data-confirm-action="Delete User" data-confirm-message="Are you sure you want to delete <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>?" data-confirm-warning="This will permanently remove this user and their associated mentorships and skills. This action cannot be undone.">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                                        <input type="hidden" name="action" value="delete_user">
-                                        <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
-                                        <button type="submit" class="btn-action btn-delete" <?= $user['user_id'] == $_SESSION['user_id'] ? 'disabled title="Cannot delete yourself"' : '' ?>>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                            Delete
-                                        </button>
-                                    </form>
-                                </div>
+                                        Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

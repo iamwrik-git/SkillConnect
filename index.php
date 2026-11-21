@@ -199,24 +199,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
         </div>
     </footer>
 
-    <script>
-        document.querySelectorAll('.landing-page a[href^="#"]').forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                var targetId = this.getAttribute('href');
-                if (!targetId || targetId === '#') return;
-                var target = document.querySelector(targetId);
-                if (!target) return;
-                event.preventDefault();
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                if (history.replaceState) history.replaceState(null, '', targetId);
-                var mobileMenu = document.querySelector('.lp-mobile-menu');
-                if (mobileMenu) mobileMenu.removeAttribute('open');
-            });
-        });
-    </script>
+    <script src="assets/js/main.js" defer></script>
 </body>
 
 </html>

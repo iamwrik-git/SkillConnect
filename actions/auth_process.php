@@ -69,15 +69,22 @@ if ($action === 'register') {
     }
 
     try {
-        // Check for existing email
-        $checkstmt = $pdo->prepare("SELECT user_id FROM users WHERE email = ?");
+        // Check for existing email & handle abandoned onboarding fallback
+        $checkstmt = $pdo->prepare("SELECT user_id, onboarding_completed, security_question FROM users WHERE email = ? LIMIT 1");
         $checkstmt->execute([$email]);
+        $existing = $checkstmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($checkstmt->fetch()) {
-            $_SESSION['error'] = "Account already registered. Please sign in.";
-            $_SESSION['form_data'] = ['name' => $name, 'email' => $email, 'role' => $role];
-            header("Location: ../login.php?mode=signup");
-            exit();
+        if ($existing) {
+            // If the account was abandoned before onboarding setup (no security question and onboarding not complete),
+            // clean up the partial account so the user can register fresh seamlessly.
+            if ((int)($existing['onboarding_completed'] ?? 1) === 0 && empty($existing['security_question'])) {
+                $pdo->prepare("DELETE FROM users WHERE user_id = ? AND onboarding_completed = 0")->execute([$existing['user_id']]);
+            } else {
+                $_SESSION['error'] = "Account already registered. Please sign in.";
+                $_SESSION['form_data'] = ['name' => $name, 'email' => $email, 'role' => $role];
+                header("Location: ../login.php?mode=signup");
+                exit();
+            }
         }
 
         // Hash and insert
@@ -138,6 +145,13 @@ if ($action === 'register') {
             $_SESSION['is_admin'] = $user['is_admin'];
             $_SESSION['onboarding_completed'] = (int) ($user['onboarding_completed'] ?? 1);
             $_SESSION['dashboard_hero_mode'] = 'welcome_back';
+
+            // Record user active login timestamp
+            try {
+                $pdo->prepare("UPDATE users SET last_login = NOW() WHERE user_id = ?")->execute([$user['user_id']]);
+            } catch (Exception $e) {
+                // Non-fatal if last_login update fails
+            }
 
             if ($user['is_admin'] == 1) {
                 header("Location: ../admin/dashboard.php");
