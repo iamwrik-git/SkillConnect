@@ -1,8 +1,7 @@
 <?php
 // admin/infoAuth.php
 // SkillConnect - Stealth Gateway & Gimmick Terminal
-require_once __DIR__ . '/../includes/auth.php';
-requireAdmin();
+require_once __DIR__ . '/../includes/session.php';
 
 // =========================================================================
 // 6-DIGIT AUTHORIZATION HASH (SHA-256)
@@ -336,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span>bash &mdash; skillconnect@srv-core:~ (tty1)</span>
         </div>
         <div>
-            <a href="dashboard.php" class="term-exit-btn" title="Return to Admin Dashboard">&larr; exit</a>
+            <a href="../index.php" class="term-exit-btn" title="Exit">&larr; exit</a>
         </div>
     </header>
 

@@ -523,7 +523,7 @@ a {
     color: var(--blue);
 }
 
-/* Demonstration Info Icon Button (Point 9) */
+/* Demonstration Info Icon Button (Point 9) - Retained for backwards compatibility if needed */
 .header-info-btn {
     display: inline-flex;
     align-items: center;
@@ -541,6 +541,63 @@ a {
     color: var(--blue);
     border-color: var(--border-highlight);
     background: var(--card-hover);
+}
+
+/* Bright / Dark Mode Theme Toggle Button */
+.admin-theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--card-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    padding: 0;
+}
+
+.admin-theme-toggle-btn:hover {
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.4);
+    background: var(--card-hover);
+    transform: translateY(-1px);
+}
+
+.admin-theme-toggle-btn .theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* Default (Dark Mode): show Sun icon, hide Moon icon */
+.admin-theme-toggle-btn .icon-sun {
+    display: flex;
+}
+
+.admin-theme-toggle-btn .icon-moon {
+    display: none;
+}
+
+/* Light / Bright Mode styles for toggle icon */
+html.theme-light .admin-theme-toggle-btn .icon-sun,
+body.theme-light .admin-theme-toggle-btn .icon-sun {
+    display: none;
+}
+
+html.theme-light .admin-theme-toggle-btn .icon-moon,
+body.theme-light .admin-theme-toggle-btn .icon-moon {
+    display: flex;
+}
+
+html.theme-light .admin-theme-toggle-btn:hover,
+body.theme-light .admin-theme-toggle-btn:hover {
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 /* Content Area */
@@ -2102,4 +2159,337 @@ body.admin-modal-open {
     .stats-grid.grid-2 {
         grid-template-columns: 1fr;
     }
+}
+
+/* ==========================================================================
+   BRIGHT / LIGHT THEME MODE (Requirement 2)
+   - Reverts color palette to clean, professional light theme (original user dashboard aesthetic)
+   - Restores SkillConnect brand logo to original colorful appearance (filter: none)
+   - Preserves high readability and seamless UI across all admin modules
+   ========================================================================== */
+html.theme-light,
+body.theme-light {
+    --bg-main: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --header-bg: #ffffff;
+    --card-bg: #ffffff;
+    --card-surface: #f1f5f9;
+    --card-hover: #e2e8f0;
+    
+    --border-color: #e2e8f0;
+    --border-highlight: #cbd5e1;
+    --border-blue: rgba(59, 130, 246, 0.22);
+
+    /* Text */
+    --text-white: #0f172a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+
+    /* Subtle Colored Accents */
+    --blue: #2563eb;
+    --blue-subtle: rgba(37, 99, 235, 0.08);
+    --green: #059669;
+    --green-subtle: rgba(5, 150, 105, 0.08);
+    --purple: #7c3aed;
+    --purple-subtle: rgba(124, 58, 237, 0.08);
+    --orange: #d97706;
+    --orange-subtle: rgba(217, 119, 6, 0.08);
+    --red: #dc2626;
+    --red-subtle: rgba(220, 38, 38, 0.08);
+}
+
+/* Light Mode: Logo reverts to ORIGINAL SkillConnect colors */
+html.theme-light .admin-brand-logo,
+body.theme-light .admin-brand-logo {
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+/* Light Mode: Dashboard Hero Banner */
+body.theme-light .dashboard-hero-banner {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 20px -2px rgba(59, 130, 246, 0.08);
+}
+
+body.theme-light .hero-text-wrap h1 {
+    color: #0f172a;
+}
+
+body.theme-light .hero-text-wrap p {
+    color: #475569;
+}
+
+body.theme-light .hero-system-pill {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #475569;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Light Mode: Page Headers & Headings */
+body.theme-light .page-header h1,
+body.theme-light .card-title,
+body.theme-light .stat-value,
+body.theme-light .user-name-text,
+body.theme-light .confirm-modal-title,
+body.theme-light .wheel-number,
+body.theme-light .mentor-name,
+body.theme-light .demanded-skill-name,
+body.theme-light .active-users-num,
+body.theme-light .action-item-text h4,
+body.theme-light .legend-count,
+body.theme-light .view-user-section h3,
+body.theme-light .sc-confirm-heading h2 {
+    color: #0f172a !important;
+}
+
+/* Light Mode: Supporting Text & Secondary Labels */
+body.theme-light .card-subtitle,
+body.theme-light .mentor-email,
+body.theme-light .badge-subtle,
+body.theme-light .active-users-label,
+body.theme-light .action-item-text p,
+body.theme-light .legend-name,
+body.theme-light .bar-legend,
+body.theme-light .day-label,
+body.theme-light .wheel-label,
+body.theme-light .sc-confirm-heading p {
+    color: #475569 !important;
+}
+
+/* Light Mode: Top Mentors & Demanded Skills items */
+body.theme-light .top-mentor-item,
+body.theme-light .demanded-skill-item,
+body.theme-light .active-users-widget {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+body.theme-light .top-mentor-item:hover,
+body.theme-light .action-item-clean:hover {
+    background: #f1f5f9;
+}
+
+body.theme-light .mentor-rank {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+body.theme-light .mentor-rank.rank-1 {
+    color: #b45309;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+}
+
+body.theme-light .mentor-stat-pill {
+    color: #047857;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+}
+
+body.theme-light .demanded-total {
+    color: #1d4ed8;
+}
+
+body.theme-light .skill-progress-track {
+    background: #e2e8f0;
+}
+
+body.theme-light .bar-val {
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+/* Light Mode: Cards and Shadows */
+body.theme-light .admin-card,
+body.theme-light .stat-card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+body.theme-light .admin-card:hover,
+body.theme-light .stat-card:hover {
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e1;
+}
+
+/* Light Mode: Sidebar Navigation */
+body.theme-light .nav-link:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+}
+
+body.theme-light .nav-link-website:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+}
+
+body.theme-light .nav-link.active {
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.35);
+}
+
+/* Light Mode: Tables */
+body.theme-light .admin-table th {
+    background: #f8fafc;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body.theme-light .admin-table td {
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+
+body.theme-light .admin-table tr:hover td {
+    background-color: #f8fafc;
+}
+
+body.theme-light .admin-table tr.clickable-row:hover td {
+    background-color: #f1f5f9 !important;
+}
+
+/* Light Mode: Form Inputs & Selects */
+body.theme-light .search-input-wrap input,
+body.theme-light .filter-select,
+body.theme-light .form-input,
+body.theme-light .form-select {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+body.theme-light .search-input-wrap input:focus,
+body.theme-light .filter-select:focus,
+body.theme-light .form-input:focus,
+body.theme-light .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* Light Mode: Badges */
+body.theme-light .admin-security-badge {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #0f172a;
+}
+
+body.theme-light .card-tag {
+    background: #eff6ff;
+    border-color: #dbeafe;
+    color: #2563eb;
+}
+
+body.theme-light .badge-purple,
+body.theme-light .badge-purple-light {
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.2);
+}
+
+body.theme-light .badge-green,
+body.theme-light .badge-green-light {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border-color: rgba(5, 150, 105, 0.2);
+}
+
+body.theme-light .badge-blue,
+body.theme-light .badge-blue-light {
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Light Mode: Modals */
+body.theme-light .admin-confirm-content,
+body.theme-light .sc-confirm-modal {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.theme-light .admin-modal-backdrop,
+body.theme-light .sc-confirm-modal::backdrop {
+    background: rgba(15, 23, 42, 0.45) !important;
+}
+
+body.theme-light .sc-confirm-close {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+body.theme-light .sc-confirm-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+body.theme-light .sc-confirm-warning {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #991b1b !important;
+}
+
+body.theme-light .sc-confirm-warning p {
+    color: #991b1b !important;
+}
+
+body.theme-light .sc-confirm-cancel,
+body.theme-light .btn-cancel {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #334155 !important;
+}
+
+body.theme-light .sc-confirm-cancel:hover,
+body.theme-light .btn-cancel:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+body.theme-light .sc-confirm-delete,
+body.theme-light .btn-confirm-danger {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border: 1px solid #dc2626 !important;
+}
+
+body.theme-light .sc-confirm-delete:hover,
+body.theme-light .btn-confirm-danger:hover {
+    background: #b91c1c !important;
+}
+
+/* Light Mode: Toast notifications */
+body.theme-light .admin-toast {
+    background: #ffffff;
+    color: #1e293b;
+    box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .admin-toast-message {
+    color: #64748b;
+}
+
+body.theme-light .admin-toast-success {
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, #ffffff 45%);
+}
+
+body.theme-light .admin-toast-danger {
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, #ffffff 45%);
+}
+
+body.theme-light .admin-toast-close {
+    color: #94a3b8;
+}
+
+body.theme-light .admin-toast-close:hover {
+    color: #0f172a;
+    background: #f1f5f9;
 }

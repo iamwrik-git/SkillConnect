@@ -254,9 +254,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     })();
+
+    // 6. Admin Bright / Dark Theme Mode Toggle
+    (() => {
+        const toggleBtn = document.getElementById('admin-theme-toggle-btn');
+        if (!toggleBtn) return;
+
+        const updateState = (isLight) => {
+            if (isLight) {
+                document.documentElement.classList.add('theme-light');
+                document.body.classList.add('theme-light');
+                toggleBtn.setAttribute('title', 'Switch to Dark Mode');
+                toggleBtn.setAttribute('aria-label', 'Switch to Dark Mode');
+            } else {
+                document.documentElement.classList.remove('theme-light');
+                document.body.classList.remove('theme-light');
+                toggleBtn.setAttribute('title', 'Switch to Bright Mode');
+                toggleBtn.setAttribute('aria-label', 'Switch to Bright Mode');
+            }
+        };
+
+        // Initialize state based on storage or existing class
+        const currentTheme = localStorage.getItem('skillconnect_admin_theme');
+        const isCurrentlyLight = currentTheme === 'light' || document.documentElement.classList.contains('theme-light');
+        updateState(isCurrentlyLight);
+
+        toggleBtn.addEventListener('click', () => {
+            const willBeLight = !document.documentElement.classList.contains('theme-light');
+            localStorage.setItem('skillconnect_admin_theme', willBeLight ? 'light' : 'dark');
+            updateState(willBeLight);
+        });
+    })();
 });
 
-// 6. Global Helper for Manage Skills Inline Edit Toggle
+// 7. Global Helper for Manage Skills Inline Edit Toggle
 window.toggleEdit = function(id) {
     const form = document.getElementById('edit-form-' + id);
     const text = document.getElementById('skill-text-' + id);

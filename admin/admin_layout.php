@@ -29,6 +29,15 @@ if (!function_exists('isActive')) {
     <title><?= htmlspecialchars($pageTitle ?? 'Admin Panel') ?> - SkillConnect</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <script>
+        // Immediately apply saved theme before first paint to prevent flash
+        (function() {
+            var theme = localStorage.getItem('skillconnect_admin_theme');
+            if (theme === 'light') {
+                document.documentElement.classList.add('theme-light');
+            }
+        })();
+    </script>
 </head>
 
 <body class="admin-body">
@@ -112,6 +121,29 @@ if (!function_exists('isActive')) {
                 </button>
             </div>
             <div class="header-right">
+                <!-- Theme Mode Toggle: Bright (Light) / Dark Mode -->
+                <button type="button" class="admin-theme-toggle-btn" id="admin-theme-toggle-btn" aria-label="Toggle Bright/Dark Mode" title="Switch Theme (Bright/Dark)">
+                    <span class="theme-toggle-icon icon-sun" aria-hidden="true">
+                        <!-- Sun Icon (shown in dark mode to switch to bright) -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle-icon icon-moon" aria-hidden="true">
+                        <!-- Moon Icon (shown in light mode to switch to dark) -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                </button>
                 <!-- Simple Security Shield + Admin Text (Requirement 8) -->
                 <div class="admin-security-badge" title="Administrator Control Panel">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -119,14 +151,6 @@ if (!function_exists('isActive')) {
                     </svg>
                     <span>Admin</span>
                 </div>
-                <!-- Info Logo on the right side of Admin badge (Auth Gateway) -->
-                <a href="infoAuth.php" class="header-info-btn" title="System Info" aria-label="System Info">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                </a>
             </div>
         </header>
 

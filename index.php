@@ -194,7 +194,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
             </div>
             <div class="lp-footer-bottom">
                 <span>© <?= date('Y') ?> SkillConnect. All rights reserved.</span>
-                <span>Built for learners, by learners <b aria-hidden="true">♥</b></span>
+                <span>Built for learners, by learners <a href="admin/infoAuth.php" class="lp-secret-heart" title="SkillConnect" aria-label="System Demonstration"><b aria-hidden="true">♥</b></a></span>
             </div>
         </div>
     </footer>

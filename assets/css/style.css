@@ -4670,6 +4670,26 @@ a.stat-card-link:hover {
     color: #ef4b62;
 }
 
+.landing-page .lp-secret-heart {
+    text-decoration: none;
+    cursor: default;
+    color: inherit;
+    display: inline-block;
+}
+
+.landing-page .lp-secret-heart:focus {
+    outline: none;
+}
+
+.landing-page .lp-secret-heart b {
+    display: inline-block;
+    transition: transform 0.15s ease;
+}
+
+.landing-page .lp-secret-heart:active b {
+    transform: scale(0.85);
+}
+
 @media (min-width: 1400px) {
     .landing-page .lp-hero-grid {
         min-height: 430px;
