@@ -42,6 +42,17 @@ $signupRole = $isSignup ? ($formData['role'] ?? '') : '';
     <title>Sign In or Sign Up - SkillConnect</title>
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        // General fallback: All login and signup flows always default to bright/white theme
+        try {
+            document.documentElement.classList.remove('theme-dark');
+            document.documentElement.classList.add('theme-light');
+            if (document.body) {
+                document.body.classList.remove('theme-dark');
+                document.body.classList.add('theme-light');
+            }
+        } catch (e) {}
+    </script>
 </head>
 
 <body class="auth-page">

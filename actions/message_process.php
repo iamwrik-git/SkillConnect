@@ -64,26 +64,37 @@ try {
         throw new Exception('Recipient account was not found.');
     }
 
-    // Format notification text (truncate safely if needed)
-    $notificationMsg = $senderName . ': ' . $messageText;
-    if (mb_strlen($notificationMsg) > 250) {
-        $notificationMsg = mb_substr($notificationMsg, 0, 247) . '...';
+    // Verify accepted mentorship connection exists between sender and recipient
+    $connStmt = $pdo->prepare('
+        SELECT 1 FROM mentorships 
+        WHERE status = "accepted" 
+          AND ((trainer_id = ? AND trainee_id = ?) OR (trainee_id = ? AND trainer_id = ?))
+        LIMIT 1
+    ');
+    $connStmt->execute([$senderId, $recipientId, $senderId, $recipientId]);
+    if (!$connStmt->fetchColumn()) {
+        throw new Exception('You can only message mentors or mentees who have an accepted connection with you.');
     }
 
-    $insertStmt = $pdo->prepare('INSERT INTO notifications (recipient_user_id, notification_type, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())');
-    $insertStmt->execute([$recipientId, 'message', $notificationMsg]);
+    // Insert into notifications with sender_user_id and full message text (0 extra tables needed)
+    $insertStmt = $pdo->prepare('INSERT INTO notifications (recipient_user_id, sender_user_id, notification_type, message, is_read, created_at) VALUES (?, ?, ?, ?, 0, NOW())');
+    $insertStmt->execute([$recipientId, $senderId, 'message', $messageText]);
+    $newMsgId = (int) $pdo->lastInsertId();
 
     if ($isAjax) {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => true,
-            'message' => 'Message sent! ' . $recipient['name'] . ' will be notified.'
+            'message' => 'Message sent!',
+            'notification_id' => $newMsgId,
+            'message_text' => $messageText,
+            'created_at' => date('Y-m-d H:i:s'),
+            'formatted_time' => date('g:i A')
         ]);
         exit;
     }
 
-    $_SESSION['success'] = 'Message sent! ' . $recipient['name'] . ' will be notified.';
-    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '../dashboard.php'));
+    header('Location: ../messages.php?user_id=' . $recipientId);
     exit;
 } catch (Exception $e) {
     error_log('Message Process Error: ' . $e->getMessage());

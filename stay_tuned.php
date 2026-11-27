@@ -27,6 +27,14 @@ if ($feature === 'messages') {
     <!-- Hook into global styles -->
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        (function() {
+            var theme = localStorage.getItem('skillconnect_user_theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+            }
+        })();
+    </script>
 </head>
 
 <body>

@@ -32,6 +32,30 @@
     </div>
 
     <div class="nav-actions">
+        <!-- Theme Mode Toggle: Light (Bright) / Dark Mode -->
+        <button type="button" class="user-theme-toggle-btn" id="user-theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="Switch Theme (Dark/Light)">
+            <span class="user-theme-icon icon-moon" aria-hidden="true">
+                <!-- Moon icon (shown in light mode to switch to dark) -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </span>
+            <span class="user-theme-icon icon-sun" aria-hidden="true">
+                <!-- Sun icon (shown in dark mode to switch to light) -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </span>
+        </button>
+
         <!-- Network Dropdown — click controlled for consistency with Notifications -->
         <div class="nav-item has-dropdown network-menu" data-dropdown="network">
             <button type="button" class="nav-btn network-menu-trigger" aria-expanded="false" aria-controls="network-dropdown" aria-haspopup="true" id="network-menu-trigger">
@@ -80,7 +104,7 @@
                         <?php foreach ($nav_notifications as $notification): ?>
                             <?php
                             $notificationType = (string) ($notification['notification_type'] ?? 'mentorship_request');
-                            $notificationIcon = $notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request');
+                            $notificationIcon = $notificationType === 'message' ? 'message' : ($notificationType === 'mentorship_accepted' ? 'accepted' : ($notificationType === 'mentorship_rejected' ? 'rejected' : 'request'));
                             $notificationIsUnread = (int) ($notification['is_read'] ?? 0) === 0;
                             ?>
                             <form method="post" action="notifications_action.php" class="notification-item-form">
@@ -90,7 +114,11 @@
                                 <input type="hidden" name="return_to" value="<?= htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8') ?>">
                                 <button type="submit" class="notification-item <?= $notificationIsUnread ? 'is-unread' : 'is-read' ?>">
                                     <span class="notification-item-icon <?= htmlspecialchars($notificationIcon, ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true">
-                                        <?php if ($notificationIcon === 'accepted'): ?>
+                                        <?php if ($notificationIcon === 'message'): ?>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        <?php elseif ($notificationIcon === 'accepted'): ?>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <circle cx="12" cy="12" r="9"></circle>
                                                 <path d="m8 12 2.5 2.5L16 9"></path>
@@ -109,7 +137,12 @@
                                         <?php endif; ?>
                                     </span>
                                     <span class="notification-item-content">
-                                        <span class="notification-item-message"><?= htmlspecialchars((string) $notification['message'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        <span class="notification-item-message">
+                                            <?php if ($notificationType === 'message' && !empty($notification['sender_name'])): ?>
+                                                <strong><?= htmlspecialchars((string) $notification['sender_name'], ENT_QUOTES, 'UTF-8') ?>:</strong>
+                                            <?php endif; ?>
+                                            <?= htmlspecialchars((string) $notification['message'], ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
                                         <span class="notification-item-time"><?= htmlspecialchars($notificationTimeLabel($notification['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
                                     </span>
                                     <?php if ($notificationIsUnread): ?><span class="notification-item-unread-dot" aria-label="Unread"></span><?php endif; ?>

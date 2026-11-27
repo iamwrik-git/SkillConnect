@@ -30,11 +30,14 @@
                 </li>
                 <?php endif; ?>
                 <li>
-                    <a href="stay_tuned.php?feature=messages" class="sidebar-link <?= ($current_page === 'stay_tuned.php' && ($_GET['feature'] ?? '') === 'messages') ? 'active' : '' ?>">
+                    <a href="messages.php" class="sidebar-link <?= ($current_page === 'messages.php') ? 'active' : '' ?>">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                         <span>Messages</span>
+                        <?php if (!empty($nav_unread_messages) && $nav_unread_messages > 0): ?>
+                            <span class="sidebar-unread-pill" aria-label="<?= (int)$nav_unread_messages ?> unread messages"><?= (int)$nav_unread_messages ?></span>
+                        <?php endif; ?>
                     </a>
                 </li>
             </ul>

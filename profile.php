@@ -116,24 +116,38 @@ if ($is_own_profile && !$user_not_found) {
     }
 }
 
-// 7. Fetch Mentorship Status (Trainee viewing Trainer)
+// 7. Fetch Mentorship Status
 $mentorship_status = null;
-if (!$user_not_found && !$is_own_profile && $current_user_role === 'trainee' && $profile_user['role'] === 'trainer') {
+$is_connected_mentorship = false;
+if (!$user_not_found && !$is_own_profile) {
     try {
-        $statusStmt = $pdo->prepare("
-            SELECT status 
-            FROM mentorships 
-            WHERE trainee_id = ? 
-              AND trainer_id = ? 
-              AND status IN ('pending', 'accepted')
-            ORDER BY created_at DESC 
+        if ($current_user_role === 'trainee' && $profile_user['role'] === 'trainer') {
+            $statusStmt = $pdo->prepare("
+                SELECT status 
+                FROM mentorships 
+                WHERE trainee_id = ? 
+                  AND trainer_id = ? 
+                  AND status IN ('pending', 'accepted')
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $statusStmt->execute([$current_user_id, $target_user_id]);
+            $active_request = $statusStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($active_request) {
+                $mentorship_status = $active_request['status'];
+            }
+        }
+
+        $connCheck = $pdo->prepare("
+            SELECT 1 FROM mentorships 
+            WHERE status = 'accepted'
+              AND ((trainer_id = ? AND trainee_id = ?) OR (trainee_id = ? AND trainer_id = ?))
             LIMIT 1
         ");
-        $statusStmt->execute([$current_user_id, $target_user_id]);
-        $active_request = $statusStmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($active_request) {
-            $mentorship_status = $active_request['status'];
+        $connCheck->execute([$current_user_id, $target_user_id, $current_user_id, $target_user_id]);
+        if ($connCheck->fetchColumn()) {
+            $is_connected_mentorship = true;
         }
     } catch (PDOException $e) {
         error_log("Mentorship Status Fetch Error (profile.php): " . $e->getMessage());
@@ -142,6 +156,18 @@ if (!$user_not_found && !$is_own_profile && $current_user_role === 'trainee' && 
 
 // 8. Output Header
 $page_title = $is_own_profile ? 'Profile - SkillConnect' : 'User Profile - SkillConnect';
+
+$profile_has_custom_photo = !empty($profile_user['profile_photo']) && $profile_user['profile_photo'] !== 'default.jpg';
+$profile_initials = 'U';
+if (!$profile_has_custom_photo && !empty($profile_user['name'])) {
+    $p_parts = array_values(array_filter(preg_split('/\s+/', trim($profile_user['name']))));
+    if (count($p_parts) >= 2) {
+        $profile_initials = mb_strtoupper(mb_substr($p_parts[0], 0, 1) . mb_substr(end($p_parts), 0, 1));
+    } elseif (count($p_parts) === 1 && $p_parts[0] !== '') {
+        $profile_initials = mb_strtoupper(mb_substr($p_parts[0], 0, 1));
+    }
+}
+
 if (file_exists('includes/header.php')) {
     require_once 'includes/header.php';
 }
@@ -149,25 +175,16 @@ if (file_exists('includes/header.php')) {
 
 <div class="profile-page-wrapper">
 
-    <!-- Flash Messages -->
+    <!-- Flash Messages (Hidden container converted to floating toast) -->
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="profile-alert alert-success js-toast-target">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
+        <div class="profile-alert alert-success js-toast-target" style="display:none;" role="status">
             <?= htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="profile-alert alert-danger js-toast-target">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-            </svg>
+        <div class="profile-alert alert-danger js-toast-target" style="display:none;" role="alert">
             <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['error']); ?>
@@ -281,7 +298,11 @@ if (file_exists('includes/header.php')) {
             <!-- Profile Identity Card -->
             <section class="profile-card profile-identity-card">
                 <div class="profile-avatar-wrapper">
-                    <img src="<?= getProfilePhotoUrl($profile_user['profile_photo'] ?? '', $profile_user['name']) ?>" alt="Profile Photo" class="profile-display-photo">
+                    <?php if (!$profile_has_custom_photo): ?>
+                        <div class="profile-display-photo profile-initials-avatar" aria-hidden="true"><?= htmlspecialchars($profile_initials, ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php else: ?>
+                        <img src="<?= getProfilePhotoUrl($profile_user['profile_photo'] ?? '', $profile_user['name']) ?>" alt="Profile Photo" class="profile-display-photo">
+                    <?php endif; ?>
                 </div>
 
                 <div class="profile-details">
@@ -412,7 +433,7 @@ if (file_exists('includes/header.php')) {
                 <!-- LEFT COLUMN: Skills Management -->
                 <div class="skills-management-col">
                     <section class="card edit-card" style="padding: 2rem !important; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background-color: var(--surface-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-                        <div class="current-skills-box" style="background: #ffffff; border: none; padding: 0; margin-bottom: 0;">
+                        <div class="current-skills-box" style="background: transparent; border: none; padding: 0; margin-bottom: 0;">
                             <div class="box-header" style="margin-bottom: 1.5rem;">
                                 <div class="box-title">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -426,7 +447,7 @@ if (file_exists('includes/header.php')) {
 
                             <?php if (empty($profile_skills)): ?>
                                 <!-- Empty State (Compact: Logo & Title only) -->
-                                <div class="empty-state" style="box-shadow: none; border: 1px dashed var(--border-color); padding: 1rem 1.25rem; background: #f8fafc; border-radius: var(--radius-md); text-align: center;">
+                                <div class="empty-state" style="box-shadow: none; border: 1px dashed var(--border-color); padding: 1rem 1.25rem; border-radius: var(--radius-md); text-align: center;">
                                     <div class="empty-state-icon" style="width: 38px; height: 38px; margin-bottom: 0.35rem;">
                                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="16 18 22 12 16 6"></polyline>
@@ -631,7 +652,11 @@ if (file_exists('includes/header.php')) {
         <!-- Visitor View (Public Profile) -->
         <section class="profile-card profile-identity-card">
             <div class="profile-avatar-wrapper">
-                <img src="<?= getProfilePhotoUrl($profile_user['profile_photo'] ?? '', $profile_user['name']) ?>" alt="Profile Photo" class="profile-display-photo">
+                <?php if (!$profile_has_custom_photo): ?>
+                    <div class="profile-display-photo profile-initials-avatar" aria-hidden="true"><?= htmlspecialchars($profile_initials, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php else: ?>
+                    <img src="<?= getProfilePhotoUrl($profile_user['profile_photo'] ?? '', $profile_user['name']) ?>" alt="Profile Photo" class="profile-display-photo">
+                <?php endif; ?>
             </div>
 
             <div class="profile-details">
@@ -674,13 +699,21 @@ if (file_exists('includes/header.php')) {
                             Mentorship Request Pending
                         </button>
                     <?php elseif ($mentorship_status === 'accepted'): ?>
-                        <button disabled class="profile-btn btn-status-accepted">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            Already Connected
-                        </button>
+                        <div style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <button disabled class="profile-btn btn-status-accepted">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                Connected
+                            </button>
+                            <a href="messages.php?user_id=<?= (int)$target_user_id ?>" class="profile-btn profile-btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                Send Message
+                            </a>
+                        </div>
                     <?php else: ?>
                         <form method="POST" action="actions/mentorship_process.php" class="profile-action-form">
                             <input type="hidden" name="action" value="send_request">
@@ -697,6 +730,13 @@ if (file_exists('includes/header.php')) {
                             </button>
                         </form>
                     <?php endif; ?>
+                <?php elseif ($current_user_role === 'trainer' && $profile_user['role'] === 'trainee' && $is_connected_mentorship): ?>
+                    <a href="messages.php?user_id=<?= (int)$target_user_id ?>" class="profile-btn profile-btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Send Message
+                    </a>
                 <?php endif; ?>
             </div>
         </section>

@@ -88,14 +88,17 @@ if (file_exists('includes/header.php')) {
         </div>
         <div class="mentorship-list-body">
             <?php if (empty($accepted)): ?>
-                <div class="empty-state" style="border: none; box-shadow: none;">
-                    <div class="empty-state-icon" style="margin-bottom: 1rem;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="empty-state">
+                    <div class="empty-state-icon icon-blue">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                     </div>
-                    <p>No <?= $role === 'trainer' ? 'mentees' : 'mentors' ?> yet.</p>
+                    <h4>No active <?= $role === 'trainer' ? 'mentees' : 'mentors' ?> yet</h4>
+                    <p><?= $role === 'trainer' ? 'When you accept mentorship requests, your mentees will appear here.' : 'When mentors accept your requests, they will appear here.' ?></p>
                 </div>
             <?php else: ?>
                 <div class="connection-card-list">
@@ -121,10 +124,6 @@ if (file_exists('includes/header.php')) {
                     endforeach; 
                     ?>
                 </div>
-                <div class="connection-tip">
-                    <span class="connection-tip-icon">Tip:</span>
-                    <span>Use <strong>Message</strong> to chat and collaborate without leaving this page.</span>
-                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -137,8 +136,15 @@ if (file_exists('includes/header.php')) {
         </div>
         <div class="mentorship-list-body">
             <?php if (empty($pending)): ?>
-                <div class="empty-state" style="border: none; box-shadow: none;">
-                    <p>No pending requests.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon icon-orange">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h4>No pending requests</h4>
+                    <p><?= $role === 'trainer' ? 'You have no pending mentorship requests waiting for review.' : 'You have no mentorship requests awaiting response.' ?></p>
                 </div>
             <?php else: ?>
                 <div class="connection-card-list">
@@ -173,8 +179,16 @@ if (file_exists('includes/header.php')) {
         </div>
         <div class="mentorship-list-body">
             <?php if (empty($history)): ?>
-                <div class="empty-state" style="border: none; box-shadow: none;">
-                    <p>No request history.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon icon-rejected">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h4>No request history</h4>
+                    <p><?= $role === 'trainer' ? 'Archived or declined mentorship requests will appear here.' : 'Past or rejected mentorship requests will be archived here.' ?></p>
                 </div>
             <?php else: ?>
                 <div class="connection-card-list">

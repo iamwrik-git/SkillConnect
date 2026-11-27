@@ -75,6 +75,7 @@ if (isset($pdo, $_SESSION['user_id'])) {
 // Notifications are stored separately from mentorship records.
 $nav_notifications = [];
 $nav_unread_notifications = 0;
+$nav_unread_messages = 0;
 if (isset($pdo, $_SESSION['user_id'])) {
     try {
         $notificationCountStmt = $pdo->prepare(
@@ -83,11 +84,19 @@ if (isset($pdo, $_SESSION['user_id'])) {
         $notificationCountStmt->execute([(int) $_SESSION['user_id']]);
         $nav_unread_notifications = (int) $notificationCountStmt->fetchColumn();
 
+        $msgCountStmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM notifications WHERE recipient_user_id = ? AND notification_type = 'message' AND is_read = 0"
+        );
+        $msgCountStmt->execute([(int) $_SESSION['user_id']]);
+        $nav_unread_messages = (int) $msgCountStmt->fetchColumn();
+
         $notificationListStmt = $pdo->prepare("
-            SELECT notification_id, request_id, notification_type, message, is_read, created_at
-            FROM notifications
-            WHERE recipient_user_id = ?
-            ORDER BY created_at DESC, notification_id DESC
+            SELECT n.notification_id, n.sender_user_id, n.request_id, n.notification_type, n.message, n.is_read, n.created_at,
+                   u.name AS sender_name
+            FROM notifications n
+            LEFT JOIN users u ON n.sender_user_id = u.user_id
+            WHERE n.recipient_user_id = ?
+            ORDER BY n.created_at DESC, n.notification_id DESC
             LIMIT 5
         ");
         $notificationListStmt->execute([(int) $_SESSION['user_id']]);
@@ -128,10 +137,24 @@ $nav_js_version = is_file($nav_js_file) ? filemtime($nav_js_file) : time();
     <!-- Cache buster active for development -->
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
     <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+    <script>
+        // Immediately apply saved theme before first paint to prevent flash
+        (function() {
+            var theme = localStorage.getItem('skillconnect_user_theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+            }
+        })();
+    </script>
     <script src="assets/js/nav.js?v=<?= (int) $nav_js_version ?>" defer></script>
 </head>
 
 <body>
+    <script>
+        if (localStorage.getItem('skillconnect_user_theme') === 'dark') {
+            document.body.classList.add('theme-dark');
+        }
+    </script>
     <div class="app-layout">
 
         <!-- TOP NAVIGATION -->

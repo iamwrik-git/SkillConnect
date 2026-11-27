@@ -73,14 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return div.innerHTML;
     }
 
-    window.showToast = function(messageText, type = 'info') {
+    window.showToast = function(messageText, type = 'info', title = '') {
         if (!messageText || typeof messageText !== 'string' || messageText.trim() === '') {
             return null;
         }
 
-        const validTypes = ['success', 'error', 'warning', 'info'];
+        const validTypes = ['success', 'error', 'danger', 'warning', 'info', 'welcome'];
         if (!validTypes.includes(type)) {
             type = 'info';
+        }
+        if (type === 'danger') type = 'error';
+
+        // Check if message signifies a deletion / removal action (Item 7)
+        const isDeletion = /\b(deleted|removed|unlinked|cancelled|rejected|cleared)\b/i.test(messageText);
+        if (isDeletion && type === 'success') {
+            type = 'error';
         }
 
         const toastContainer = getOrCreateToastContainer();
@@ -88,37 +95,58 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.className = `toast toast-${type}`;
         toast.setAttribute('role', 'alert');
 
+        let displayTitle = title;
         let iconSvg = '';
-        if (type === 'success') {
+        if (type === 'welcome') {
+            if (!displayTitle) displayTitle = 'Welcome to SkillConnect! 🎉';
             iconSvg = `
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
+                <svg width="22" height="22" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
                      stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>`;
+        } else if (isDeletion) {
+            if (!displayTitle) displayTitle = 'Removed';
+            iconSvg = `
+                <svg width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>`;
+        } else if (type === 'success') {
+            if (!displayTitle) displayTitle = 'Success';
+            iconSvg = `
+                <svg width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>`;
         } else if (type === 'error') {
+            if (!displayTitle) displayTitle = 'Notice';
             iconSvg = `
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
+                <svg width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
                      stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>`;
         } else if (type === 'warning') {
+            if (!displayTitle) displayTitle = 'Warning';
             iconSvg = `
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
+                <svg width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
                      stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                     <line x1="12" y1="9" x2="12" y2="13"></line>
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>`;
         } else {
+            if (!displayTitle) displayTitle = 'Info';
             iconSvg = `
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
+                <svg width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
                      stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -126,37 +154,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>`;
         }
 
+        const duration = type === 'welcome' ? 4200 : (type === 'error' ? 4500 : 3700);
+
         toast.innerHTML = `
             <div class="toast-icon">${iconSvg}</div>
             <div class="toast-content">
+                <div class="toast-title">${escapeToastHtml(displayTitle)}</div>
                 <div class="toast-message">${escapeToastHtml(messageText)}</div>
             </div>
             <button
                 type="button"
                 class="toast-close"
-                aria-label="Close Notification">
-                <svg width="16" height="16" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+                aria-label="Dismiss notification">&times;</button>
+            <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
         `;
 
         toastContainer.appendChild(toast);
 
-        const closeBtn = toast.querySelector('.toast-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => dismissToast(toast));
-        }
-
-        const duration = type === 'error' ? 6000 : 4000;
-        setTimeout(() => {
+        let dismissTimeout = setTimeout(() => {
             if (document.body.contains(toast)) {
                 dismissToast(toast);
             }
         }, duration);
+
+        const progress = toast.querySelector('.toast-progress');
+        toast.addEventListener('mouseenter', () => {
+            clearTimeout(dismissTimeout);
+            if (progress) progress.style.animationPlayState = 'paused';
+        });
+
+        toast.addEventListener('mouseleave', () => {
+            if (progress) progress.style.animationPlayState = 'running';
+            dismissTimeout = setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    dismissToast(toast);
+                }
+            }, 2000);
+        });
+
+        const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissToast(toast);
+            });
+        }
 
         return toast;
     };
@@ -164,20 +206,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const flashMessages = document.querySelectorAll('.js-toast-target');
     if (flashMessages.length > 0) {
         flashMessages.forEach(msgElement => {
-            let type = 'info';
-            if (msgElement.classList.contains('alert-success')) {
-                type = 'success';
-            } else if (msgElement.classList.contains('alert-danger')) {
-                type = 'error';
-            } else if (msgElement.classList.contains('alert-warning')) {
-                type = 'warning';
+            let type = msgElement.dataset.toastType || 'info';
+            if (!msgElement.dataset.toastType) {
+                if (msgElement.classList.contains('alert-success')) {
+                    type = 'success';
+                } else if (msgElement.classList.contains('alert-danger')) {
+                    type = 'error';
+                } else if (msgElement.classList.contains('alert-warning')) {
+                    type = 'warning';
+                }
             }
 
+            const customTitle = msgElement.dataset.toastTitle || '';
             const messageText = msgElement.textContent.trim();
             msgElement.style.display = 'none';
 
             if (messageText) {
-                window.showToast(messageText, type);
+                window.showToast(messageText, type, customTitle);
             }
         });
     }

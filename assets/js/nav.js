@@ -376,7 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
                     if (data && data.success) {
                         closeModal();
-                        showInPageToast(data.message || 'Message sent successfully!');
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(data.message || 'Message sent successfully!', 'success', 'Message Sent');
+                        } else {
+                            showInPageToast(data.message || 'Message sent successfully!');
+                        }
                     } else {
                         alert(data.error || 'Could not send message. Please try again.');
                     }
@@ -409,5 +413,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => toast.remove(), 300);
             }, 4500);
         }
+    })();
+
+    // 4. User Dark / Light Theme Toggle
+    (() => {
+        const toggleBtn = document.getElementById('user-theme-toggle-btn');
+        if (!toggleBtn) return;
+
+        const updateThemeUI = (isDark) => {
+            if (isDark) {
+                document.documentElement.classList.add('theme-dark');
+                document.body.classList.add('theme-dark');
+                toggleBtn.setAttribute('title', 'Switch to Light Mode');
+                toggleBtn.setAttribute('aria-label', 'Switch to Light Mode');
+            } else {
+                document.documentElement.classList.remove('theme-dark');
+                document.body.classList.remove('theme-dark');
+                toggleBtn.setAttribute('title', 'Switch to Dark Mode');
+                toggleBtn.setAttribute('aria-label', 'Switch to Dark Mode');
+            }
+        };
+
+        const currentTheme = localStorage.getItem('skillconnect_user_theme');
+        const isCurrentlyDark = currentTheme === 'dark' || document.documentElement.classList.contains('theme-dark');
+        updateThemeUI(isCurrentlyDark);
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const willBeDark = !document.documentElement.classList.contains('theme-dark');
+            localStorage.setItem('skillconnect_user_theme', willBeDark ? 'dark' : 'light');
+            updateThemeUI(willBeDark);
+        });
     })();
 });

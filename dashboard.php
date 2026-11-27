@@ -243,10 +243,8 @@ require_once __DIR__ . '/includes/header.php';
 <div class="dashboard-page">
 
     <?php if ($show_onboarding_success): ?>
-        <div class="sc-onboarding-toast" role="status" aria-live="polite">
-            <span class="sc-onboarding-toast-icon" aria-hidden="true">✓</span>
-            <div><strong>Profile completed!</strong><span>Your account is now set up.</span></div>
-            <button type="button" class="sc-onboarding-toast-close" aria-label="Dismiss notification">×</button>
+        <div class="profile-alert alert-success js-toast-target js-toast-welcome" style="display:none;" role="status" data-toast-title="Welcome to SkillConnect! 🎉" data-toast-type="welcome">
+            Your profile has been created and your account is ready to go. Welcome aboard!
         </div>
     <?php endif; ?>
 
@@ -612,10 +610,6 @@ require_once __DIR__ . '/includes/header.php';
                         endforeach; 
                         ?>
                     </div>
-                    <div class="connection-tip">
-                        <span class="connection-tip-icon">Tip:</span>
-                        <span>Use <strong>Message</strong> to chat and collaborate without leaving this page.</span>
-                    </div>
                 <?php endif; ?>
             </section>
         <?php else: ?>
@@ -662,10 +656,6 @@ require_once __DIR__ . '/includes/header.php';
                             require __DIR__ . '/includes/partials/connection_card.php';
                         endforeach; 
                         ?>
-                    </div>
-                    <div class="connection-tip">
-                        <span class="connection-tip-icon">Tip:</span>
-                        <span>Use <strong>Message</strong> to chat and collaborate without leaving this page.</span>
                     </div>
                 <?php endif; ?>
             </section>

@@ -2229,78 +2229,112 @@ body.theme-light .hero-system-pill {
 }
 
 /* Light Mode: Page Headers & Headings */
+html.theme-light .page-header h1,
 body.theme-light .page-header h1,
+html.theme-light .card-title,
 body.theme-light .card-title,
+html.theme-light .stat-value,
 body.theme-light .stat-value,
+html.theme-light .user-name-text,
 body.theme-light .user-name-text,
+html.theme-light .confirm-modal-title,
 body.theme-light .confirm-modal-title,
+html.theme-light .wheel-number,
 body.theme-light .wheel-number,
+html.theme-light .mentor-name,
 body.theme-light .mentor-name,
+html.theme-light .demanded-skill-name,
 body.theme-light .demanded-skill-name,
+html.theme-light .active-users-num,
 body.theme-light .active-users-num,
+html.theme-light .action-item-text h4,
 body.theme-light .action-item-text h4,
+html.theme-light .legend-count,
 body.theme-light .legend-count,
+html.theme-light .view-user-section h3,
 body.theme-light .view-user-section h3,
+html.theme-light .sc-confirm-heading h2,
 body.theme-light .sc-confirm-heading h2 {
     color: #0f172a !important;
 }
 
 /* Light Mode: Supporting Text & Secondary Labels */
+html.theme-light .card-subtitle,
 body.theme-light .card-subtitle,
+html.theme-light .mentor-email,
 body.theme-light .mentor-email,
+html.theme-light .badge-subtle,
 body.theme-light .badge-subtle,
+html.theme-light .active-users-label,
 body.theme-light .active-users-label,
+html.theme-light .action-item-text p,
 body.theme-light .action-item-text p,
+html.theme-light .legend-name,
 body.theme-light .legend-name,
+html.theme-light .bar-legend,
 body.theme-light .bar-legend,
+html.theme-light .day-label,
 body.theme-light .day-label,
+html.theme-light .wheel-label,
 body.theme-light .wheel-label,
+html.theme-light .sc-confirm-heading p,
 body.theme-light .sc-confirm-heading p {
     color: #475569 !important;
 }
 
 /* Light Mode: Top Mentors & Demanded Skills items */
+html.theme-light .top-mentor-item,
 body.theme-light .top-mentor-item,
+html.theme-light .demanded-skill-item,
 body.theme-light .demanded-skill-item,
+html.theme-light .active-users-widget,
 body.theme-light .active-users-widget {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
+html.theme-light .top-mentor-item:hover,
 body.theme-light .top-mentor-item:hover,
+html.theme-light .action-item-clean:hover,
 body.theme-light .action-item-clean:hover {
-    background: #f1f5f9;
+    background: #f1f5f9 !important;
 }
 
+html.theme-light .mentor-rank,
 body.theme-light .mentor-rank {
-    background: #e2e8f0;
-    color: #334155;
+    background: #e2e8f0 !important;
+    color: #334155 !important;
 }
 
+html.theme-light .mentor-rank.rank-1,
 body.theme-light .mentor-rank.rank-1 {
-    color: #b45309;
-    background: #fef3c7;
-    border: 1px solid #fde68a;
+    color: #b45309 !important;
+    background: #fef3c7 !important;
+    border: 1px solid #fde68a !important;
 }
 
+html.theme-light .mentor-stat-pill,
 body.theme-light .mentor-stat-pill {
-    color: #047857;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
+    color: #047857 !important;
+    background: #ecfdf5 !important;
+    border: 1px solid #a7f3d0 !important;
 }
 
+html.theme-light .demanded-total,
 body.theme-light .demanded-total {
-    color: #1d4ed8;
+    color: #1d4ed8 !important;
 }
 
+html.theme-light .skill-progress-track,
 body.theme-light .skill-progress-track {
-    background: #e2e8f0;
+    background: #e2e8f0 !important;
 }
 
+html.theme-light .bar-val,
 body.theme-light .bar-val {
-    color: #0f172a;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
 }
 
 /* Light Mode: Cards and Shadows */

@@ -28,7 +28,7 @@ if (!function_exists('isActive')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Admin Panel') ?> - SkillConnect</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=<?= time() ?>">
     <script>
         // Immediately apply saved theme before first paint to prevent flash
         (function() {
@@ -41,6 +41,11 @@ if (!function_exists('isActive')) {
 </head>
 
 <body class="admin-body">
+    <script>
+        if (localStorage.getItem('skillconnect_admin_theme') === 'light') {
+            document.body.classList.add('theme-light');
+        }
+    </script>
 
     <button type="button" class="admin-sidebar-backdrop" aria-label="Close admin navigation" tabindex="-1"></button>
 
@@ -163,15 +168,29 @@ if (!function_exists('isActive')) {
     <!-- FLOATING TOAST NOTIFICATION CONTAINER (Point 4) -->
     <div id="admin-toast-container" class="admin-toast-container" aria-live="polite" aria-atomic="true">
         <?php if (isset($_SESSION['admin_success'])): ?>
-            <div class="admin-toast admin-toast-success" role="alert" data-auto-dismiss="4500">
+            <?php
+            $adminSuccessMsg = (string) $_SESSION['admin_success'];
+            $isDeletion = (bool) preg_match('/\b(deleted|removed|unlinked|cancelled|rejected|cleared)\b/i', $adminSuccessMsg);
+            $toastClass = $isDeletion ? 'admin-toast-danger' : 'admin-toast-success';
+            $toastTitle = $isDeletion ? 'Deleted' : 'Success';
+            $toastDuration = $isDeletion ? 4100 : 3700;
+            ?>
+            <div class="admin-toast <?= $toastClass ?>" role="alert" data-auto-dismiss="<?= $toastDuration ?>">
                 <div class="admin-toast-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
+                    <?php if ($isDeletion): ?>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    <?php else: ?>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    <?php endif; ?>
                 </div>
                 <div class="admin-toast-content">
-                    <div class="admin-toast-title">Success</div>
-                    <div class="admin-toast-message"><?= htmlspecialchars($_SESSION['admin_success'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="admin-toast-title"><?= htmlspecialchars($toastTitle, ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="admin-toast-message"><?= htmlspecialchars($adminSuccessMsg, ENT_QUOTES, 'UTF-8') ?></div>
                 </div>
                 <button type="button" class="admin-toast-close" aria-label="Dismiss notification">&times;</button>
                 <div class="admin-toast-progress"></div>
@@ -180,7 +199,7 @@ if (!function_exists('isActive')) {
         <?php endif; ?>
 
         <?php if (isset($_SESSION['admin_error'])): ?>
-            <div class="admin-toast admin-toast-danger" role="alert" data-auto-dismiss="5000">
+            <div class="admin-toast admin-toast-danger" role="alert" data-auto-dismiss="4100">
                 <div class="admin-toast-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>

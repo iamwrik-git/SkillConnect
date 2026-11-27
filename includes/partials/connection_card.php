@@ -54,16 +54,14 @@ $viewLabel = !empty($card_view_label) ? $card_view_label : 'View Profile';
                 </svg>
                 <span><?= htmlspecialchars($viewLabel, ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <button type="button" class="btn-card-primary js-open-message-modal" 
-                    data-user-id="<?= (int)$card_user_id ?>" 
-                    data-user-name="<?= htmlspecialchars($card_name ?? 'User', ENT_QUOTES, 'UTF-8') ?>" 
-                    data-role="<?= htmlspecialchars($roleBadge, ENT_QUOTES, 'UTF-8') ?>"
-                    title="Message <?= htmlspecialchars($card_name ?? 'User', ENT_QUOTES, 'UTF-8') ?>">
+            <a href="messages.php?user_id=<?= (int)$card_user_id ?>" 
+               class="btn-card-primary" 
+               title="Message <?= htmlspecialchars($card_name ?? 'User', ENT_QUOTES, 'UTF-8') ?>">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
                 <span>Message</span>
-            </button>
+            </a>
             <?php if ($showUnlink): ?>
                 <div class="mentorship-more" data-mentorship-menu>
                     <button type="button" class="mentorship-more-toggle" aria-label="More mentorship options" aria-expanded="false" aria-haspopup="true">

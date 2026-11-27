@@ -66,6 +66,16 @@ $csrf = csrfToken();
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/recovery.css">
     <link rel="icon" type="image/png" href="/SkillConnect/assets/images/favicon.png">
+    <script>
+        try {
+            document.documentElement.classList.remove('theme-dark');
+            document.documentElement.classList.add('theme-light');
+            if (document.body) {
+                document.body.classList.remove('theme-dark');
+                document.body.classList.add('theme-light');
+            }
+        } catch (e) {}
+    </script>
 </head>
 
 <body class="auth-page recovery-auth-page">

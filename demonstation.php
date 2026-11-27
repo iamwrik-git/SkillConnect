@@ -1,7 +1,5 @@
 <?php
-// demonstation.php
-require_once __DIR__ . '/includes/auth.php';
-requireAdmin();
-
+// demonstation.php - Direct access to stealth demonstration gateway
 header("Location: admin/infoAuth.php");
 exit();
+

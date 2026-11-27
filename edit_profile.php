@@ -121,16 +121,16 @@ if (file_exists('includes/header.php')) {
         </button>
     </nav>
 
-    <!-- Flash Messages -->
+    <!-- Flash Messages (Hidden container converted to floating toast) -->
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="profile-alert alert-success js-toast-target">
+        <div class="profile-alert alert-success js-toast-target" style="display:none;" role="status">
             <?= htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="profile-alert alert-danger js-toast-target">
+        <div class="profile-alert alert-danger js-toast-target" style="display:none;" role="alert">
             <?= htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
         </div>
         <?php unset($_SESSION['error']); ?>
@@ -319,8 +319,8 @@ if (file_exists('includes/header.php')) {
                             </svg>
                         </div>
                         <div class="header-text">
-                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a;">Change Password</h2>
-                            <p style="font-size: 0.875rem; color: #64748b;">Update your account password. You'll need to enter your current password to make changes.</p>
+                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Change Password</h2>
+                            <p style="font-size: 0.875rem;">Update your account password. You'll need to enter your current password to make changes.</p>
                         </div>
                     </div>
                 </div>
@@ -399,8 +399,8 @@ if (file_exists('includes/header.php')) {
                             </svg>
                         </div>
                         <div class="header-text">
-                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a;">Account Recovery</h2>
-                            <p style="font-size: 0.875rem; color: #64748b;">Set up a security question and answer to help you recover your account if you ever forget your password.</p>
+                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Account Recovery</h2>
+                            <p style="font-size: 0.875rem;">Set up a security question and answer to help you recover your account if you ever forget your password.</p>
                         </div>
                     </div>
                     <?php if ($recovery_configured): ?>

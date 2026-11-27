@@ -106,15 +106,15 @@ if (file_exists('includes/header.php')) {
         <!-- Empty State -->
         <div class="search-empty-state card" style="text-align: center; padding: 4rem 2rem !important; margin-top: 1rem;">
             <div class="empty-icon-wrapper initial-state" style="margin: 0 auto 1.5rem auto;">
-                <div style="background-color: #eff6ff; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="empty-icon-circle" style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                     </svg>
                 </div>
             </div>
             <div class="empty-text">
-                <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">No saved mentors yet</h3>
-                <p style="color: #64748b; margin-bottom: 1.5rem;">Bookmark mentors you're interested in<br>to find them here later.</p>
+                <h3 class="empty-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No saved mentors yet</h3>
+                <p class="empty-subtitle" style="margin-bottom: 1.5rem;">Bookmark mentors you're interested in<br>to find them here later.</p>
                 <a href="search.php" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
                     Find Mentors
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
